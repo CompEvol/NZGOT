@@ -6,6 +6,7 @@
                 Department of Computer Science
                      University of Auckland
                     walter@cs.auckland.ac.nz
+                    alexei@cs.auckland.ac.nz
 
 Last updated: walter@cs.auckland.ac.nz - 22nd October 2013
 
