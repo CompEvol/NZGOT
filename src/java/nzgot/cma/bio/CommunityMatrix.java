@@ -1,24 +1,23 @@
-package awc.uoa.mes.tools.bio;
+package java.nzgot.cma.bio;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.nzgot.cma.util.NameSpace;
+import java.nzgot.core.util.BioObject;
 
 /**
- * OTU
+ * Community Matrix
  * @author Walter Xie
  */
-public class CommunityMatrix {
+public class CommunityMatrix extends BioObject {
 
-    protected String name;
-    protected Map<String, OTU> otusMap = new HashMap<String, OTU>();
     protected File otusFile;
     protected File otuMappingFile;
-    protected File referenceMappingFile; // Sanger sequence for reference
+    protected File referenceMappingFile; // optional: Sanger sequence for reference
 
     public CommunityMatrix(File otusFile, File otuMappingFile) {
+        super(otusFile.getName());
         this.otusFile = otusFile;
-        setName(otusFile.getName());
+
         try {
             importOTUs(otusFile);
             importOTUMapping(otuMappingFile);
@@ -41,7 +40,7 @@ public class CommunityMatrix {
                 String otuName = line.substring(1);
                 otu = new OTU(otuName);
 
-                addOTU(otu);
+                addUniqueElement(otu);
 
             } else {
                 // TODO add ref sequence
@@ -68,13 +67,12 @@ public class CommunityMatrix {
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            if (containsOTU(fields[indexOTUName])) {
-                OTU otu = getOTU(fields[indexOTUName]);
-
-                otu.addRead(fields[indexRead]);
-
+            OTU otu = (OTU) getUniqueElement(fields[indexOTUName]);
+            if (otu == null) {
+                throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
+                        ", from the mapping file which does not exist in OTUs file !");
             } else {
-                throw new IllegalArgumentException("Error: find an invalid OTU (" + fields[1] + ") not existing in OTUs file !");
+                otu.addUniqueElement(fields[indexRead]);
             }
 
             line = reader.readLine();
@@ -99,13 +97,12 @@ public class CommunityMatrix {
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            if (containsOTU(fields[indexOTUName])) {
-                OTU otu = getOTU(fields[indexOTUName]);
-
-                otu.setRefSeqId(fields[indexRefSeq]);
-
+            OTU otu = (OTU) getUniqueElement(fields[indexOTUName]);
+            if (otu == null) {
+                throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
+                        ", from the mapping file which does not exist in OTUs file !");
             } else {
-                throw new IllegalArgumentException("Error: find an invalid OTU (" + fields[1] + ") not existing in OTUs file !");
+                otu.setRefSeqId(fields[indexRefSeq]);
             }
 
             line = reader.readLine();
@@ -128,13 +125,10 @@ public class CommunityMatrix {
         System.out.println("\nGenerate report of how many reads map to reference sequence in the file: " + outFileAndPath);
 
         int total = 0;
-        for(Map.Entry<String, OTU> entry : otusMap.entrySet()){
-            OTU otu = entry.getValue();
-            if (!otu.getOTUName().equalsIgnoreCase(entry.getKey())) {
-                throw new IllegalArgumentException("Error: find an invalid OTU having different names : " +
-                        entry.getValue() + ", " + otu.getOTUName());
-            } else if (otu.getRefSeqId() != null) {
-                int reads = otu.getReadsList().size();
+        for(Object e : elementsSet){
+            OTU otu = (OTU) e;
+            if (otu.getRefSeqId() != null) {
+                int reads = otu.elementsSet.size();
                 out.println(otu.getRefSeqId() + "\t" + reads);
                 total += reads;
             }
@@ -164,35 +158,4 @@ public class CommunityMatrix {
         this.otuMappingFile = otuMappingFile;
     }
 
-    public OTU getOTU(String otuName) {
-        return otusMap.get(otuName);
-    }
-
-    public OTU addOTU(OTU otu) throws IllegalArgumentException {
-        if (containsOTU(otu.getOTUName())) {
-            throw new IllegalArgumentException("Error: find duplicate OTU (" + otu + ") in the file: " + otusFile + " !");
-        } else {
-            return otusMap.put(otu.getOTUName(), otu);
-        }
-    }
-
-    public OTU removeOTU(String otuName) {
-        return otusMap.remove(otuName);
-    }
-
-    public boolean containsOTU(String otuName) {
-        return otusMap.containsKey(otuName);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String toString() {
-        return name;
-    }
 }

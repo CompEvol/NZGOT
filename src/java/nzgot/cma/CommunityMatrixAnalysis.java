@@ -1,9 +1,8 @@
-package awc.uoa.mes.tools;
-
-import awc.uoa.mes.tools.bio.CommunityMatrix;
+package java.nzgot.cma;
 
 import java.io.File;
 import java.io.IOException;
+import java.nzgot.cma.bio.CommunityMatrix;
 
 /**
  * Community Matrix Analysis
@@ -11,15 +10,16 @@ import java.io.IOException;
  */
 public class CommunityMatrixAnalysis {
 
-    public static String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Combined/otu";
-
     //Main method
     public static void main(final String[] args) throws IOException {
+        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
+
+        String workPath = args[0];
+        System.out.println("\nWorking path = " + workPath);
+
         File otusFile = null;
         File otuMappingFile = null;
         File referenceMappingFile = null;
-
-        System.out.println("\nWorking path = " + workPath);
 
         File folder = new File(workPath);
         File[] listOfFiles = folder.listFiles();

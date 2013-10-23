@@ -1,7 +1,7 @@
-package awc.uoa.mes.tools.bio;
+package java.nzgot.cma.util;
 
 /**
- * OTU
+ * Name Space
  * @author Walter Xie
  */
 public class NameSpace {
