@@ -2,7 +2,7 @@ package java.nzgot.cma;
 
 import java.io.File;
 import java.io.IOException;
-import java.nzgot.cma.core.CommunityMatrix;
+import java.nzgot.cma.community.CommunityMatrix;
 
 /**
  * Community Matrix Analysis

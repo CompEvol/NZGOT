@@ -1,4 +1,4 @@
-package java.nzgot.cma.core;
+package java.nzgot.cma.community;
 
 import java.nzgot.core.util.BioObject;
 
