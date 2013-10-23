@@ -1,4 +1,4 @@
-package java.nzgot.cma.bio;
+package java.nzgot.cma.core;
 
 import java.nzgot.core.util.BioObject;
 

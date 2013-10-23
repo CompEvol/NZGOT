@@ -1,4 +1,4 @@
-package java.nzgot.cma.bio;
+package java.nzgot.cma.core;
 
 import java.io.*;
 import java.nzgot.cma.util.NameSpace;
