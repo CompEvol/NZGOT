@@ -54,5 +54,7 @@ public class BioObject<E> {
         return getName();
     }
 
-
+    public boolean equalsIgnoreCase(String name) {
+        return this.name.equalsIgnoreCase(name);
+    }
 }

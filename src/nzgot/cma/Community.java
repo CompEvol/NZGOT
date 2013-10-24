@@ -1,6 +1,7 @@
 package nzgot.cma;
 
 import nzgot.cma.io.CMImporter;
+import nzgot.cma.util.NameSpace;
 import nzgot.core.util.BioObject;
 
 import java.io.File;
@@ -13,6 +14,8 @@ import java.util.Map;
  * @author Walter Xie
  */
 public class Community extends BioObject {
+
+    public String[] samples; // by subplot
 
     protected final File otusFile;
     protected final File otuMappingFile;
@@ -38,8 +41,14 @@ public class Community extends BioObject {
         }
     }
 
-    public Map<OTU, int[]> getCommunityMatrix(String[] sample) {
-        //TODO
+    public Map<OTU, int[]> getCommunityMatrix(int by) {
+        Map<OTU, int[]> communityMatrix = new HashMap<>();
+        // by plot
+        if (by == NameSpace.BY_PLOT) {
+
+        } else {
+
+        }
         return null;
     }
 

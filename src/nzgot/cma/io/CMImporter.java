@@ -2,6 +2,7 @@ package nzgot.cma.io;
 
 import nzgot.cma.Community;
 import nzgot.cma.OTU;
+import nzgot.cma.util.NameParser;
 import nzgot.cma.util.NameSpace;
 
 import java.io.BufferedReader;
@@ -14,6 +15,14 @@ import java.io.IOException;
  * @author Walter Xie
  */
 public class CMImporter {
+
+    // column index in OTU mapping file
+    public static int OTU_MAPPING_INDEX_READ = 0;
+    public static int OTU_MAPPING_INDEX_OTU_NAME = 1;
+    // column index in reference sequence mapping file
+    public static int REF_SEQ_MAPPING_INDEX_IDENTITY = 0;
+    public static int REF_SEQ_MAPPING_INDEX_OTU_NAME = 1;
+    public static int REF_SEQ_MAPPING_INDEX_REF_SEQ = 2;
 
     public static void importOTUs (File otusFile, Community community) throws IOException, IllegalArgumentException {
         BufferedReader reader = new BufferedReader(new FileReader(otusFile));
@@ -42,8 +51,6 @@ public class CMImporter {
     }
 
     public static void importOTUMapping (File otuMappingFile, Community community) throws IOException, IllegalArgumentException {
-        int indexRead = 0;
-        int indexOTUName = 1;
 
         BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
 
@@ -52,16 +59,16 @@ public class CMImporter {
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = line.split("\t", -1);
+            String[] fields = line.split(NameParser.SEPARATOR_COLUMN, -1);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            OTU otu = (OTU) community.getUniqueElement(fields[indexOTUName]);
+            OTU otu = (OTU) community.getUniqueElement(fields[OTU_MAPPING_INDEX_OTU_NAME]);
             if (otu == null) {
                 throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
                         ", from the mapping file which does not exist in OTUs file !");
             } else {
-                otu.addUniqueElement(fields[indexRead]);
+                otu.addUniqueElement(fields[OTU_MAPPING_INDEX_READ]);
             }
 
             line = reader.readLine();
@@ -71,9 +78,6 @@ public class CMImporter {
     }
 
     public static void importReferenceMappingFile (File referenceMappingFile, Community community) throws IOException, IllegalArgumentException {
-        int indexIdentity = 0;
-        int indexOTUName = 1;
-        int indexRefSeq = 2;
 
         BufferedReader reader = new BufferedReader(new FileReader(referenceMappingFile));
 
@@ -82,16 +86,16 @@ public class CMImporter {
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = line.split("\t", -1);
+            String[] fields = line.split(NameParser.SEPARATOR_COLUMN, -1);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            OTU otu = (OTU) community.getUniqueElement(fields[indexOTUName]);
+            OTU otu = (OTU) community.getUniqueElement(fields[REF_SEQ_MAPPING_INDEX_OTU_NAME]);
             if (otu == null) {
                 throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
                         ", from the mapping file which does not exist in OTUs file !");
             } else {
-                otu.setRefSeqId(fields[indexRefSeq]);
+                otu.setRefSeqId(fields[REF_SEQ_MAPPING_INDEX_REF_SEQ]);
             }
 
             line = reader.readLine();
