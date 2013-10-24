@@ -1,8 +1,10 @@
-package java.nzgot.cma;
+package nzgot.cma;
+
+import nzgot.cma.io.CMExporter;
+import nzgot.cma.io.CMImporter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nzgot.cma.community.CommunityMatrix;
 
 /**
  * Community Matrix Analysis
@@ -28,17 +30,17 @@ public class CommunityMatrixAnalysis {
             File file = listOfFiles[i];
             if (file.isFile()) {
                 String fileName = file.getName();
-                if (CommunityMatrix.isOTUsFile(fileName)) {
+                if (CMImporter.isOTUsFile(fileName)) {
                     System.out.println("\nFind OTUs file: " + file);
 
                     otusFile = file;
 
-                } else if (CommunityMatrix.isOTUMappingFile(fileName)) {
+                } else if (CMImporter.isOTUMappingFile(fileName)) {
                     System.out.println("\nFind OTU mapping file: " + file);
 
                     otuMappingFile = file;
 
-                } else if (CommunityMatrix.isReferenceMappingFile(fileName)) {
+                } else if (CMImporter.isReferenceMappingFile(fileName)) {
                     System.out.println("\nFind reference sequence mapping file: " + file);
 
                     referenceMappingFile = file;
@@ -52,13 +54,19 @@ public class CommunityMatrixAnalysis {
         if (otusFile == null) throw new IllegalArgumentException("Error: cannot find OTUs file !");
         if (otuMappingFile == null) throw new IllegalArgumentException("Error: cannot find OTU mapping file !");
 
-        CommunityMatrix communityMatrix = new CommunityMatrix(otusFile, otuMappingFile);
+        Community community;
+        if (referenceMappingFile == null) {
+            System.out.println("\nWarning: create community analysis without providing reference sequence. ");
 
-        if (referenceMappingFile == null) throw new IllegalArgumentException("Error: cannot find reference mapping file !");
-        communityMatrix.importReferenceMappingFile(referenceMappingFile);
+            community = new Community(otusFile, otuMappingFile);
 
-        String outFile = workPath + File.separator + "report_ref_reads.txt";
-        communityMatrix.writeRefReads(outFile);
+        } else {
+            community = new Community(otusFile, otuMappingFile, referenceMappingFile);
+
+            String outFile = workPath + File.separator + "report_ref_reads.txt";
+            CMExporter.writeRefReads(outFile, community);
+        }
+
     }
 
 }

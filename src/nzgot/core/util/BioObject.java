@@ -1,4 +1,4 @@
-package java.nzgot.core.util;
+package nzgot.core.util;
 
 import java.util.HashSet;
 import java.util.Set;

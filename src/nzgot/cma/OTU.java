@@ -1,6 +1,6 @@
-package java.nzgot.cma.community;
+package nzgot.cma;
 
-import java.nzgot.core.util.BioObject;
+import nzgot.core.util.BioObject;
 
 /**
  * OTU

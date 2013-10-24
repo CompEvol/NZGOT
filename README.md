@@ -13,15 +13,16 @@ Last updated: walter@cs.auckland.ac.nz - 22nd October 2013
 
 =====
 
-The toolkit is initially designed to analyse various types of data collected from 
-New Zealand Genomic Observatory project, but we hope these tools would become useful
-and reusable tools for data analysis in bioinformatics and ecology.
+The toolkit is initially designed to analyse various types of data collected from
+New Zealand Genomic Observatory project, but we are aimed to integrate these tools
+to create an open-source framework useful and reusable for data analysis and modelling
+in bioinformatics and ecology.
 
-The whole software has the dependencies on BioJava (http://biojava.org) and 
-JEBL (http://jebl.sourceforge.net). Each tool should have its core package containing 
-the main code, and separated owners who have its copyright and are responsible to
-maintain it. 
+The minimum version of Java 1.7 is required. The whole software has the dependencies
+on BioJava (http://biojava.org) and JEBL (http://jebl.sourceforge.net).
 
+Each tool should have its core package containing the main code, and separated
+owners who have its copyright and are responsible to maintain it.
 It contains the following tools:
 
 1) Community matrix analysis.

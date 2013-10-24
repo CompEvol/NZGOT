@@ -1,32 +1,21 @@
-package java.nzgot.cma.community;
+package nzgot.cma.io;
 
-import java.io.*;
-import java.nzgot.cma.util.NameSpace;
-import java.nzgot.core.util.BioObject;
+import nzgot.cma.Community;
+import nzgot.cma.OTU;
+import nzgot.cma.util.NameSpace;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
- * Community Matrix
+ * Community Matrix Importer
  * @author Walter Xie
  */
-public class CommunityMatrix extends BioObject {
+public class CMImporter {
 
-    protected File otusFile;
-    protected File otuMappingFile;
-    protected File referenceMappingFile; // optional: Sanger sequence for reference
-
-    public CommunityMatrix(File otusFile, File otuMappingFile) {
-        super(otusFile.getName());
-        this.otusFile = otusFile;
-
-        try {
-            importOTUs(otusFile);
-            importOTUMapping(otuMappingFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void importOTUs (File otusFile) throws IOException, IllegalArgumentException {
+    public static void importOTUs (File otusFile, Community community) throws IOException, IllegalArgumentException {
         BufferedReader reader = new BufferedReader(new FileReader(otusFile));
 
         System.out.println("\nImport OTUs from file: " + otusFile);
@@ -40,7 +29,7 @@ public class CommunityMatrix extends BioObject {
                 String otuName = line.substring(1);
                 otu = new OTU(otuName);
 
-                addUniqueElement(otu);
+                community.addUniqueElement(otu);
 
             } else {
                 // TODO add ref sequence
@@ -52,7 +41,7 @@ public class CommunityMatrix extends BioObject {
         reader.close();
     }
 
-    public void importOTUMapping (File otuMappingFile) throws IOException, IllegalArgumentException {
+    public static void importOTUMapping (File otuMappingFile, Community community) throws IOException, IllegalArgumentException {
         int indexRead = 0;
         int indexOTUName = 1;
 
@@ -67,7 +56,7 @@ public class CommunityMatrix extends BioObject {
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            OTU otu = (OTU) getUniqueElement(fields[indexOTUName]);
+            OTU otu = (OTU) community.getUniqueElement(fields[indexOTUName]);
             if (otu == null) {
                 throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
                         ", from the mapping file which does not exist in OTUs file !");
@@ -81,7 +70,7 @@ public class CommunityMatrix extends BioObject {
         reader.close();
     }
 
-    public void importReferenceMappingFile (File referenceMappingFile) throws IOException, IllegalArgumentException {
+    public static void importReferenceMappingFile (File referenceMappingFile, Community community) throws IOException, IllegalArgumentException {
         int indexIdentity = 0;
         int indexOTUName = 1;
         int indexRefSeq = 2;
@@ -97,7 +86,7 @@ public class CommunityMatrix extends BioObject {
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            OTU otu = (OTU) getUniqueElement(fields[indexOTUName]);
+            OTU otu = (OTU) community.getUniqueElement(fields[indexOTUName]);
             if (otu == null) {
                 throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
                         ", from the mapping file which does not exist in OTUs file !");
@@ -111,51 +100,15 @@ public class CommunityMatrix extends BioObject {
         reader.close();
     }
 
-    /**
-     * 2 columns: 1st -> reference sequence id, 2nd -> number of reads
-     * last row is total reads
-     * depend on importOTUs, importOTUMapping, importReferenceMappingFile
-     * @param outFileAndPath
-     * @throws IOException
-     * @throws IllegalArgumentException
-     */
-    public void writeRefReads(String outFileAndPath) throws IOException, IllegalArgumentException {
-        PrintStream out = new PrintStream(new FileOutputStream(outFileAndPath));
-
-        System.out.println("\nGenerate report of how many reads map to reference sequence in the file: " + outFileAndPath);
-
-        int total = 0;
-        for(Object e : elementsSet){
-            OTU otu = (OTU) e;
-            if (otu.getRefSeqId() != null) {
-                int reads = otu.elementsSet.size();
-                out.println(otu.getRefSeqId() + "\t" + reads);
-                total += reads;
-            }
-        }
-        out.println("total\t" + total);
-        out.flush();
-        out.close();
-    }
-
     public static boolean isOTUsFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTUS_RELABELED) && fileName.endsWith(".fasta");
+        return fileName.startsWith(NameSpace.PREFIX_OTUS_RELABELED) && fileName.endsWith(NameSpace.POSTFIX_OTUS);
     }
 
     public static boolean isOTUMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_MAPPING) && fileName.endsWith(".m8");
+        return fileName.startsWith(NameSpace.PREFIX_OTU_MAPPING) && fileName.endsWith(NameSpace.POSTFIX_MAPPING);
     }
 
     public static boolean isReferenceMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && fileName.endsWith(".m8");
+        return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && fileName.endsWith(NameSpace.POSTFIX_MAPPING);
     }
-
-    public void setReferenceMappingFile(File referenceMappingFile) {
-        this.referenceMappingFile = referenceMappingFile;
-    }
-
-    public void setOtuMappingFile(File otuMappingFile) {
-        this.otuMappingFile = otuMappingFile;
-    }
-
 }

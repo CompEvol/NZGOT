@@ -1,4 +1,4 @@
-package java.nzgot.cma.util;
+package nzgot.cma.util;
 
 /**
  * Name Space
@@ -15,4 +15,7 @@ public class NameSpace {
     public static String PREFIX_OTUS_RELABELED = "otus_relabeled_";
     public static String PREFIX_OTU_MAPPING = "otu_map_";
     public static String PREFIX_OTU_REFERENCE = "reference_";
+
+    public static String POSTFIX_OTUS = ".fasta";
+    public static String POSTFIX_MAPPING = ".m8";
 }
