@@ -69,7 +69,7 @@ public class CMImporter {
 
         System.out.println("\nImport OTU mapping (to reads) file: " + otuMappingFile);
 
-        // ======= 1st =======
+        // 1st
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
@@ -94,9 +94,9 @@ public class CMImporter {
 
         reader.close();
 
-        // ======= 2nd =======
+        // 2nd
         community.initSamples(samples);
-        // ======= 3rd =======
+        // 3rd
         community.setAlphaDiversity();
 
         return samples;

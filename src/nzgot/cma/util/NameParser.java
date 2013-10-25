@@ -24,7 +24,7 @@ public class NameParser {
 
     // parse name by mutli-separators in different naming level
     // allow to customize separator according to index
-    private String[] separators = new String[]{"|", "-", "_"};
+    private String[] separators = new String[]{"\\|", "-", "_"};
 
     public String getSeparator(int index) {
         return separators[index];
@@ -63,7 +63,8 @@ public class NameParser {
     }
 
 
-    public String getSampleBy (int samplesBy, String sample) {
+    public String getSampleBy (int samplesBy, String readName) {
+        String sample = getSampleFromRead(readName);
         return samplesBy == NameSpace.BY_PLOT ? getPlotFromSample(sample)[0] : sample;
     }
 }

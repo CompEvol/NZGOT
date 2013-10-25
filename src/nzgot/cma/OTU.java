@@ -26,11 +26,11 @@ public class OTU<E> extends BioSortedSet<E> {
         for (E read: this) {
             String sampleLocation = NameParser.getInstance().getSampleBy(samplesBy, read.toString());
             int i = ArrayUtil.indexOf(sampleLocation, samples);
-            if (i > 0) {
-                alphaDiversity[i]++;
-            } else {
+            if (i < 0) {
                 throw new IllegalArgumentException("Error: missing sample location : " + sampleLocation +
                         " from samples array : " + Arrays.asList(samples));
+            } else {
+                alphaDiversity[i]++;
             }
         }
     }
