@@ -1,20 +1,20 @@
 package nzgot.core.util;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.TreeSet;
 
 /**
- * BioObject
+ * BioSortedSet
  * @author Walter Xie
  */
-public class BioObject<E> {
+public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
 
-    public Set<E> elementsSet = new HashSet<E>(); // elements are unique
+//    public SortedSet<E> elementsSet = new TreeSet<>(); // elements are unique, and sorted
 
     protected String name;
 
-    public BioObject(String name) {
-        this.name = name;
+    public BioSortedSet(String name) {
+        super();
+        setName(name);
     }
 
     /**
@@ -23,7 +23,7 @@ public class BioObject<E> {
      * @throws IllegalArgumentException
      */
     public void addUniqueElement(E e) throws IllegalArgumentException {
-        if (!elementsSet.add(e))
+        if (!add(e))
             throw new IllegalArgumentException("Error: find duplicate " +
                     e.toString() + " in " + getName() + " !");
     }
@@ -35,7 +35,7 @@ public class BioObject<E> {
      * @throws IllegalArgumentException
      */
     public E getUniqueElement(String name) throws IllegalArgumentException {
-        for (E e : elementsSet) {
+        for (E e : this) {
             if (e.toString().equals(name)) return e;
         }
         return null;
@@ -56,5 +56,10 @@ public class BioObject<E> {
 
     public boolean equalsIgnoreCase(String name) {
         return this.name.equalsIgnoreCase(name);
+    }
+
+    @Override
+    public int compareTo(E o) {
+        return name.compareTo(o.toString());
     }
 }

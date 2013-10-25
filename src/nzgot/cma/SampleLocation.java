@@ -1,13 +1,13 @@
 package nzgot.cma;
 
-import nzgot.core.util.BioObject;
+import nzgot.core.util.BioSortedSet;
 
 /**
  * Sample Location = Plot
  * elementsSet contains subplot being sampled
  * @author Walter Xie
  */
-public class SampleLocation extends BioObject {
+public class SampleLocation<E> extends BioSortedSet<E> {
 
     protected double latitude;
     protected double longitude;

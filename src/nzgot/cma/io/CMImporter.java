@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.TreeSet;
 
 /**
  * Community Matrix Importer
@@ -50,12 +51,25 @@ public class CMImporter {
         reader.close();
     }
 
-    public static void importOTUMapping (File otuMappingFile, Community community) throws IOException, IllegalArgumentException {
+    /**
+     * 1st load mapping OTU - Reads,
+     * 2nd initialize samples array in Community, which are sample locations
+     * 3rd calculate Alpha diversity for each OTU
+     * @param otuMappingFile
+     * @param community
+     * @return
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
+    public static TreeSet<String> importOTUMapping (File otuMappingFile, Community community) throws IOException, IllegalArgumentException {
+        TreeSet<String> samples = new TreeSet<>();
+        NameParser nameParser = NameParser.getInstance();
 
         BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
 
         System.out.println("\nImport OTU mapping (to reads) file: " + otuMappingFile);
 
+        // ======= 1st =======
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
@@ -69,12 +83,23 @@ public class CMImporter {
                         ", from the mapping file which does not exist in OTUs file !");
             } else {
                 otu.addUniqueElement(fields[OTU_MAPPING_INDEX_READ]);
+
+                // if by plot, then add plot to TreeSet, otherwise add subplot
+                String sampleLocation = nameParser.getSampleBy(community.getSamplesBy(), fields[OTU_MAPPING_INDEX_READ]);
+                samples.add(sampleLocation);
             }
 
             line = reader.readLine();
         }
 
         reader.close();
+
+        // ======= 2nd =======
+        community.initSamples(samples);
+        // ======= 3rd =======
+        community.setAlphaDiversity();
+
+        return samples;
     }
 
     public static void importReferenceMappingFile (File referenceMappingFile, Community community) throws IOException, IllegalArgumentException {

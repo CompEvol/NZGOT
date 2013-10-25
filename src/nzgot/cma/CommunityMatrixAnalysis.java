@@ -55,6 +55,7 @@ public class CommunityMatrixAnalysis {
         if (otuMappingFile == null) throw new IllegalArgumentException("Error: cannot find OTU mapping file !");
 
         Community community;
+        String outFileAndPath;
         if (referenceMappingFile == null) {
             System.out.println("\nWarning: create community analysis without providing reference sequence. ");
 
@@ -63,10 +64,12 @@ public class CommunityMatrixAnalysis {
         } else {
             community = new Community(otusFile, otuMappingFile, referenceMappingFile);
 
-            String outFile = workPath + File.separator + "report_ref_reads.txt";
-            CMExporter.writeRefReads(outFile, community);
+            outFileAndPath = workPath + File.separator + "report_ref_reads.txt";
+            CMExporter.writeRefReads(outFileAndPath, community);
         }
 
+        outFileAndPath = workPath + File.separator + "community_matrix.csv";
+        CMExporter.writeCommunityMatrix(outFileAndPath, community);
     }
 
 }

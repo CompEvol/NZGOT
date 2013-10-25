@@ -2,20 +2,25 @@ package nzgot.cma;
 
 import nzgot.cma.io.CMImporter;
 import nzgot.cma.util.NameSpace;
-import nzgot.core.util.BioObject;
+import nzgot.core.util.BioSortedSet;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Community Matrix
+ * elementsSet contains OTU
  * @author Walter Xie
  */
-public class Community extends BioObject {
+public class Community<E> extends BioSortedSet<E> {
 
-    public String[] samples; // by subplot
+    // the sampling location determined by samplesBy, default by plot
+    // e.g. 454 soil data: by subplot is 2-C and 2-N, by plot is 2
+    public String[] samples;
+    protected int samplesBy = NameSpace.BY_PLOT;
 
     protected final File otusFile;
     protected final File otuMappingFile;
@@ -34,6 +39,7 @@ public class Community extends BioObject {
         try {
             CMImporter.importOTUs(otusFile, this);
             CMImporter.importOTUMapping(otuMappingFile, this);
+
             if (referenceMappingFile != null)
                 CMImporter.importReferenceMappingFile(referenceMappingFile, this);
         } catch (IOException e) {
@@ -41,15 +47,18 @@ public class Community extends BioObject {
         }
     }
 
-    public Map<OTU, int[]> getCommunityMatrix(int by) {
-        Map<OTU, int[]> communityMatrix = new HashMap<>();
-        // by plot
-        if (by == NameSpace.BY_PLOT) {
+    public void initSamples(TreeSet<String> samples){
+        if (samples == null || samples.size() < 1)
+            throw new IllegalArgumentException("Error: cannot parse sample from read name : " + samples);
 
-        } else {
+        this.samples = samples.toArray(new String[samples.size()]);
+    }
 
+    public void setAlphaDiversity () {
+        for (E e : this) {
+            OTU otu = (OTU) e;
+            otu.setAlphaDiversity(samplesBy, samples);
         }
-        return null;
     }
 
     /**
@@ -59,14 +68,14 @@ public class Community extends BioObject {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public Map<String, Integer> getRefSeqReadsCount() throws IOException, IllegalArgumentException {
-        Map<String, Integer> readsCountMap = new HashMap<String, Integer>();
+    public Map<String, Integer> getRefSeqReadsCountMap() throws IOException, IllegalArgumentException {
+        Map<String, Integer> readsCountMap = new HashMap<>();
 
-        for(Object e : elementsSet){
+        for(E e : this){
             OTU otu = (OTU) e;
             String refSeqId = otu.getRefSeqId();
             if (refSeqId != null) {
-                int reads = otu.elementsSet.size();
+                int reads = otu.size();
                 // if refseq has count in map, then add new count to it
                 if (readsCountMap.containsKey(refSeqId)) {
                     reads += readsCountMap.get(refSeqId);
@@ -77,6 +86,16 @@ public class Community extends BioObject {
         }
 
         return readsCountMap;
+    }
+
+
+    public int getSamplesBy() {
+        return samplesBy;
+    }
+
+    public void setSamplesBy(int samplesBy) {
+        this.samplesBy = samplesBy;
+        //TODO update matrix
     }
 
     public File getReferenceMappingFile() {
