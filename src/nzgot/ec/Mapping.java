@@ -21,9 +21,9 @@ import jebl.evolution.sequences.*;
 
 
 /**
- * This class uses the new mapping file...
- * two mapping files required: read-otu-map, otu-reference-map
- * both files are produced with USEARCH with default option parameters
+ * This class parse the new mapping files
+ * <br>two mapping files required: read-otu-map, otu-reference-map
+ * <br>both files are produced with USEARCH with default option parameters
  * @author Thomas Hummel
  */
 public class Mapping {
@@ -140,83 +140,6 @@ public class Mapping {
 		}
 		return result;
 			
-	}
-
-	
-	public static void main(String[] args) throws IOException, ImportException {
-		
-		//Sequence files
-		String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
-		String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta";
-		String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_corrected_fullRef.fasta";
-		
-		//Mapping files
-		String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
-		String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
-		
-		File sequenceIn = new File(fileSeq);
-		File referenceIn = new File(fileRef);
-		File sequenceOut = new File(fileCor);
-
-		Mapping map = new Mapping();
-		map.parseSeqOtuTable(mapSeqOtu);
-		map.parseOtuRefTable(mapOtuRef);
-		
-		//create sequence lists
-		FastaImporter sequenceImport = new FastaImporter(sequenceIn , SequenceType.NUCLEOTIDE);
-		FastaImporter referenceImport = new FastaImporter(referenceIn, SequenceType.AMINO_ACID);
-
-		List<Sequence> sequences = sequenceImport.importSequences();
-		List<Sequence> references =referenceImport.importSequences();
-		List<Sequence> sequencesCor = new ArrayList<Sequence>(2000);
-
-		
-		String referenceLabel;
-		String referenceSeq;
-		
-		double count = 0;
-		double size = sequences.size();
-
-		//Align and correct loop
-		for (Sequence seq : sequences) {
-			
-			count++;
-			referenceLabel = null;
-			referenceSeq = null;
-			
-			referenceLabel = map.findReference(seq.getTaxon().toString());
-			
-			//reference String 
-			if (referenceLabel != null) {
-				referenceSeq = getReferenceString(referenceLabel, references);
-			}
-			
-			//correct sequence with reference alignment and save in list
-			if (referenceSeq != null) {
-				AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, GeneticCode.INVERTEBRATE_MT);
-				ac.doAlignment(seq.getString(), referenceSeq);
-				try{
-					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString().replace('-', '\0')); //replace gaps with '?'...	
-					sequencesCor.add(correctedSeq);
-					Debugger.log( String.format("%.5g", ((count/size))*100) +"%" );
-				}
-				catch (NullPointerException e) {
-					Debugger.log(seq.getTaxon().toString());
-				}
-				
-			}
-
-			//ac.getCorrected(seq);
-			//ac.doMatch(new SystemOut(), "");
-		}
-		
-		//export corrected sequences
-		Writer write = new OutputStreamWriter(new FileOutputStream(sequenceOut));
-		FastaExporter fe = new FastaExporter(write);
-		fe.exportSequences(sequencesCor);
-		write.flush();
-		write.close();
-
 	}
 	
 }
