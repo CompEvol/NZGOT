@@ -19,7 +19,7 @@ to create an open-source framework useful and reusable for data analysis and mod
 in bioinformatics and ecology.
 
 The minimum version of Java 1.7 is required. The whole software has the dependencies
-on BioJava (http://biojava.org) and JEBL (http://jebl.sourceforge.net).
+on JEBL (http://jebl.sourceforge.net).
 
 Each tool should have its core package containing the main code, and separated
 owners who have its copyright and are responsible to maintain it.
