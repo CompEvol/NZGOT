@@ -30,8 +30,8 @@ Core package: nzgot.cma
 Owners: Walter Xie, Alexei Drummond
 
 2) Error correction tool for the next-generation sequencing data.
-Core package: 
-Owners: 
+Core package: nzgot.ec
+Owners: Thomas Hummel, Alexei Drummond, Walter Xie
 
 
 
