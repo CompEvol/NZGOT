@@ -17,10 +17,8 @@ import jebl.evolution.align.scores.Blosum80;
 import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
-import jebl.evolution.sequences.BasicSequence;
-import jebl.evolution.sequences.GeneticCode;
-import jebl.evolution.sequences.Sequence;
-import jebl.evolution.sequences.SequenceType;
+import jebl.evolution.sequences.*;
+
 
 /**
  * This class uses the new mapping file...
@@ -32,8 +30,8 @@ public class Mapping {
 	
 	
 	//Initial capacity?
-	HashMap<String, String> seqOtuMap = new HashMap<String, String>(10000);
-	HashMap<String, String> otuRefMap = new HashMap<String, String>(100); 
+	static HashMap<String, String> seqOtuMap = new HashMap<String, String>(10000);
+	static HashMap<String, String> otuRefMap = new HashMap<String, String>(100); 
 	
 	/**
 	 *Creates HashMap of Sequence OTU Table
@@ -114,8 +112,17 @@ public class Mapping {
 		return reference;
 		
 	}
+	
 	/**
+	 * return sequences of given OTU file
 	 * 
+	 */
+	public void searchOTU(String filePathOTU, String filePathMap) {
+		
+	}
+	
+	/**
+	 * get reference sequence string of given reference label
 	 * @param referenceLabel Label of query reference sequence
 	 * @param references Sequence list of reference sequences
 	 * @return reference amino acid sequence
@@ -138,14 +145,22 @@ public class Mapping {
 	
 	public static void main(String[] args) throws IOException, ImportException {
 		
-		//Files
-		File sequenceIn = new File("/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/SoilKit_endTrimmed.fasta");
-		File sequenceOut = new File("/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/SoilKit_corrected_fullRef.fasta");
-		File referenceIn = new File("/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta");
+		//Sequence files
+		String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
+		String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta";
+		String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_corrected_fullRef.fasta";
+		
+		//Mapping files
+		String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
+		String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
+		
+		File sequenceIn = new File(fileSeq);
+		File referenceIn = new File(fileRef);
+		File sequenceOut = new File(fileCor);
 
 		Mapping map = new Mapping();
-		map.parseSeqOtuTable("/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/mapping/DirectSoil_userout.m8");
-		map.parseOtuRefTable("/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/reference/DirectSoil_reference_userout_85.m8");
+		map.parseSeqOtuTable(mapSeqOtu);
+		map.parseOtuRefTable(mapOtuRef);
 		
 		//create sequence lists
 		FastaImporter sequenceImport = new FastaImporter(sequenceIn , SequenceType.NUCLEOTIDE);
@@ -158,12 +173,16 @@ public class Mapping {
 		
 		String referenceLabel;
 		String referenceSeq;
+		
+		double count = 0;
+		double size = sequences.size();
 
 		//Align and correct loop
 		for (Sequence seq : sequences) {
 			
-			referenceLabel=null;
-			referenceSeq=null;
+			count++;
+			referenceLabel = null;
+			referenceSeq = null;
 			
 			referenceLabel = map.findReference(seq.getTaxon().toString());
 			
@@ -177,11 +196,12 @@ public class Mapping {
 				AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, GeneticCode.INVERTEBRATE_MT);
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
-					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString());
+					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString().replace('-', '\0')); //replace gaps with '?'...	
 					sequencesCor.add(correctedSeq);
+					Debugger.log( String.format("%.5g", ((count/size))*100) +"%" );
 				}
 				catch (NullPointerException e) {
-					System.out.println(seq.getTaxon().toString());
+					Debugger.log(seq.getTaxon().toString());
 				}
 				
 			}

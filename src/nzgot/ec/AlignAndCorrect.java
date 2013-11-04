@@ -114,14 +114,15 @@ public class AlignAndCorrect {
             }
         }
 
-        System.out.println("Maximum score = " + maxval);
+        //System.out.println("Maximum score = " + maxval);
+        Debugger.log("Maximum score = " + maxval);
         if (maxj != -1) {            // the maximum score was F[m][maxj]
             optimal = nodes[m][maxj];
         } else {                       // the maximum score was F[maxi][n]
             optimal = nodes[maxi][n];
         }
-
-        System.out.println("Optimal found at " + optimal.i + ", " + optimal.j);
+        Debugger.log("Optimal found at " + optimal.i + ", " + optimal.j);
+        //System.out.println("Optimal found at " + optimal.i + ", " + optimal.j);
     }
 
 
