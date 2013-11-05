@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import nzgot.cma.Community;
+
 /**
  * 
  * @author Thomas Hummel
@@ -22,6 +24,13 @@ public class OTU {
 		for(String temp : uniqueSet) {
 			System.out.println(temp+": "+ Collections.frequency(otu, temp));
 		}
+	}
+	
+	public static void sequenceOtuList(HashMap<String,String> seqOtuMap) {
+		
+		
+		
+		
 	}
 /*	public static void sequenceOtuList(HashMap<String,String> seqOtuMap) {
 		Set<Map.Entry<String, String>> set = seqOtuMap.entrySet();
