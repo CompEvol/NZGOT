@@ -16,7 +16,9 @@ public class oldMapping {
 	
 	//Initial capacity?
 	HashMap<String, String> seqOtuMap = new HashMap<String, String>(1000);
-	BestReference elements = new BestReference(1000);
+	BestReference bestElements = new BestReference(1000);
+	WorstReference worstElements = new WorstReference(1000);
+	
 	
 	//creates HashMap of Sequence OTU Table
 	public void parseSeqOtuTable(String filePath) {
@@ -48,7 +50,7 @@ public class oldMapping {
 	}
 	
 	//creates HashMap of Identity OTU Reference Table
-	public void parseOtuRefTable(String filePath) {
+	public void parseBestOtuRefTable(String filePath) {
 		
 		String otuToken;
 		String refToken;
@@ -67,7 +69,45 @@ public class oldMapping {
 					otuToken = st.nextToken();
 					refToken = st.nextToken();
 					
-					elements.addElement(otuToken, idToken, refToken);
+					bestElements.addElement(otuToken, idToken, refToken);
+					
+				}
+				
+				current = reader.readLine();
+
+			}
+			
+			reader.close();
+			file.close();
+
+
+		} catch (FileNotFoundException e) {
+			System.out.println(e);
+		} catch (IOException e) {
+			System.out.println("I/O-error");
+		}
+	}
+	
+	public void parseWorstOtuRefTable(String filePath) {
+		
+		String otuToken;
+		String refToken;
+		double idToken;
+		
+		
+		try{
+			FileReader file = new FileReader(filePath);
+			BufferedReader reader = new BufferedReader(file); 
+			String current = reader.readLine();
+			while (current != null) { 
+				final StringTokenizer st = new StringTokenizer(current, "\t");
+				while (st.hasMoreTokens()) {
+					
+					idToken = Double.parseDouble(st.nextToken());
+					otuToken = st.nextToken();
+					refToken = st.nextToken();
+					
+					worstElements.addElement(otuToken, idToken, refToken);
 					
 				}
 				
@@ -94,7 +134,18 @@ public class oldMapping {
 		if (otu == null) {
 			return null;
 		}
-		String reference = elements.getBestReference(otu);
+		String reference = bestElements.getBestReference(otu);
+		return reference;
+		
+	}
+public String searchWorstReference(String seq) {
+		
+		String seqLabel = seq; 
+		String otu = seqOtuMap.get(seqLabel);
+		if (otu == null) {
+			return null;
+		}
+		String reference = worstElements.getWorstReference(otu);
 		return reference;
 		
 	}
