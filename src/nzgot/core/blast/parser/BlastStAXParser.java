@@ -1,4 +1,4 @@
-package nzgot.core.blast.paser;
+package nzgot.core.blast.parser;
 
 import nzgot.core.blast.Hit;
 import nzgot.core.blast.Iteration;

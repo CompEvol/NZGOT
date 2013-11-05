@@ -1,4 +1,4 @@
-package nzgot.core.blast.paser;
+package nzgot.core.blast.parser;
 
 /**
  * parse Blast XML output by SAX (XMLReader)
