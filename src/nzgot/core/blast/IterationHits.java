@@ -14,7 +14,8 @@ import java.util.List;
 
 
 /**
- * 
+ * modified
+ * @author Walter Xie
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -22,6 +23,19 @@ import java.util.List;
 })
 @XmlRootElement(name = "Iteration_hits")
 public class IterationHits {
+
+    /**
+     * only return the first top hit for each iteration
+     */
+    public void reduceToFirstTopHit() {
+        if (hit == null) {
+            hit = new ArrayList<Hit>();
+        } else if (hit.size() > 1) {
+            Hit first = hit.get(0);
+            hit = new ArrayList<>();
+            hit.add(first);
+        }
+    }
 
     @XmlElement(name = "Hit")
     protected List<Hit> hit;
@@ -55,13 +69,4 @@ public class IterationHits {
         return this.hit;
     }
 
-    public void reduceToFirstTopHit() {
-        if (hit == null) {
-            hit = new ArrayList<Hit>();
-        } else if (hit.size() > 1) {
-            Hit first = hit.get(0);
-            hit = new ArrayList<>();
-            hit.add(first);
-        }
-    }
 }

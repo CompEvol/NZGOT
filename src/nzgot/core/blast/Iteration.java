@@ -11,7 +11,8 @@ import javax.xml.bind.annotation.*;
 
 
 /**
- * 
+ * modified
+ * @author Walter Xie
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -25,6 +26,13 @@ import javax.xml.bind.annotation.*;
 })
 @XmlRootElement(name = "Iteration")
 public class Iteration {
+
+    /**
+     * only return the first top hit for each iteration
+     */
+    public void reduceToFirstTopHit() {
+        iterationHits.reduceToFirstTopHit();
+    }
 
     @XmlElement(name = "Iteration_iter-num", required = true)
     protected String iterationIterNum;
@@ -209,7 +217,4 @@ public class Iteration {
         this.iterationMessage = value;
     }
 
-    public void reduceToFirstTopHit() {
-        iterationHits.reduceToFirstTopHit();
-    }
 }
