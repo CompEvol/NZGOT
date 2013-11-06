@@ -2,7 +2,6 @@ package nzgot.core.community;
 
 import nzgot.core.util.BioSortedSet;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,10 +36,8 @@ public class OTUs<E> extends BioSortedSet<E> {
      * key -> reference sequence id, value -> number of reads
      * sum up reads according to reference sequence
      * E has to be OTU
-     * @throws java.io.IOException
-     * @throws IllegalArgumentException
      */
-    public Map<String, Integer> getRefSeqReadsCountMap() throws IOException, IllegalArgumentException {
+    public Map<String, Integer> getRefSeqReadsCountMap() {
         Map<String, Integer> readsCountMap = new HashMap<>();
 
         for(E e : this){

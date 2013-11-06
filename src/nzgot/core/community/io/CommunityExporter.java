@@ -3,6 +3,7 @@ package nzgot.core.community.io;
 import nzgot.core.community.AlphaDiversity;
 import nzgot.core.community.Community;
 import nzgot.core.community.OTU;
+import nzgot.core.community.OTUs;
 import nzgot.core.community.util.NameParser;
 
 import java.io.FileOutputStream;
@@ -14,7 +15,7 @@ import java.util.Map;
  * Community Matrix Exporter
  * @author Walter Xie
  */
-public class CMExporter {
+public class CommunityExporter {
 
     /**
      * write community matrix
@@ -57,23 +58,21 @@ public class CMExporter {
     /**
      * 2 columns: 1st -> reference sequence id, 2nd -> number of reads
      * last row is total reads
-     * depend on importOTUs, importOTUMapping, importReferenceMappingFile
+     * at least one OTU should have reference
      * @param outFileAndPath
-     * @param community
+     * @param otus
      * @throws IOException
      * @throws IllegalArgumentException
      */
 
-    public static void writeRefReads(String outFileAndPath, Community community) throws IOException, IllegalArgumentException {
-        if (community.getReferenceMappingFile() == null)
-            throw new IllegalArgumentException("Error: need to import reference sequence mapping file to generate this report !");
+    public static void writeRefReads(String outFileAndPath, OTUs otus) throws IOException, IllegalArgumentException {
 
         PrintStream out = new PrintStream(new FileOutputStream(outFileAndPath));
 
         System.out.println("\nGenerate report of how many reads map to reference sequence in the file: " + outFileAndPath);
 
         int total = 0;
-        Map<String, Integer> readsCountMap = community.getRefSeqReadsCountMap();
+        Map<String, Integer> readsCountMap = otus.getRefSeqReadsCountMap();
         for(Map.Entry<String, Integer> entry : readsCountMap.entrySet()){
             out.println(entry.getKey() + "\t" + entry.getValue());
             total += entry.getValue();

@@ -1,6 +1,6 @@
 package nzgot.core.community;
 
-import nzgot.core.community.io.CMImporter;
+import nzgot.core.community.io.OTUsImporter;
 import nzgot.core.community.util.NameSpace;
 
 import java.io.File;
@@ -12,37 +12,37 @@ import java.util.TreeSet;
  * elementsSet contains OTU
  * load all OTUs and mappings from 3 files
  * 2 compulsory files: otusFile, otuMappingFile
- * 1 optional file: referenceMappingFile
+ * 1 optional file: refSeqMappingFile
  * @author Walter Xie
  */
 public class Community<E> extends OTUs<E> {
 
     // the sampling location determined by sampleType, default by plot
     // e.g. 454 soil data: by subplot is 2-C and 2-N, by plot is 2
-    protected int sampleType = NameSpace.BY_PLOT;
+    protected String sampleType = NameSpace.BY_PLOT;
     // the final samples already parsed from label
     protected String[] samples;
 
     protected final File otusFile;
     protected final File otuMappingFile;
-    protected final File referenceMappingFile; // optional: Sanger sequence for reference
+    protected final File refSeqMappingFile; // optional: Sanger sequence for reference
 
     public Community(File otusFile, File otuMappingFile) {
         this(otusFile, otuMappingFile, null);
     }
 
-    public Community(File otusFile, File otuMappingFile, File referenceMappingFile) {
+    public Community(File otusFile, File otuMappingFile, File refSeqMappingFile) {
         super(otusFile.getName());
         this.otusFile = otusFile;
         this.otuMappingFile = otuMappingFile;
-        this.referenceMappingFile = referenceMappingFile;
+        this.refSeqMappingFile = refSeqMappingFile;
 
         try {
-            CMImporter.importOTUs(otusFile, this);
-            CMImporter.importOTUMapping(otuMappingFile, this);
+            OTUsImporter.importOTUs(otusFile, this);
+            OTUsImporter.importOTUMappingBySamples(otuMappingFile, this);
 
-            if (referenceMappingFile != null)
-                CMImporter.importReferenceMappingFile(referenceMappingFile, this);
+            if (refSeqMappingFile != null)
+                OTUsImporter.importReferenceSequenceMapping(refSeqMappingFile, this);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -65,11 +65,11 @@ public class Community<E> extends OTUs<E> {
         }
     }
 
-    public int getSampleType() {
+    public String getSampleType() {
         return sampleType;
     }
 
-    public void setSampleType(int sampleType) {
+    public void setSampleType(String sampleType) {
         this.sampleType = sampleType;
         if (samples != null) {
         //TODO update matrix and diversity
@@ -80,8 +80,8 @@ public class Community<E> extends OTUs<E> {
         return samples;
     }
 
-    public File getReferenceMappingFile() {
-        return referenceMappingFile;
+    public File getRefSeqMappingFile() {
+        return refSeqMappingFile;
     }
 
 }

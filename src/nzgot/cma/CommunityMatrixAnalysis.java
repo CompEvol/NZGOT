@@ -1,8 +1,8 @@
 package nzgot.cma;
 
 import nzgot.core.community.Community;
-import nzgot.core.community.io.CMExporter;
-import nzgot.core.community.io.CMImporter;
+import nzgot.core.community.io.CommunityExporter;
+import nzgot.core.community.io.OTUsImporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,17 +31,17 @@ public class CommunityMatrixAnalysis {
             File file = listOfFiles[i];
             if (file.isFile()) {
                 String fileName = file.getName();
-                if (CMImporter.isOTUsFile(fileName)) {
+                if (OTUsImporter.isOTUsFile(fileName)) {
                     System.out.println("\nFind OTUs file: " + file);
 
                     otusFile = file;
 
-                } else if (CMImporter.isOTUMappingFile(fileName)) {
+                } else if (OTUsImporter.isOTUMappingFile(fileName)) {
                     System.out.println("\nFind OTU mapping file: " + file);
 
                     otuMappingFile = file;
 
-                } else if (CMImporter.isReferenceMappingFile(fileName)) {
+                } else if (OTUsImporter.isReferenceMappingFile(fileName)) {
                     System.out.println("\nFind reference sequence mapping file: " + file);
 
                     referenceMappingFile = file;
@@ -66,11 +66,11 @@ public class CommunityMatrixAnalysis {
             community = new Community(otusFile, otuMappingFile, referenceMappingFile);
 
             outFileAndPath = workPath + File.separator + "report_ref_reads.txt";
-            CMExporter.writeRefReads(outFileAndPath, community);
+            CommunityExporter.writeRefReads(outFileAndPath, community);
         }
 
         outFileAndPath = workPath + File.separator + "community_matrix.csv";
-        CMExporter.writeCommunityMatrix(outFileAndPath, community);
+        CommunityExporter.writeCommunityMatrix(outFileAndPath, community);
     }
 
 }

@@ -63,7 +63,7 @@ public class NameParser {
     }
 
 
-    public String getSampleBy (int samplesBy, String readName) {
+    public String getSampleBy (String samplesBy, String readName) {
         String sample = getSampleFromRead(readName);
         return samplesBy == NameSpace.BY_PLOT ? getPlotFromSample(sample)[0] : sample;
     }

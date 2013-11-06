@@ -14,6 +14,6 @@ public class NameSpace {
     public static final String POSTFIX_OTUS = ".fasta";
     public static final String POSTFIX_MAPPING = ".m8";
 
-    public static final int BY_PLOT = 1;
-    public static final int BY_SUBPLOT = 2;
+    public static final String BY_PLOT = "by plot";
+    public static final String BY_SUBPLOT = "by subplot";
 }

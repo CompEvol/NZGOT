@@ -14,11 +14,11 @@ public class AlphaDiversity {
 
     protected int[] alphaDiversity; // only valid for given sample array
 
-    public AlphaDiversity(int samplesBy, String[] samples, OTU otu) {
+    public AlphaDiversity(String samplesBy, String[] samples, OTU otu) {
         setAlphaDiversity(samplesBy, samples, otu);
     }
 
-    public void setAlphaDiversity(int samplesBy, String[] samples, OTU otu) {
+    public void setAlphaDiversity(String samplesBy, String[] samples, OTU otu) {
         if (samples == null || samples.length < 1)
             throw new IllegalArgumentException("Error: sample array was not initialized: " + samples);
 
