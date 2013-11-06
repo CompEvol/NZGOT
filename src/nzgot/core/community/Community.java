@@ -58,8 +58,8 @@ public class Community<E> extends OTUs<E> {
     public void setDiversities () {
         for (E e : this) {
             OTU otu = (OTU) e;
-            BioDiversity bioDiversity = new BioDiversity(sampleType, samples, otu);
-            otu.setBioDiversity(bioDiversity);
+            AlphaDiversity alphaDiversity = new AlphaDiversity(sampleType, samples, otu);
+            otu.setAlphaDiversity(alphaDiversity);
         }
     }
 

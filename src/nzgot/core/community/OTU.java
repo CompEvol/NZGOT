@@ -12,7 +12,7 @@ import nzgot.core.util.BioSortedSet;
 public class OTU<E> extends BioSortedSet<E> {
 
     protected Reference reference;
-    protected BioDiversity bioDiversity;
+    protected AlphaDiversity alphaDiversity;
 
     public OTU(String name) {
         super(name);
@@ -26,11 +26,11 @@ public class OTU<E> extends BioSortedSet<E> {
         this.reference = reference;
     }
 
-    public BioDiversity getBioDiversity() {
-        return bioDiversity;
+    public AlphaDiversity getAlphaDiversity() {
+        return alphaDiversity;
     }
 
-    public void setBioDiversity(BioDiversity bioDiversity) {
-        this.bioDiversity = bioDiversity;
+    public void setAlphaDiversity(AlphaDiversity alphaDiversity) {
+        this.alphaDiversity = alphaDiversity;
     }
 }

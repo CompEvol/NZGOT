@@ -7,15 +7,14 @@ import nzgot.core.util.ArrayUtil;
 import java.util.Arrays;
 
 /**
- * BioDiversity
- * default to calculate alpha
+ * Alpha Diversity for each sample given a OTU
  * @author Walter Xie
  */
-public class BioDiversity {
+public class AlphaDiversity {
 
     protected int[] alphaDiversity;
 
-    public BioDiversity(int samplesBy, String[] samples, OTU otu) {
+    public AlphaDiversity(int samplesBy, String[] samples, OTU otu) {
         setAlphaDiversity(samplesBy, samples, otu);
     }
 
