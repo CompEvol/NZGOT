@@ -7,12 +7,12 @@ import nzgot.core.util.ArrayUtil;
 import java.util.Arrays;
 
 /**
- * Alpha Diversity for each sample given a OTU
+ * Alpha Diversity for samples given a OTU
  * @author Walter Xie
  */
 public class AlphaDiversity {
 
-    protected int[] alphaDiversity;
+    protected int[] alphaDiversity; // only valid for given sample array
 
     public AlphaDiversity(int samplesBy, String[] samples, OTU otu) {
         setAlphaDiversity(samplesBy, samples, otu);
@@ -46,4 +46,5 @@ public class AlphaDiversity {
     public int[] getAlphaDiversity() {
         return alphaDiversity;
     }
+
 }

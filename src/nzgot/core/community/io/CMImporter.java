@@ -53,25 +53,26 @@ public class CMImporter {
     }
 
     /**
-     * 1st load mapping OTU - Reads,
-     * 2nd initialize samples array in Community, which are sample locations
-     * 3rd calculate Alpha diversity for each OTU
+     * 1st set sampleType, default to BY_PLOT
+     * 2nd load reads into each OTU, and parse label to get sample array
+     * 3rd set sample array, and calculate Alpha diversity for each OTU
      * @param otuMappingFile
      * @param community
-     * @return
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static TreeSet<String> importOTUMapping (File otuMappingFile, Community community) throws IOException, IllegalArgumentException {
-        TreeSet<String> samples = new TreeSet<>(); // default to BY_PLOT
-//        community.setSampleType(NameSpace.BY_PLOT);
+    public static void importOTUMapping (File otuMappingFile, Community community) throws IOException, IllegalArgumentException {
+        TreeSet<String> samples = new TreeSet<>();
         NameParser nameParser = NameParser.getInstance();
 
         BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
 
         System.out.println("\nImport OTU mapping (to reads) file: " + otuMappingFile);
 
-        // 1st
+        // 1st, set sampleType, default to BY_PLOT
+        community.setSampleType(NameSpace.BY_PLOT);
+
+        // 2nd, parse label to get sample
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
@@ -96,12 +97,8 @@ public class CMImporter {
 
         reader.close();
 
-        // 2nd
-        community.initSamplesBy(samples);
-        // 3rd
-        community.setDiversities();
-
-        return samples;
+        // 3rd, set diversities and samples
+        community.setSamplesAndDiversities(samples);
     }
 
     public static void importReferenceMappingFile (File referenceMappingFile, Community community) throws IOException, IllegalArgumentException {

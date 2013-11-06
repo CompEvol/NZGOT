@@ -48,17 +48,19 @@ public class Community<E> extends OTUs<E> {
         }
     }
 
-    public void initSamplesBy(TreeSet<String> samples){
+    protected void initSamplesBy(TreeSet<String> samples){
         if (samples == null || samples.size() < 1)
             throw new IllegalArgumentException("Error: cannot parse sample from read name : " + samples);
 
         this.samples = samples.toArray(new String[samples.size()]);
     }
 
-    public void setDiversities () {
+    public void setSamplesAndDiversities(TreeSet<String> samples) {
+        initSamplesBy(samples);
+
         for (E e : this) {
             OTU otu = (OTU) e;
-            AlphaDiversity alphaDiversity = new AlphaDiversity(sampleType, samples, otu);
+            AlphaDiversity alphaDiversity = new AlphaDiversity(sampleType, this.samples, otu);
             otu.setAlphaDiversity(alphaDiversity);
         }
     }
