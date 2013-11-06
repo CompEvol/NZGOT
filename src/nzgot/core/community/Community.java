@@ -2,25 +2,26 @@ package nzgot.core.community;
 
 import nzgot.core.community.io.CMImporter;
 import nzgot.core.community.util.NameSpace;
-import nzgot.core.util.BioSortedSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TreeSet;
 
 /**
  * Community Matrix
  * elementsSet contains OTU
+ * load all OTUs and mappings from 3 files
+ * 2 compulsory files: otusFile, otuMappingFile
+ * 1 optional file: referenceMappingFile
  * @author Walter Xie
  */
-public class Community<E> extends BioSortedSet<E> {
+public class Community<E> extends OTUs<E> {
 
-    // the sampling location determined by samplesBy, default by plot
+    // the sampling location determined by sampleType, default by plot
     // e.g. 454 soil data: by subplot is 2-C and 2-N, by plot is 2
-    public String[] samples;
-    protected int samplesBy = NameSpace.BY_PLOT;
+    protected int sampleType = NameSpace.BY_PLOT;
+    // the final samples already parsed from label
+    protected String[] samples;
 
     protected final File otusFile;
     protected final File otuMappingFile;
@@ -47,55 +48,34 @@ public class Community<E> extends BioSortedSet<E> {
         }
     }
 
-    public void initSamples(TreeSet<String> samples){
+    public void initSamplesBy(TreeSet<String> samples){
         if (samples == null || samples.size() < 1)
             throw new IllegalArgumentException("Error: cannot parse sample from read name : " + samples);
 
         this.samples = samples.toArray(new String[samples.size()]);
     }
 
-    public void setAlphaDiversity () {
+    public void setDiversities () {
         for (E e : this) {
             OTU otu = (OTU) e;
-            otu.setAlphaDiversity(samplesBy, samples);
+            BioDiversity bioDiversity = new BioDiversity(sampleType, samples, otu);
+            otu.setBioDiversity(bioDiversity);
         }
     }
 
-    /**
-     * key -> reference sequence id, value -> number of reads
-     * sum up reads according to reference sequence
-     * depend on data uploaded from importOTUs, importOTUMapping, importReferenceMappingFile
-     * @throws IOException
-     * @throws IllegalArgumentException
-     */
-    public Map<String, Integer> getRefSeqReadsCountMap() throws IOException, IllegalArgumentException {
-        Map<String, Integer> readsCountMap = new HashMap<>();
+    public int getSampleType() {
+        return sampleType;
+    }
 
-        for(E e : this){
-            OTU otu = (OTU) e;
-            String refSeqId = otu.getReference().toString();
-            if (refSeqId != null) {
-                int reads = otu.size();
-                // if refseq has count in map, then add new count to it
-                if (readsCountMap.containsKey(refSeqId)) {
-                    reads += readsCountMap.get(refSeqId);
-                    readsCountMap.put(refSeqId, reads);
-                }
-                readsCountMap.put(refSeqId, reads);
-            }
+    public void setSampleType(int sampleType) {
+        this.sampleType = sampleType;
+        if (samples != null) {
+        //TODO update matrix and diversity
         }
-
-        return readsCountMap;
     }
 
-
-    public int getSamplesBy() {
-        return samplesBy;
-    }
-
-    public void setSamplesBy(int samplesBy) {
-        this.samplesBy = samplesBy;
-        //TODO update matrix
+    public String[] getSamples() {
+        return samples;
     }
 
     public File getReferenceMappingFile() {

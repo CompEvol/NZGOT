@@ -63,7 +63,8 @@ public class CMImporter {
      * @throws IllegalArgumentException
      */
     public static TreeSet<String> importOTUMapping (File otuMappingFile, Community community) throws IOException, IllegalArgumentException {
-        TreeSet<String> samples = new TreeSet<>();
+        TreeSet<String> samples = new TreeSet<>(); // default to BY_PLOT
+//        community.setSampleType(NameSpace.BY_PLOT);
         NameParser nameParser = NameParser.getInstance();
 
         BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
@@ -86,7 +87,7 @@ public class CMImporter {
                 otu.addUniqueElement(fields[OTU_MAPPING_INDEX_READ]);
 
                 // if by plot, then add plot to TreeSet, otherwise add subplot
-                String sampleLocation = nameParser.getSampleBy(community.getSamplesBy(), fields[OTU_MAPPING_INDEX_READ]);
+                String sampleLocation = nameParser.getSampleBy(community.getSampleType(), fields[OTU_MAPPING_INDEX_READ]);
                 samples.add(sampleLocation);
             }
 
@@ -96,9 +97,9 @@ public class CMImporter {
         reader.close();
 
         // 2nd
-        community.initSamples(samples);
+        community.initSamplesBy(samples);
         // 3rd
-        community.setAlphaDiversity();
+        community.setDiversities();
 
         return samples;
     }

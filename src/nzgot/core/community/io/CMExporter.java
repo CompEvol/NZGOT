@@ -1,5 +1,6 @@
 package nzgot.core.community.io;
 
+import nzgot.core.community.BioDiversity;
 import nzgot.core.community.Community;
 import nzgot.core.community.OTU;
 import nzgot.core.community.util.NameParser;
@@ -29,7 +30,7 @@ public class CMExporter {
 
         System.out.println("\nReport community matrix " + community.getName() + " in the file : " + outFileAndPath);
 
-        for (String sample : community.samples) {
+        for (String sample : community.getSamples()) {
             out.print(NameParser.SEPARATOR_CSV_COLUMN + sample);
         }
         out.print("\n");
@@ -37,7 +38,13 @@ public class CMExporter {
         for(Object o : community){
             OTU otu = (OTU) o;
             out.print(otu.getName());
-            for (int a : otu.getAlphaDiversity()) {
+
+            BioDiversity bioDiversity = otu.getBioDiversity();
+
+            if (bioDiversity == null)
+                throw new IllegalArgumentException("Error: cannot BioDiversity report for OTU : " + otu);
+
+            for (int a : bioDiversity.getAlphaDiversity()) {
                 out.print(NameParser.SEPARATOR_CSV_COLUMN + a);
             }
             out.print("\n");
