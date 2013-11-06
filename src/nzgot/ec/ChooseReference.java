@@ -3,10 +3,11 @@ package nzgot.ec;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
  * @author Thomas Hummel
  */ 
-public class WorstReference {
+public class ChooseReference {
         private static class Element {
                 private final String string;
                 public final double value;
@@ -28,17 +29,23 @@ public class WorstReference {
  
         private final Map<String, Element> elements;
  
-        public WorstReference(int initialCapacity) {
+        public ChooseReference(int initialCapacity) {
                 elements = new HashMap<String,Element>(initialCapacity);
         }
  
-        public void addElement(String key, double value, String string) {
+        public void addBestElement(String key, double value, String string) {
                 Element el = elements.get(key);
-                if (el == null || el.getValue() > value)
+                if (el == null || el.getValue() < value)
                         elements.put(key, new Element(string, value));
         }
+     
+        public void addWorstElement(String key, double value, String string) {
+            Element el = elements.get(key);
+            if (el == null || el.getValue() > value)
+                    elements.put(key, new Element(string, value));
+    }
  
-        public String getWorstReference(String key) {
+        public String getReference(String key) {
                 Element el = elements.get(key);
                 if (el == null)
                         return null;

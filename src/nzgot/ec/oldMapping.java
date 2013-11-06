@@ -16,8 +16,7 @@ public class oldMapping {
 	
 	//Initial capacity?
 	HashMap<String, String> seqOtuMap = new HashMap<String, String>(1000);
-	BestReference bestElements = new BestReference(1000);
-	WorstReference worstElements = new WorstReference(1000);
+	ChooseReference elements = new ChooseReference(1000);
 	
 	
 	//creates HashMap of Sequence OTU Table
@@ -69,7 +68,7 @@ public class oldMapping {
 					otuToken = st.nextToken();
 					refToken = st.nextToken();
 					
-					bestElements.addElement(otuToken, idToken, refToken);
+					elements.addBestElement(otuToken, idToken, refToken);
 					
 				}
 				
@@ -107,7 +106,7 @@ public class oldMapping {
 					otuToken = st.nextToken();
 					refToken = st.nextToken();
 					
-					worstElements.addElement(otuToken, idToken, refToken);
+					elements.addWorstElement(otuToken, idToken, refToken);
 					
 				}
 				
@@ -134,7 +133,7 @@ public class oldMapping {
 		if (otu == null) {
 			return null;
 		}
-		String reference = bestElements.getBestReference(otu);
+		String reference = elements.getReference(otu);
 		return reference;
 		
 	}
@@ -145,7 +144,7 @@ public String searchWorstReference(String seq) {
 		if (otu == null) {
 			return null;
 		}
-		String reference = worstElements.getWorstReference(otu);
+		String reference = elements.getReference(otu);
 		return reference;
 		
 	}
