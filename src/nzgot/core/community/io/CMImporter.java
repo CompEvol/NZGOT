@@ -1,9 +1,10 @@
-package nzgot.cma.io;
+package nzgot.core.community.io;
 
-import nzgot.cma.Community;
-import nzgot.cma.OTU;
-import nzgot.cma.util.NameParser;
-import nzgot.cma.util.NameSpace;
+import nzgot.core.community.Community;
+import nzgot.core.community.OTU;
+import nzgot.core.community.Reference;
+import nzgot.core.community.util.NameParser;
+import nzgot.core.community.util.NameSpace;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -120,7 +121,8 @@ public class CMImporter {
                 throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
                         ", from the mapping file which does not exist in OTUs file !");
             } else {
-                otu.setRefSeqId(fields[REF_SEQ_MAPPING_INDEX_REF_SEQ]);
+                Reference<OTU, String> refSeq = new Reference<>(otu, fields[REF_SEQ_MAPPING_INDEX_REF_SEQ]);
+                otu.setReference(refSeq);
             }
 
             line = reader.readLine();

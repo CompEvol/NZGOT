@@ -1,7 +1,7 @@
-package nzgot.cma;
+package nzgot.core.community;
 
-import nzgot.cma.io.CMImporter;
-import nzgot.cma.util.NameSpace;
+import nzgot.core.community.io.CMImporter;
+import nzgot.core.community.util.NameSpace;
 import nzgot.core.util.BioSortedSet;
 
 import java.io.File;
@@ -73,7 +73,7 @@ public class Community<E> extends BioSortedSet<E> {
 
         for(E e : this){
             OTU otu = (OTU) e;
-            String refSeqId = otu.getRefSeqId();
+            String refSeqId = otu.getReference().toString();
             if (refSeqId != null) {
                 int reads = otu.size();
                 // if refseq has count in map, then add new count to it

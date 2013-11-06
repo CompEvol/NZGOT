@@ -1,6 +1,7 @@
-package nzgot.cma;
+package nzgot.core.community;
 
-import nzgot.cma.util.NameParser;
+import jebl.evolution.sequences.Sequence;
+import nzgot.core.community.util.NameParser;
 import nzgot.core.util.ArrayUtil;
 import nzgot.core.util.BioSortedSet;
 
@@ -9,12 +10,13 @@ import java.util.Arrays;
 /**
  * OTU
  * elementsSet contains Reads
+ * E could be String or jebl.evolution.sequences.Sequence
  * @author Walter Xie
  */
 public class OTU<E> extends BioSortedSet<E> {
 
     private int[] alphaDiversity;
-    protected String refSeqId; // TODO convert to Sequence object
+    protected Reference reference;
 
     public OTU(String name) {
         super(name);
@@ -24,7 +26,14 @@ public class OTU<E> extends BioSortedSet<E> {
         initAlphaDiversity(samples);
 
         for (E read: this) {
-            String sampleLocation = NameParser.getInstance().getSampleBy(samplesBy, read.toString());
+            String label = "";
+            if (read instanceof Sequence) {
+               label = ((Sequence) read).getTaxon().getName();
+            } else {
+                label = read.toString();
+            }
+
+            String sampleLocation = NameParser.getInstance().getSampleBy(samplesBy, label);
             int i = ArrayUtil.indexOf(sampleLocation, samples);
             if (i < 0) {
                 throw new IllegalArgumentException("Error: missing sample location : " + sampleLocation +
@@ -39,12 +48,12 @@ public class OTU<E> extends BioSortedSet<E> {
         return alphaDiversity;
     }
 
-    public String getRefSeqId() {
-        return refSeqId;
+    public Reference getReference() {
+        return reference;
     }
 
-    public void setRefSeqId(String refSeqId) {
-        this.refSeqId = refSeqId;
+    public void setReference(Reference reference) {
+        this.reference = reference;
     }
 
     private void initAlphaDiversity(String[] samples) {

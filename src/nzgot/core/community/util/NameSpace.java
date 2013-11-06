@@ -1,4 +1,4 @@
-package nzgot.cma.util;
+package nzgot.core.community.util;
 
 /**
  * Name Space

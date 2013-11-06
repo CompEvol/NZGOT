@@ -1,7 +1,8 @@
 package nzgot.cma;
 
-import nzgot.cma.io.CMExporter;
-import nzgot.cma.io.CMImporter;
+import nzgot.core.community.Community;
+import nzgot.core.community.io.CMExporter;
+import nzgot.core.community.io.CMImporter;
 
 import java.io.File;
 import java.io.IOException;

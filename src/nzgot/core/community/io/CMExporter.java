@@ -1,8 +1,8 @@
-package nzgot.cma.io;
+package nzgot.core.community.io;
 
-import nzgot.cma.Community;
-import nzgot.cma.OTU;
-import nzgot.cma.util.NameParser;
+import nzgot.core.community.Community;
+import nzgot.core.community.OTU;
+import nzgot.core.community.util.NameParser;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

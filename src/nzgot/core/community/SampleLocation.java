@@ -1,4 +1,4 @@
-package nzgot.cma;
+package nzgot.core.community;
 
 import nzgot.core.util.BioSortedSet;
 
