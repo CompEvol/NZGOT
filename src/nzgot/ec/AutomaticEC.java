@@ -14,6 +14,8 @@ import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.BasicSequence;
+import jebl.evolution.sequences.GaplessSequence;
+import jebl.evolution.sequences.*;
 import jebl.evolution.sequences.GeneticCode;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
@@ -82,7 +84,7 @@ public class AutomaticEC {
 				AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, GeneticCode.INVERTEBRATE_MT);
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
-					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString().replace('-', '\0')); //replace gaps with '?'...	
+					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString()); //replace gaps with '?'...	
 					sequencesCor.add(correctedSeq);
 					Debugger.log( String.format("%.5g", ((count/size))*100) +"%" );
 				}
