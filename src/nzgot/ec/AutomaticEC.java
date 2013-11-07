@@ -27,7 +27,7 @@ public class AutomaticEC {
 	//Sequence files
 	final String fileSeq = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/IndirectSoil_endTrimmed.fasta";
 	final String fileRef = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/1608_Sanger_translated.fasta";
-	final String fileCor = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/IndirectSoil_corrected_fullRef.fasta";
+	final String fileCor = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/IndirectSoil_corrected_fullRef.fasta";
 
 	//Mapping files
 	final String mapSeqOtu = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/otu/otu_map_IndirectSoil_userout.m8";
