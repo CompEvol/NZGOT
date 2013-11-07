@@ -1,5 +1,7 @@
 package nzgot.core.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
 /**
@@ -53,6 +55,10 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
 
     public String toString() {
         return getName();
+    }
+
+    public List<E> toList() {
+        return new ArrayList<E>(this);
     }
 
     public boolean equalsIgnoreCase(String name) {

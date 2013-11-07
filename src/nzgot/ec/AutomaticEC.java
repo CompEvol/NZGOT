@@ -76,7 +76,7 @@ public class AutomaticEC {
 			referenceLabel = null;
 			referenceSeq = null;
 
-            OTU otu = (OTU) otus.getOTU(seq.getTaxon().toString());
+            OTU otu = (OTU) otus.getOTUOfSeq(seq.getTaxon().toString());
             if (otu != null && otu.getReference() != null)
                 referenceLabel = otu.getReference().toString();
 //			referenceLabel = map.findReference(seq.getTaxon().toString());

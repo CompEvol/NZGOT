@@ -24,12 +24,20 @@ public class OTUs<E> extends BioSortedSet<E> {
         return false;
     }
 
+    public E getOTU(String otuName) {
+        for(E e : this){
+            if (e.toString().contentEquals(otuName))
+                return e;
+        }
+        return null;
+    }
+
     /**
      * give a sequence to get the OTU it belongs to
      * @param sequenceName
      * @return
      */
-    public E getOTU(String sequenceName) {
+    public E getOTUOfSeq(String sequenceName) {
         Object sequence;
         for(E e : this){
             OTU otu = (OTU) e;
