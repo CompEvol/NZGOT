@@ -10,7 +10,6 @@ import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import nzgot.core.community.OTU;
 import nzgot.core.community.OTUs;
-import nzgot.core.community.Reference;
 import nzgot.core.community.io.CommunityImporter;
 import nzgot.core.util.SequenceUtil;
 
@@ -26,13 +25,13 @@ import java.util.List;
 public class AutomaticEC {
 
 	//Sequence files
-	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
-	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta";
-	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_corrected_fullRef.fasta";
+	final String fileSeq = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/IndirectSoil_endTrimmed.fasta";
+	final String fileRef = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/1608_Sanger_translated.fasta";
+	final String fileCor = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/IndirectSoil_corrected_fullRef.fasta";
 
 	//Mapping files
-	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
-	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
+	final String mapSeqOtu = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/otu/otu_map_IndirectSoil_userout.m8";
+	final String mapOtuRef = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/otu/reference_85_IndirectSoil_userout.m8";
 
 	List<Sequence> sequences;
 	List<Sequence> references;
@@ -78,9 +77,8 @@ public class AutomaticEC {
 			referenceSeq = null;
 
             OTU otu = (OTU) otus.getOTU(seq.getTaxon().toString());
-            Reference reference = otu.getReference();
-            if (reference != null)
-                referenceLabel = reference.toString();
+            if (otu != null && otu.getReference() != null)
+                referenceLabel = otu.getReference().toString();
 //			referenceLabel = map.findReference(seq.getTaxon().toString());
 
 			//reference String 

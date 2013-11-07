@@ -36,7 +36,8 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
      */
     public E getUniqueElement(String name) throws IllegalArgumentException {
         for (E e : this) {
-            if (e.toString().contentEquals(name)) return e;
+            if (e.toString().contentEquals(name))
+                return e;
         }
         return null;
     }
