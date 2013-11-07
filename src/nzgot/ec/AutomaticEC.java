@@ -1,28 +1,27 @@
 package nzgot.ec;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-
 import jebl.evolution.align.scores.Blosum80;
 import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.BasicSequence;
-import jebl.evolution.sequences.GaplessSequence;
-import jebl.evolution.sequences.*;
 import jebl.evolution.sequences.GeneticCode;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
+import nzgot.core.community.OTU;
+import nzgot.core.community.OTUs;
+import nzgot.core.community.Reference;
+import nzgot.core.community.io.CommunityImporter;
+import nzgot.core.util.SequenceUtil;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Automatic error correction
  * @author Thomas Hummel
+ * @author Walter Xie
  */
 public class AutomaticEC {
 
@@ -35,49 +34,58 @@ public class AutomaticEC {
 	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
 	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
 
-	File sequenceIn = new File(fileSeq);
-	File referenceIn = new File(fileRef);
-	File sequenceOut = new File(fileCor);
-
 	List<Sequence> sequences;
 	List<Sequence> references;
 	List<Sequence> sequencesCor;
 
-	String referenceLabel;
-	String referenceSeq;
-
-	double count = 0;
-	double size;
-	
 	/**
 	 *Automatic error correction of all sequences given 
 	 *in the <code>fileSeq</code> file which mapped to the <code>fileRef</code> file 
 	 */
-	public void doEC() throws FileNotFoundException, IOException, ImportException{
-		Mapping map = new Mapping();
+	public void doEC() throws IOException, ImportException{
+        File sequenceIn = new File(fileSeq);
+        File referenceIn = new File(fileRef);
+        File sequenceOut = new File(fileCor);
+
+//		Mapping map = new Mapping();
 		FastaImporter sequenceImport = new FastaImporter(sequenceIn , SequenceType.NUCLEOTIDE);
 		FastaImporter referenceImport = new FastaImporter(referenceIn, SequenceType.AMINO_ACID);
 		sequences = sequenceImport.importSequences();
 		references =referenceImport.importSequences();
 		sequencesCor = new ArrayList<Sequence>(2000);
-		
-		map.parseSeqOtuTable(mapSeqOtu);
-		map.parseOtuRefTable(mapOtuRef);
-		size = sequences.size();
+
+        File file = new File(mapSeqOtu);
+        OTUs otus = new OTUs(file.getName());
+        CommunityImporter.importOTUsAndMapping(file, otus);
+
+        file = new File(mapOtuRef);
+        CommunityImporter.importReferenceSequenceMapping(file, otus);
 
 
-		for (Sequence seq : sequences) {
+//		map.parseSeqOtuTable(mapSeqOtu);
+//		map.parseOtuRefTable(mapOtuRef);
+
+        double count = 0;
+        double size = sequences.size();
+
+        String referenceLabel;
+        String referenceSeq;
+
+        for (Sequence seq : sequences) {
 
 			count++;
 			referenceLabel = null;
 			referenceSeq = null;
 
-			referenceLabel = map.findReference(seq.getTaxon().toString());
+            OTU otu = (OTU) otus.getOTU(seq.getTaxon().toString());
+            Reference reference = otu.getReference();
+            if (reference != null)
+                referenceLabel = reference.toString();
+//			referenceLabel = map.findReference(seq.getTaxon().toString());
 
 			//reference String 
-			if (referenceLabel != null) {
-				referenceSeq = Mapping.getReferenceString(referenceLabel, references);
-			}
+			if (referenceLabel != null)
+				referenceSeq = SequenceUtil.getSequenceStringFrom(referenceLabel, references);
 
 			//correct sequence with reference alignment and save in list
 			if (referenceSeq != null) {
@@ -97,7 +105,8 @@ public class AutomaticEC {
 			//ac.getCorrected(seq);
 			//ac.doMatch(new SystemOut(), "");
 		}
-		Writer write = new OutputStreamWriter(new FileOutputStream(sequenceOut));
+
+        Writer write = new OutputStreamWriter(new FileOutputStream(sequenceOut));
 		FastaExporter fe = new FastaExporter(write);
 		fe.exportSequences(sequencesCor);
 		write.flush();
@@ -105,7 +114,7 @@ public class AutomaticEC {
 	}
 
 
-	public static void main(String[] args) throws ImportException, FileNotFoundException, IOException{
+	public static void main(String[] args) throws ImportException, IOException{
 		// TODO Auto-generated method stub
 		AutomaticEC ec = new AutomaticEC();
 		ec.doEC();

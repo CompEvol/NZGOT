@@ -1,6 +1,6 @@
 package nzgot.core.community;
 
-import nzgot.core.community.io.OTUsImporter;
+import nzgot.core.community.io.CommunityImporter;
 import nzgot.core.community.util.NameSpace;
 
 import java.io.File;
@@ -38,11 +38,11 @@ public class Community<E> extends OTUs<E> {
         this.refSeqMappingFile = refSeqMappingFile;
 
         try {
-            OTUsImporter.importOTUs(otusFile, this);
-            OTUsImporter.importOTUMappingBySamples(otuMappingFile, this);
+            CommunityImporter.importOTUs(otusFile, this);
+            CommunityImporter.importOTUMappingBySamples(otuMappingFile, this);
 
             if (refSeqMappingFile != null)
-                OTUsImporter.importReferenceSequenceMapping(refSeqMappingFile, this);
+                CommunityImporter.importReferenceSequenceMapping(refSeqMappingFile, this);
         } catch (IOException e) {
             e.printStackTrace();
         }
