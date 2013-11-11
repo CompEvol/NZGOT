@@ -25,14 +25,24 @@ import java.util.List;
 public class AutomaticEC {
 
 	//Sequence files
-	final String fileSeq = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/IndirectSoil_endTrimmed.fasta";
-	final String fileRef = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/1608_Sanger_translated.fasta";
-	final String fileCor = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/IndirectSoil_corrected_fullRef.fasta";
+	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
+	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta";
+	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil_test_Sanger.fasta";
 
 	//Mapping files
-	final String mapSeqOtu = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/otu/otu_map_IndirectSoil_userout.m8";
-	final String mapOtuRef = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/otu/reference_85_IndirectSoil_userout.m8";
+	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
+	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
 
+	
+//	//Sequence files
+//	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
+//	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/ibol.all.frame0.translation.fasta";
+//	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/iBold/IndirectSoil/IndirectSoil_ibol_corrected.fasta";
+//
+//	//Mapping files
+//	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
+//	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/ibol.75.m8";
+	
 	List<Sequence> sequences;
 	List<Sequence> references;
 	List<Sequence> sequencesCor;
@@ -84,10 +94,11 @@ public class AutomaticEC {
 			//reference String 
 			if (referenceLabel != null)
 				referenceSeq = SequenceUtil.getSequenceStringFrom(referenceLabel, references);
-
+//				referenceSeq = Mapping.getReferenceString(referenceLabel, references);
+				
 			//correct sequence with reference alignment and save in list
 			if (referenceSeq != null) {
-				AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, GeneticCode.INVERTEBRATE_MT);
+				AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, myGeneticCode.INVERTEBRATE_MT);
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
 					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString()); //replace gaps with '?'...	

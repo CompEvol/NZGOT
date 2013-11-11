@@ -2,7 +2,12 @@ package nzgot.ec;
 
 import jebl.evolution.align.scores.AminoAcidScores;
 import jebl.evolution.align.scores.Blosum45;
-import jebl.evolution.sequences.*;
+import jebl.evolution.sequences.AminoAcidState;
+import jebl.evolution.sequences.GeneticCode;
+import jebl.evolution.sequences.NucleotideState;
+import jebl.evolution.sequences.Nucleotides;
+import jebl.evolution.sequences.Sequence;
+
 
 /**
  * Provides scoring for alignment + correction
@@ -11,7 +16,7 @@ import jebl.evolution.sequences.*;
  */
 public class FScore {
 
-    GeneticCode geneticCode;
+    myGeneticCode geneticCode;
 
     double indelPenalty;
     double stopCodonPenalty;
@@ -20,9 +25,12 @@ public class FScore {
     AminoAcidScores scores = new Blosum45();
 
     Sequence read;
+    NucleotideState[] readStates;
+    
+    
     Sequence ref;
 
-    public FScore(GeneticCode geneticCode,
+    public FScore(myGeneticCode geneticCode,
                   double indelPenalty,
                   double correctionPenalty,
                   double stopCodonPenalty,
@@ -37,10 +45,11 @@ public class FScore {
         this.scores = scores;
 
         this.read = read;
+                
         this.ref = ref;
     }
 
-    public FScore(GeneticCode geneticCode,
+    public FScore(myGeneticCode geneticCode,
                   double indelPenalty,
                   double correctionPenalty,
                   double stopCodonPenalty,
@@ -50,13 +59,21 @@ public class FScore {
     }
 
 
-    public AminoAcidState[] getAminoAcidStates(int i1, int i2, int i3) {
+    /**
+     * @param i1
+     * @param i2
+     * @param i3
+     * @param states an array of size one of preallocated memory for the standard case
+     * @return
+     */
+    public AminoAcidState[] getAminoAcidStates(int i1, int i2, int i3, AminoAcidState[] states) {
 
         if (i1 >= 0) {
-            return new AminoAcidState[]{geneticCode.getTranslation(
+        	states[0] =geneticCode.getTranslation(
                     (NucleotideState) read.getState(i1),
                     (NucleotideState) read.getState(i2),
-                    (NucleotideState) read.getState(i3))};
+                    (NucleotideState) read.getState(i3));
+            return states;
         } else if (i2 >= 0) {
             AminoAcidState[] aa = new AminoAcidState[4];
             for (int i = 0; i < 4; i++) {
@@ -100,7 +117,7 @@ public class FScore {
 
         double score = 0;
 
-        AminoAcidState[] aaState = getAminoAcidStates(i1,i2,i3);
+        AminoAcidState[] aaState = getAminoAcidStates(i1,i2,i3,aa);
 
         boolean isStop = true;
         for (AminoAcidState anAaState : aaState) {
@@ -132,11 +149,13 @@ public class FScore {
                 return matchScore(codon, j) + correctionPenalty;
     }
 
+    private static AminoAcidState[] aa = new AminoAcidState[1];
+    // NOT THREAD SAFE -- uses above static memory
     public double insertCodon(int[] codon) {
 
         double score = 0;
 
-        AminoAcidState[] aaState = getTranslation(codon);
+        AminoAcidState[] aaState = getTranslation(codon, aa);
 
         boolean isStop = true;
         for (AminoAcidState anAaState : aaState) {
@@ -173,8 +192,8 @@ public class FScore {
         return c;
     }
 
-    public AminoAcidState[] getTranslation(int[] codon) {
-        return getAminoAcidStates(codon[0]-1, codon[1]-1, codon[2]-1);
+    public AminoAcidState[] getTranslation(int[] codon, AminoAcidState[] states) {
+        return getAminoAcidStates(codon[0]-1, codon[1]-1, codon[2]-1, states);
     }
 
 //    /**

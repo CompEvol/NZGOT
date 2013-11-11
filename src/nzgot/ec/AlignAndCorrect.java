@@ -35,7 +35,7 @@ public class AlignAndCorrect {
 	 * @param d   indel penalty
 	 * @param c   correction penalty
 	 */
-	public AlignAndCorrect(Scores sub, float d, float c, float stopCodonPenalty, GeneticCode geneticCode) {
+	public AlignAndCorrect(Scores sub, float d, float c, float stopCodonPenalty, myGeneticCode geneticCode) {
 
 		scores = new FScore(geneticCode, d, c, stopCodonPenalty, new Blosum45());
 	}
@@ -48,8 +48,8 @@ public class AlignAndCorrect {
 	 */
 	public void prepareAlignment(String read, String aa) {
 
-		dna_read = new BasicSequence(SequenceType.NUCLEOTIDE, Taxon.getTaxon("read"), read);
-		aa_ref = new BasicSequence(SequenceType.AMINO_ACID, Taxon.getTaxon("aa_reference"), aa);
+		dna_read = new BasicSequence(SequenceType.NUCLEOTIDE, Taxon.getTaxon("read"), read.toUpperCase());
+		aa_ref = new BasicSequence(SequenceType.AMINO_ACID, Taxon.getTaxon("aa_reference"), aa.toUpperCase());
 
 		scores.read = dna_read;
 		scores.ref = aa_ref;
@@ -140,6 +140,8 @@ public class AlignAndCorrect {
 		StringBuilder code = new StringBuilder();
 
 		FNode node = optimal;
+		AminoAcidState[] translation = new AminoAcidState[1];
+		
 		while (node.i > 0 && node.j > 0) {
 
 		
@@ -165,13 +167,13 @@ public class AlignAndCorrect {
 				gaps += 1;
 			}
 
-			AminoAcidState[] translation = null;
+			
 
 			// output aligned read
 			if (prefix.type != FNode.FType.ins_ref) {
 				alignedRead.append(scores.getCodonString(prefix.codon).reverse());
 
-				translation = scores.getTranslation(prefix.codon);
+				translation = scores.getTranslation(prefix.codon, translation);
 				if (translation.length == 1) {
 					translatedRead.append(" ").append(translation[0].getCode()).append(" ");
 				} else {
