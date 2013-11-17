@@ -1,5 +1,6 @@
 package nzgot.ec;
 
+import jebl.evolution.align.SystemOut;
 import jebl.evolution.align.scores.Blosum80;
 import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
@@ -24,28 +25,41 @@ import java.util.List;
  */
 public class AutomaticEC {
 
-	//Sequence files
-	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
-	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta";
-	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil_test_Sanger.fasta";
-
-	//Mapping files
-	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
-	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
-
-	
 //	//Sequence files
 //	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
-//	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/ibol.all.frame0.translation.fasta";
-//	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/iBold/IndirectSoil/IndirectSoil_ibol_corrected.fasta";
+//	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta";
+//	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil_test_Sanger.fasta";
+//	final String fileControl = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil_test_Sanger_Control.fasta";
 //
 //	//Mapping files
 //	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
-//	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/ibol.75.m8";
+//	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
+
+	
+//	//Sequence files
+//	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/SoilKit_endTrimmed.fasta";
+//	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/ibol.all.frame0.translation.fasta";
+//	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/corrected.fasta";
+//	final String fileControl = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/control.fasta";
+//	
+//	//Mapping files
+//	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/mapping/DirectSoil_userout.m8";
+//	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/SoilKit/SoilKit_userout_75_ibold.m8";
+	
+	//Sequence files
+	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/seq.fasta";
+	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/ref.fasta";
+	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/corrected.fasta";
+	final String fileControl = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/control.fasta";
+	
+	//Mapping files
+	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/seqOtuMap.txt";
+	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/otuRefMap.txt";
 	
 	List<Sequence> sequences;
 	List<Sequence> references;
 	List<Sequence> sequencesCor;
+	List<Sequence> sequencesControl;
 
 	/**
 	 *Automatic error correction of all sequences given 
@@ -55,6 +69,7 @@ public class AutomaticEC {
         File sequenceIn = new File(fileSeq);
         File referenceIn = new File(fileRef);
         File sequenceOut = new File(fileCor);
+        File sequenceOut2 = new File(fileControl);
 
 //		Mapping map = new Mapping();
 		FastaImporter sequenceImport = new FastaImporter(sequenceIn , SequenceType.NUCLEOTIDE);
@@ -62,6 +77,7 @@ public class AutomaticEC {
 		sequences = sequenceImport.importSequences();
 		references =referenceImport.importSequences();
 		sequencesCor = new ArrayList<Sequence>(2000);
+		sequencesControl = new ArrayList<Sequence>(2000);
 
         File file = new File(mapSeqOtu);
         OTUs otus = new OTUs(file.getName());
@@ -102,7 +118,9 @@ public class AutomaticEC {
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
 					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString()); //replace gaps with '?'...	
+					ac.doMatch(new SystemOut(), "");
 					sequencesCor.add(correctedSeq);
+					sequencesControl.add(seq);
 					Debugger.log( String.format("%.5g", ((count/size))*100) +"%" );
 				}
 				catch (NullPointerException e) {
@@ -114,12 +132,20 @@ public class AutomaticEC {
 			//ac.getCorrected(seq);
 			//ac.doMatch(new SystemOut(), "");
 		}
-
+        
+        //Corrected sequences
         Writer write = new OutputStreamWriter(new FileOutputStream(sequenceOut));
 		FastaExporter fe = new FastaExporter(write);
 		fe.exportSequences(sequencesCor);
 		write.flush();
 		write.close();
+		
+		//Control sequences
+		Writer write2 = new OutputStreamWriter(new FileOutputStream(sequenceOut2));
+		FastaExporter fe2 = new FastaExporter(write2);
+		fe2.exportSequences(sequencesControl);
+		write2.flush();
+		write2.close();
 	}
 
 

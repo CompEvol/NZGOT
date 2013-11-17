@@ -3,7 +3,6 @@ package nzgot.ec;
 import jebl.evolution.align.scores.AminoAcidScores;
 import jebl.evolution.align.scores.Blosum45;
 import jebl.evolution.sequences.AminoAcidState;
-import jebl.evolution.sequences.GeneticCode;
 import jebl.evolution.sequences.NucleotideState;
 import jebl.evolution.sequences.Nucleotides;
 import jebl.evolution.sequences.Sequence;

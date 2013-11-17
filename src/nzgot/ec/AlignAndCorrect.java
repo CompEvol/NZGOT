@@ -1,5 +1,7 @@
 package nzgot.ec;
 
+import nzgot.ec.FNode.FType;
+import jebl.evolution.align.Output;
 import jebl.evolution.align.scores.Blosum45;
 import jebl.evolution.align.scores.Scores;
 import jebl.evolution.sequences.AminoAcidState;
@@ -84,46 +86,47 @@ public class AlignAndCorrect {
 	/**
 	 *
 	 */
-    public void doAlignment(String read, String aminoAcid) {
+	public void doAlignment(String read, String aminoAcid) {
 
-        prepareAlignment(read, aminoAcid);
+		prepareAlignment(read, aminoAcid);
 
-        for (int i = 0; i <= m; i++) {
-            for (int j = 0; j <= n; j++) {
+		for (int i = 0; i <= m; i++) {
+			for (int j = 0; j <= n; j++) {
 
-                if (nodes[i][j] == null) {
-                    nodes[i][j] = new FNode();
-                }
-                nodes[i][j].compute(i, j, nodes, scores);
-            }
-        }
+				if (nodes[i][j] == null) {
+					nodes[i][j] = new FNode();
+				}
+				nodes[i][j].compute(i, j, nodes, scores);
+			}
+		}
 
-        // Find maximal score on right-hand and bottom borders
-        int maxi = -1, maxj = -1;
-        double maxval = Double.NEGATIVE_INFINITY;
-        for (int i = 0; i <= m; i++) {
-            if (maxval < nodes[i][n].score) {
-                maxi = i;
-                maxval = nodes[i][n].score;
-            }
-        }
-        for (int j = 0; j <= n; j++) {
-            if (maxval < nodes[m][j].score) {
-                maxj = j;
-                maxval = nodes[m][j].score;
-            }
-        }
+		// Find maximal score on right-hand and bottom borders
+		int maxi = -1, maxj = -1;
+		double maxval = Double.NEGATIVE_INFINITY;
+		for (int i = 0; i <= m; i++) {
+			if (maxval < nodes[i][n].score) {
+				maxi = i;
+				maxval = nodes[i][n].score;
+			}
+		}
+		for (int j = 0; j <= n; j++) {
+			if (maxval < nodes[m][j].score) {
+				maxj = j;
+				maxval = nodes[m][j].score;
+			}
+		}
 
-        //System.out.println("Maximum score = " + maxval);
-        Debugger.log("Maximum score = " + maxval);
-        if (maxj != -1) {            // the maximum score was F[m][maxj]
-            optimal = nodes[m][maxj];
-        } else {                       // the maximum score was F[maxi][n]
-            optimal = nodes[maxi][n];
-        }
-        Debugger.log("Optimal found at " + optimal.i + ", " + optimal.j);
-        //System.out.println("Optimal found at " + optimal.i + ", " + optimal.j);
-    }
+		//System.out.println("Maximum score = " + maxval);
+		Debugger.log("Maximum score = " + maxval);
+		if (maxj != -1) {            // the maximum score was F[m][maxj]
+			optimal = nodes[m][maxj];
+		} else {                       // the maximum score was F[maxi][n]
+			optimal = nodes[maxi][n];
+		}
+		Debugger.log("Optimal found at " + optimal.i + ", " + optimal.j);
+		//System.out.println("Optimal found at " + optimal.i + ", " + optimal.j);
+		
+	}
 
 
 	public String[] getMatch() {
@@ -141,90 +144,96 @@ public class AlignAndCorrect {
 
 		FNode node = optimal;
 		AminoAcidState[] translation = new AminoAcidState[1];
-		
+
 		while (node.i > 0 && node.j > 0) {
 
-		
-			
+
+
 			FEdge prefix = node.prefix();
 
 			if (prefix == null) {
 				return null;
 				//System.out.println("finished at node " + node);
 			} else {
-			
-			switch (prefix.type) {
-			case ins_read_delete:
-				gaps += 1;
-			case match_delete:
-				correctionDeletions += 1; break;
-			case ins_read_duplicate:
-				gaps += 1;
-			case match_duplicate:
-				correctionInsertions += 1; break;
-			case ins_read:
-			case ins_ref:
-				gaps += 1;
-			}
 
-			
-
-			// output aligned read
-			if (prefix.type != FNode.FType.ins_ref) {
-				alignedRead.append(scores.getCodonString(prefix.codon).reverse());
-
-				translation = scores.getTranslation(prefix.codon, translation);
-				if (translation.length == 1) {
-					translatedRead.append(" ").append(translation[0].getCode()).append(" ");
-				} else {
-					translatedRead.append(" ? ");
+				switch (prefix.type) {
+				case ins_read_delete:
+					gaps += 1;
+				case match_delete:
+//					node.codon(FType.match_delete, 0);
+					Debugger.log(scores.getCodonString(prefix.codon));
+//					Debugger.log(dna_read.getState(node.i).toString());
+					correctionDeletions += 1; break;
+				case ins_read_duplicate:
+					gaps += 1;
+				case match_duplicate:
+					correctionInsertions += 1; break;
+				case ins_read:
+				case ins_ref:
+					gaps += 1;
 				}
 
-			} else {
-				alignedRead.append("---");
-				translatedRead.append(" - ");
-			}
 
-			// output reference amino acid
-			if (prefix.type != FNode.FType.ins_read &&
-					prefix.type != FNode.FType.ins_read_duplicate &&
-					prefix.type != FNode.FType.ins_read_delete) {
 
-				AminoAcidState ref_state = (AminoAcidState) aa_ref.getState(node.j - 1);
-				alignedRef.append(" ").append(ref_state).append(" ");
+				// output aligned read
+				if (prefix.type != FNode.FType.ins_ref) {
+					alignedRead.append(scores.getCodonString(prefix.codon).reverse());
 
-				if (translation != null && translation[0].equals(ref_state)) {
-					matches += 1;
+					translation = scores.getTranslation(prefix.codon, translation);
+					if (translation.length == 1) {
+						translatedRead.append(" ").append(translation[0].getCode()).append(" ");
+					} else {
+						translatedRead.append(" ? ");
+					}
+
 				} else {
-					mismatches += 1;
+					alignedRead.append("---");
+					translatedRead.append(" - ");
 				}
-			} else {
-				alignedRef.append(" - ");
+
+				// output reference amino acid
+				if (prefix.type != FNode.FType.ins_read &&
+						prefix.type != FNode.FType.ins_read_duplicate &&
+						prefix.type != FNode.FType.ins_read_delete) {
+
+					AminoAcidState ref_state = (AminoAcidState) aa_ref.getState(node.j - 1);
+					alignedRef.append(" ").append(ref_state).append(" ");
+
+					if (translation != null && translation[0].equals(ref_state)) {
+						matches += 1;
+					} else {
+						mismatches += 1;
+					}
+				} else {
+					alignedRef.append(" - ");
+				}
+
+				switch (prefix.type) {
+				case match:
+					code.append(" . ");
+					break;
+
+				case match_delete:
+				case ins_read_delete:
+					code.append("c- ");
+					break;
+				case match_duplicate:
+				case ins_read_duplicate:
+					code.append("c+ ");
+					break;
+				default: code.append("   ");
+				}
+
+				node = prefix.prefix;
 			}
-
-			switch (prefix.type) {
-			case match:
-				code.append(" . ");
-				break;
-
-			case match_delete:
-			case ins_read_delete:
-				code.append("c- ");
-				break;
-			case match_duplicate:
-			case ins_read_duplicate:
-				code.append("c+ ");
-				break;
-			default: code.append("   ");
-			}
-
-			node = prefix.prefix;
 		}
-		}
-
+		
+		Debugger.log("Del: "+correctionDeletions);
+		Debugger.log("Ins: "+correctionInsertions);
+		
 		String[] result = new String[]{ code.reverse().toString(),
 				alignedRead.reverse().toString(), translatedRead.reverse().toString(), alignedRef.reverse().toString(),};
-		
+
 		return result;
 		/*String corrected = result[1];
 		return corrected;*/
@@ -239,12 +248,12 @@ public class AlignAndCorrect {
 	 * @param out           output to print to
 	 * @param msg           message printed at start
 	 */
-/*	public void doMatch(Output out, String msg) {
+		public void doMatch(Output out, String msg) {
 		out.println(msg + ":");
 		out.println("Score = " + optimal.score);
 
 		out.println("An optimal alignment:");
-		String match = getMatch(	);
+		String[] match = getMatch(	);
 		for (String s : match) {
 			out.println(s);
 		}
@@ -253,6 +262,6 @@ public class AlignAndCorrect {
 		out.println("corrections(del)=" + correctionDeletions + " corrections(insert)=" + correctionInsertions);
 		out.println("amino acid percent identity=" + Math.round((double) matches * 1000.0 / (match[0].length()/3.0)) / 10.0 + "%");
 
-	}*/
+	}
 
 }
