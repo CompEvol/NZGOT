@@ -6,6 +6,7 @@ import nzgot.core.community.OTUs;
 import nzgot.core.community.Reference;
 import nzgot.core.community.util.NameParser;
 import nzgot.core.community.util.NameSpace;
+import nzgot.core.logger.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,7 +24,7 @@ public class CommunityImporter extends OTUsImporter {
     public static void importOTUs (File otusFile, OTUs otus) throws IOException, IllegalArgumentException {
         BufferedReader reader = new BufferedReader(new FileReader(otusFile));
 
-        System.out.println("\nImport OTUs from file: " + otusFile);
+        Logger.getLogger().info("\nImport OTUs from file: " + otusFile);
 
         OTU otu = null;
         String line = reader.readLine();
@@ -50,7 +51,7 @@ public class CommunityImporter extends OTUsImporter {
 
         BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
 
-        System.out.println("\nImport OTUs and OTU mapping from file: " + otuMappingFile);
+        Logger.getLogger().info("\nImport OTUs and OTU mapping from file: " + otuMappingFile);
 
         OTU otu = null;
         String line = reader.readLine();
@@ -91,11 +92,11 @@ public class CommunityImporter extends OTUsImporter {
 
         BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
 
-        System.out.println("\nImport OTU mapping (to reads) file: " + otuMappingFile);
+        Logger.getLogger().info("\nImport OTU mapping (to reads) file: " + otuMappingFile);
 
         // 1st, set sampleType, default to BY_PLOT
         community.setSampleType(NameSpace.BY_PLOT);
-        System.out.println("\nSet sample type: " + community.getSampleType());
+        Logger.getLogger().info("\nSet sample type: " + community.getSampleType());
 
         // 2nd, parse label to get sample
         String line = reader.readLine();
@@ -130,7 +131,7 @@ public class CommunityImporter extends OTUsImporter {
 
         BufferedReader reader = new BufferedReader(new FileReader(referenceMappingFile));
 
-        System.out.println("\nImport reference sequence mapping (to OTU) file: " + referenceMappingFile);
+        Logger.getLogger().info("\nImport reference sequence mapping (to OTU) file: " + referenceMappingFile);
 
         String line = reader.readLine();
         while (line != null) {

@@ -5,6 +5,7 @@ import nzgot.core.community.OTU;
 import nzgot.core.community.OTUs;
 import nzgot.core.community.util.NameParser;
 import nzgot.core.community.util.NameSpace;
+import nzgot.core.logger.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,7 +33,7 @@ public class OTUsImporter {
 
         BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
 
-        System.out.println("\nImport OTUs and OTU mapping from file: " + otuMappingFile);
+        Logger.getLogger().info("\nImport OTUs and OTU mapping from file: " + otuMappingFile);
 
         OTU otu = null;
         String line = reader.readLine();

@@ -5,6 +5,7 @@ import nzgot.core.community.Community;
 import nzgot.core.community.OTU;
 import nzgot.core.community.OTUs;
 import nzgot.core.community.util.NameParser;
+import nzgot.core.logger.Logger;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class CommunityExporter {
 
         PrintStream out = new PrintStream(new FileOutputStream(outFileAndPath));
 
-        System.out.println("\nReport community matrix " + community.getName() + " in the file : " + outFileAndPath);
+        Logger.getLogger().info("\nReport community matrix " + community.getName() + " in the file : " + outFileAndPath);
 
         for (String sample : community.getSamples()) {
             out.print(NameParser.SEPARATOR_CSV_COLUMN + sample);
@@ -69,7 +70,7 @@ public class CommunityExporter {
 
         PrintStream out = new PrintStream(new FileOutputStream(outFileAndPath));
 
-        System.out.println("\nGenerate report of how many reads map to reference sequence in the file: " + outFileAndPath);
+        Logger.getLogger().info("\nGenerate report of how many reads map to reference sequence in the file: " + outFileAndPath);
 
         int total = 0;
         Map<String, Integer> readsCountMap = otus.getRefSeqReadsCountMap();

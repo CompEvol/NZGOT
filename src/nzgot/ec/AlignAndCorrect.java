@@ -1,15 +1,14 @@
 package nzgot.ec;
 
-import nzgot.ec.FNode.FType;
 import jebl.evolution.align.Output;
 import jebl.evolution.align.scores.Blosum45;
 import jebl.evolution.align.scores.Scores;
 import jebl.evolution.sequences.AminoAcidState;
 import jebl.evolution.sequences.BasicSequence;
-import jebl.evolution.sequences.GeneticCode;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
+import nzgot.core.logger.Logger;
 
 /**
  * @author Alexei Drummond
@@ -117,13 +116,13 @@ public class AlignAndCorrect {
 		}
 
 		//System.out.println("Maximum score = " + maxval);
-		Debugger.log("Maximum score = " + maxval);
+		Logger.getLogger().debug("Maximum score = " + maxval);
 		if (maxj != -1) {            // the maximum score was F[m][maxj]
 			optimal = nodes[m][maxj];
 		} else {                       // the maximum score was F[maxi][n]
 			optimal = nodes[maxi][n];
 		}
-		Debugger.log("Optimal found at " + optimal.i + ", " + optimal.j);
+		Logger.getLogger().debug("Optimal found at " + optimal.i + ", " + optimal.j);
 		//System.out.println("Optimal found at " + optimal.i + ", " + optimal.j);
 		
 	}
@@ -161,8 +160,8 @@ public class AlignAndCorrect {
 					gaps += 1;
 				case match_delete:
 //					node.codon(FType.match_delete, 0);
-					Debugger.log(scores.getCodonString(prefix.codon));
-//					Debugger.log(dna_read.getState(node.i).toString());
+					Logger.getLogger().debug(scores.getCodonString(prefix.codon));
+//					Logger.getLogger().debug(dna_read.getState(node.i).toString());
 					correctionDeletions += 1; break;
 				case ins_read_duplicate:
 					gaps += 1;
@@ -228,8 +227,8 @@ public class AlignAndCorrect {
 			}
 		}
 		
-		Debugger.log("Del: "+correctionDeletions);
-		Debugger.log("Ins: "+correctionInsertions);
+		Logger.getLogger().debug("Del: " + correctionDeletions);
+		Logger.getLogger().debug("Ins: " + correctionInsertions);
 		
 		String[] result = new String[]{ code.reverse().toString(),
 				alignedRead.reverse().toString(), translatedRead.reverse().toString(), alignedRef.reverse().toString(),};

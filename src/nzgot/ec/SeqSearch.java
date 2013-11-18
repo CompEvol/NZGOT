@@ -1,18 +1,15 @@
 package nzgot.ec;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-
 import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
+import nzgot.core.logger.Logger;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -40,15 +37,15 @@ public class SeqSearch {
 		File sequenceIn1 = new File(filePathIn1);
 		File sequenceIn2 = new File(filePathIn2);
 		
-		Debugger.log("\nImport: "+filePathIn1);
+		Logger.getLogger().debug("\nImport: "+filePathIn1);
 		FastaImporter sequenceImport1 = new FastaImporter(sequenceIn1 , SequenceType.NUCLEOTIDE);
 		sequencesIn1 = sequenceImport1.importSequences();
 		
-		Debugger.log("\nImport: "+filePathIn2);
+		Logger.getLogger().debug("\nImport: "+filePathIn2);
 		FastaImporter sequenceImport2 = new FastaImporter(sequenceIn2 , SequenceType.NUCLEOTIDE);
 		sequencesIn2 = sequenceImport2.importSequences();
 
-		Debugger.log("\nSearch...");
+		Logger.getLogger().debug("\nSearch...");
 		for (Sequence seqQuery : sequencesIn1) {
 
 			for(Sequence seqDB : sequencesIn2) {
@@ -57,18 +54,18 @@ public class SeqSearch {
 						sequencesOut.add(seqDB);
 					}
 					catch(NullPointerException e) {
-						Debugger.log("Error: " +seqDB.getTaxon().toString());
+						Logger.getLogger().debug("Error: " +seqDB.getTaxon().toString());
 					}
 				}
 			}
 		}
-		Debugger.log("Write...");
+		Logger.getLogger().debug("Write...");
 		Writer write = new OutputStreamWriter(new FileOutputStream(filePathOut));
 		FastaExporter fe = new FastaExporter(write);
 		fe.exportSequences(sequencesOut);
 		write.flush();
 		write.close();
-		Debugger.log("Done");
+		Logger.getLogger().debug("Done");
 	}
 
 	public static void main(String[] args) throws IOException, ImportException {

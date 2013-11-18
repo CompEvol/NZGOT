@@ -6,12 +6,12 @@ import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.BasicSequence;
-import jebl.evolution.sequences.GeneticCode;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import nzgot.core.community.OTU;
 import nzgot.core.community.OTUs;
 import nzgot.core.community.io.CommunityImporter;
+import nzgot.core.logger.Logger;
 import nzgot.core.util.SequenceUtil;
 
 import java.io.*;
@@ -25,36 +25,18 @@ import java.util.List;
  */
 public class AutomaticEC {
 
-//	//Sequence files
-//	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/IndirectSoil_endTrimmed.fasta";
-//	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/1608_Sanger_translated.fasta";
-//	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil_test_Sanger.fasta";
-//	final String fileControl = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil_test_Sanger_Control.fasta";
-//
-//	//Mapping files
-//	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/mapping/IndirectSoil_userout.m8";
-//	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/IndirectSoil/reference/IndirectSoil_reference_userout_85.m8";
+    //    final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/";
+    final String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/errorCorrection/TestScenario/";
 
-	
-//	//Sequence files
-//	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/SoilKit_endTrimmed.fasta";
-//	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/ibol.all.frame0.translation.fasta";
-//	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/corrected.fasta";
-//	final String fileControl = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/control.fasta";
-//	
-//	//Mapping files
-//	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/DirectSoil/mapping/DirectSoil_userout.m8";
-//	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/iBold/SoilKit/SoilKit_userout_75_ibold.m8";
-	
 	//Sequence files
-	final String fileSeq = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/seq.fasta";
-	final String fileRef = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/ref.fasta";
-	final String fileCor = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/corrected.fasta";
-	final String fileControl = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/control.fasta";
+	final String fileSeq = workPath + "seq.fasta";
+	final String fileRef = workPath + "ref.fasta";
+	final String fileCor = workPath + "corrected.fasta";
+	final String fileControl = workPath + "control.fasta";
 	
 	//Mapping files
-	final String mapSeqOtu = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/seqOtuMap.txt";
-	final String mapOtuRef = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/otuRefMap.txt";
+	final String mapSeqOtu = workPath + "seqOtuMap.txt";
+	final String mapOtuRef = workPath + "otuRefMap.txt";
 	
 	List<Sequence> sequences;
 	List<Sequence> references;
@@ -121,10 +103,10 @@ public class AutomaticEC {
 					ac.doMatch(new SystemOut(), "");
 					sequencesCor.add(correctedSeq);
 					sequencesControl.add(seq);
-					Debugger.log( String.format("%.5g", ((count/size))*100) +"%" );
+                    Logger.getLogger().debug(String.format("%.5g", ((count / size)) * 100) + "%");
 				}
 				catch (NullPointerException e) {
-					Debugger.log(seq.getTaxon().toString());
+                    Logger.getLogger().debug(seq.getTaxon().toString());
 				}
 
 			}
