@@ -12,6 +12,7 @@ import jebl.evolution.sequences.Sequence;
  * Provides scoring for alignment + correction
  *
  * @author Alexei Drummond
+ * @author Walter Xie
  */
 public class FScore {
 

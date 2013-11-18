@@ -12,6 +12,7 @@ import nzgot.core.logger.Logger;
 
 /**
  * @author Alexei Drummond
+ * @author Walter Xie
  */
 public class AlignAndCorrect {
 
@@ -176,8 +177,6 @@ public class AlignAndCorrect {
                     case ins_ref:
                         gaps += 1;
                 }
-
-
 
                 // output aligned read
                 if (prefix.type != FNode.FType.ins_ref) {

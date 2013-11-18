@@ -2,6 +2,7 @@ package nzgot.ec;
 
 /**
  * @author Alexei Drummond
+ * @author Walter Xie
  */
 public class FEdge {
 

@@ -9,6 +9,7 @@ import java.util.List;
  * sequence prefixes as well as traceback links to recover an optimal alignment.
  *
  * @author Alexei Drummond
+ * @author Walter Xie
  */
 public class FNode {
 
