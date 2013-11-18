@@ -191,6 +191,14 @@ public class FScore {
         return c;
     }
 
+    public String getCorrectNuc(FEdge optimalPrefix) {
+        if (optimalPrefix == null) throw new IllegalArgumentException();
+
+        int i_codon = optimalPrefix.correctNucInSeq;
+        if (i_codon < 1) return null;
+        return read.getState(i_codon-1).getCode();
+    }
+
     public AminoAcidState[] getTranslation(int[] codon, AminoAcidState[] states) {
         return getAminoAcidStates(codon[0]-1, codon[1]-1, codon[2]-1, states);
     }

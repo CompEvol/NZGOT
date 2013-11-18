@@ -99,31 +99,32 @@ public class FNode {
     public double extend(FType type, int offset, FNode[][] F, FScore score, List<FEdge> prefixes) {
 
         int[] codon = codon(type, offset);
+        int correctNucInSeq = correctNucInSeq(type, offset);
 
         switch (type) {
             case match:
                 if (offset != 0) throw new IllegalArgumentException();
-                prefixes.add(new FEdge(F[i - 3][j - 1], FType.match, offset, codon));
+                prefixes.add(new FEdge(F[i - 3][j - 1], FType.match, offset, codon, correctNucInSeq));
                 return F[i - 3][j - 1].score + score.matchScore(codon, j);
             case match_duplicate:
-                prefixes.add(new FEdge(F[i - 2][j - 1], FType.match_duplicate, offset, codon));
+                prefixes.add(new FEdge(F[i - 2][j - 1], FType.match_duplicate, offset, codon, correctNucInSeq));
                 return F[i - 2][j - 1].score + score.matchDuplicate(codon, j);
             case match_delete:
-                prefixes.add(new FEdge(F[i - 4][j - 1], FType.match_delete, offset, codon));
+                prefixes.add(new FEdge(F[i - 4][j - 1], FType.match_delete, offset, codon, correctNucInSeq));
                 return F[i - 4][j - 1].score + score.matchDelete(codon, j);
             case ins_read:
                 if (offset != 0) throw new IllegalArgumentException();
-                prefixes.add(new FEdge(F[i - 3][j], FType.ins_read, offset, codon));
+                prefixes.add(new FEdge(F[i - 3][j], FType.ins_read, offset, codon, correctNucInSeq));
                 return F[i - 3][j].score + score.insertCodon(codon);
             case ins_read_duplicate:
-                prefixes.add(new FEdge(F[i - 2][j], FType.ins_read_duplicate, offset, codon));
+                prefixes.add(new FEdge(F[i - 2][j], FType.ins_read_duplicate, offset, codon, correctNucInSeq));
                 return F[i - 2][j].score + score.insertCodonDuplicate(codon);
             case ins_read_delete:
-                prefixes.add(new FEdge(F[i - 4][j], FType.ins_read_delete, offset, codon));
+                prefixes.add(new FEdge(F[i - 4][j], FType.ins_read_delete, offset, codon, correctNucInSeq));
                 return F[i - 4][j].score + score.insertCodonDelete(codon);
             case ins_ref:
                 if (offset != 0) throw new IllegalArgumentException();
-                prefixes.add(new FEdge(F[i][j - 1], FType.ins_ref, offset, codon));
+                prefixes.add(new FEdge(F[i][j - 1], FType.ins_ref, offset, codon, correctNucInSeq));
                 return F[i][j - 1].score + score.indelPenalty;
             default:
                 throw new IllegalArgumentException();
@@ -169,7 +170,46 @@ public class FNode {
         }
 
     }
-    
+
+    public int correctNucInSeq(FType type, int offset) {
+        switch (type) {
+            case match:
+            case ins_read:
+            case ins_ref:
+                return -1;
+            case match_duplicate:
+            case ins_read_duplicate:
+                switch (offset) {
+                    case 0:
+                        return i;
+                    case -1:
+                        return i - 1;
+                    case -2:
+                        return i - 2;
+                    default:
+                        throw new IllegalArgumentException();
+                }
+            case match_delete:
+            case ins_read_delete:
+                switch (offset) {
+                    case 0:
+                        return i;
+                    case -1:
+                        return i - 1;
+                    case -2:
+                        return i - 2;
+                    case -3:
+                        return i - 3;
+                    default:
+                        throw new IllegalArgumentException();
+                }
+            default:
+                throw new IllegalArgumentException();
+        }
+
+    }
+
+
     public String toString() {
     	StringBuilder builder = new StringBuilder();
     	

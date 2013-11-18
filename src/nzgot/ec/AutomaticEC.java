@@ -99,8 +99,9 @@ public class AutomaticEC {
 				AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, myGeneticCode.INVERTEBRATE_MT);
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
-					Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getMatch()[1].toString()); //replace gaps with '?'...	
-					ac.doMatch(new SystemOut(), "");
+                    String[] match = ac.getMatch();
+                    Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), match[1]); //replace gaps with '?'...
+					ac.doMatch(new SystemOut(), "", match);
 					sequencesCor.add(correctedSeq);
 					sequencesControl.add(seq);
                     Logger.getLogger().debug(String.format("%.5g", ((count / size)) * 100) + "%");
