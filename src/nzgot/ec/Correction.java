@@ -1,8 +1,19 @@
 package nzgot.ec;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import nzgot.core.logger.Logger;
+import jebl.evolution.taxa.Taxon;
+
 /**
  * Correction to reads
  * @author Walter Xie
+ * @author Thomas Hummel
  */
 public class Correction {
 
@@ -71,5 +82,28 @@ public class Correction {
                 return 3 + offset;
         }
         return -1;
+    }
+    
+    public void writeCorrectionMatrix(HashMap<Taxon, int[]> correctionCountMatrix, String filePath) throws IOException {
+        PrintStream out = new PrintStream(new FileOutputStream(filePath));
+
+        Logger.getLogger().info("\nSave correction count matrix in file: " + filePath);
+        
+        String header = "";
+        for (int i=0; i<correctionHeader.length; i++) {
+        	header = header + "\t" + correctionHeader[i];
+        }
+        out.println(header);
+             
+        for(Map.Entry<Taxon, int[]> entry : correctionCountMatrix.entrySet()){
+        	String value = "";
+        	for (int i=0; i<entry.getValue().length; i++) {
+        		value = value + "\t" + entry.getValue()[i];
+        	}
+            out.println(entry.getKey() + value);
+        }
+        
+        out.flush();
+        out.close();
     }
 }
