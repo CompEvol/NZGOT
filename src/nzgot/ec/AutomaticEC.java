@@ -8,6 +8,7 @@ import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.BasicSequence;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
+import jebl.evolution.taxa.Taxon;
 import nzgot.core.community.OTU;
 import nzgot.core.community.OTUs;
 import nzgot.core.community.io.CommunityImporter;
@@ -16,6 +17,7 @@ import nzgot.core.util.SequenceUtil;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -25,8 +27,8 @@ import java.util.List;
  */
 public class AutomaticEC {
 
-    //    final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/";
-    final String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/errorCorrection/TestScenario/";
+    final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/";
+//  final String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/errorCorrection/TestScenario/";
 
 	//Sequence files
 	final String fileSeq = workPath + "seq.fasta";
@@ -37,6 +39,8 @@ public class AutomaticEC {
 	//Mapping files
 	final String mapSeqOtu = workPath + "seqOtuMap.txt";
 	final String mapOtuRef = workPath + "otuRefMap.txt";
+	
+	final String fileCorCountMatrix = workPath + "correctionCountMatrix.txt";
 	
 	List<Sequence> sequences;
 	List<Sequence> references;
@@ -77,13 +81,15 @@ public class AutomaticEC {
 
         String referenceLabel;
         String referenceSeq;
+        
+        HashMap<Taxon,int[]> correctionCountMatrix = new HashMap<Taxon, int[]>();
 
         for (Sequence seq : sequences) {
-
+        	
 			count++;
 			referenceLabel = null;
 			referenceSeq = null;
-
+			
             OTU otu = (OTU) otus.getOTUOfSeq(seq.getTaxon().toString());
             if (otu != null && otu.getReference() != null)
                 referenceLabel = otu.getReference().toString();
@@ -100,6 +106,11 @@ public class AutomaticEC {
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
                     String[] match = ac.getMatch();
+                    correctionCountMatrix.put(seq.getTaxon(), ac.correctionCounts);
+                    //TODO add method to save matrix in file
+                    Correction cor = new Correction();
+                    cor.writeCorrectionMatrix(correctionCountMatrix, fileCorCountMatrix);
+                    ac.getRandomCorrection();
                     Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), match[1]); //replace gaps with '?'...
 					ac.doMatch(new SystemOut(), "", match);
 					sequencesCor.add(correctedSeq);
