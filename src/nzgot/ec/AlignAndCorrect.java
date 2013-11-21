@@ -259,6 +259,8 @@ public class AlignAndCorrect {
     	Random rand = new Random();
     	int[] count = correctionCounts;
     	char nuc;
+    	StringBuilder string = new StringBuilder();
+    	
     	
     	char[] seq = dna_read.getString().toCharArray();
     	List<Character> charList = new ArrayList<Character>();
@@ -330,8 +332,9 @@ public class AlignAndCorrect {
     		default: break;
     		}
     	}
-    	
-    	return null;
+       	string.append(charList.toArray());
+    	       	
+       	return string.toString();
     }
 
 
