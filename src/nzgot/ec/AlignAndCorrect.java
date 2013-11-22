@@ -1,5 +1,9 @@
 package nzgot.ec;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import jebl.evolution.align.Output;
 import jebl.evolution.align.scores.Blosum45;
 import jebl.evolution.align.scores.Scores;
@@ -13,6 +17,7 @@ import nzgot.core.logger.Logger;
 /**
  * @author Alexei Drummond
  * @author Walter Xie
+ * @author Thomas Hummel
  */
 public class AlignAndCorrect {
 
@@ -30,7 +35,10 @@ public class AlignAndCorrect {
     int gaps = 0;
     int correctionDeletions = 0;
     int correctionInsertions = 0;
-
+    
+    //run getMatch() first to get all counts
+    public int[] correctionCounts = new int[Correction.correctionHeader.length];
+    
     /**
      * @param sub match score matrix
      * @param d   indel penalty
@@ -135,8 +143,8 @@ public class AlignAndCorrect {
         gaps = 0;
         correctionDeletions = 0;
         correctionInsertions = 0;
-
-        int[] correctionCounts = new int[Correction.correctionHeader.length];
+        
+//        int[] correctionCounts = new int[Correction.correctionHeader.length];
 
         StringBuilder alignedRead = new StringBuilder();
         StringBuilder alignedRef = new StringBuilder();
@@ -237,14 +245,97 @@ public class AlignAndCorrect {
         String[] result = new String[]{ code.reverse().toString(), alignedRead.reverse().toString(),
                 translatedRead.reverse().toString(), alignedRef.reverse().toString(),
                 Correction.toString(correctionCounts)
-
         };
 
         return result;
-		/*String corrected = result[1];
-		return corrected;*/
     }
-
+    
+    /**
+     * 
+     * @return random corrected sequence
+     */
+    public String getRandomCorrection() {
+    	
+    	Random rand = new Random();
+    	int[] count = correctionCounts;
+    	char nuc;
+    	StringBuilder string = new StringBuilder();
+    	
+    	
+    	char[] seq = dna_read.getString().toCharArray();
+    	List<Character> charList = new ArrayList<Character>();
+    	
+    	for(int i=0; i<seq.length; i++) {
+    		charList.add(seq[i]);
+    	}
+    	
+    	
+    	while (count[0] > 0 || count[1] > 0 || count[2] > 0 || count[3] > 0) {
+    		int rnd = rand.nextInt(charList.size());
+    		nuc = charList.get(rnd);
+    		switch (nuc) {
+    		case 'A': 
+    			if(count[0] > 0) {
+    				charList.remove(rnd);
+    				count[0]--;
+    				break;
+    			}
+    		case 'C':
+    			if(count[1] > 0) {
+    				charList.remove(rnd);
+    				count[1]--;
+    				break;
+    			}
+    		case 'G':
+    			if(count[2] > 0) {
+    				charList.remove(rnd);
+    				count[2]--;
+    				break;
+    			}
+    		case 'T':
+    			if(count[3] > 0) {
+    				charList.remove(rnd);
+    				count[3]--;
+    				break;
+    			}
+    		default: break;
+    		}
+    	}
+    	while (count[4] > 0 || count[5] > 0 || count[6] > 0 || count[7] > 0) {
+    		int rnd = rand.nextInt(charList.size());
+    		nuc = charList.get(rnd);
+    		switch (nuc) {
+    		case 'A':
+    			if(count[4] > 0) {
+    				charList.add(rnd+1, nuc);
+    				count[4]--;
+    				break;
+    			}
+    		case 'C':
+    			if(count[5] > 0) {
+    				charList.add(rnd+1, nuc);
+    				count[5]--;
+    				break;
+    			}
+    		case 'G':
+    			if(count[6] > 0) {
+    				charList.add(rnd+1, nuc);
+    				count[6]--;
+    				break;
+    			}
+    		case 'T':
+    			if(count[7] > 0) {
+    				charList.add(rnd+1, nuc);
+    				count[7]--;
+    				break;
+    			}
+    		default: break;
+    		}
+    	}
+       	string.append(charList.toArray());
+    	       	
+       	return string.toString();
+    }
 
 
 
@@ -267,7 +358,6 @@ public class AlignAndCorrect {
         out.println("matchs=" + matches + " mismatchs=" + mismatches + " gaps=" + gaps);
         out.println("corrections(del)=" + correctionDeletions + " corrections(insert)=" + correctionInsertions);
         out.println("amino acid percent identity=" + Math.round((double) matches * 1000.0 / (match[0].length()/3.0)) / 10.0 + "%");
-
     }
 
 }
