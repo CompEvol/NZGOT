@@ -10,7 +10,6 @@ import nzgot.core.logger.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.TreeSet;
 
@@ -22,9 +21,8 @@ import java.util.TreeSet;
 public class CommunityImporter extends OTUsImporter {
 
     public static void importOTUs (File otusFile, OTUs otus) throws IOException, IllegalArgumentException {
-        BufferedReader reader = new BufferedReader(new FileReader(otusFile));
 
-        Logger.getLogger().info("\nImport OTUs from file: " + otusFile);
+        BufferedReader reader = getReader(otusFile, "OTUs from");
 
         OTU otu = null;
         String line = reader.readLine();
@@ -49,15 +47,13 @@ public class CommunityImporter extends OTUsImporter {
 
     public static void importOTUsAndMapping(File otuMappingFile, OTUs otus) throws IOException, IllegalArgumentException {
 
-        BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
-
-        Logger.getLogger().info("\nImport OTUs and OTU mapping from file: " + otuMappingFile);
+        BufferedReader reader = getReader(otuMappingFile, "OTUs and OTU mapping from");
 
         OTU otu = null;
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = line.split(NameParser.SEPARATOR_COLUMN, -1);
+            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -90,9 +86,7 @@ public class CommunityImporter extends OTUsImporter {
         TreeSet<String> samples = new TreeSet<>();
         NameParser nameParser = NameParser.getInstance();
 
-        BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
-
-        Logger.getLogger().info("\nImport OTU mapping (to reads) file: " + otuMappingFile);
+        BufferedReader reader = getReader(otuMappingFile, "OTU mapping (to reads) from");
 
         // 1st, set sampleType, default to BY_PLOT
         community.setSampleType(NameSpace.BY_PLOT);
@@ -102,7 +96,7 @@ public class CommunityImporter extends OTUsImporter {
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = line.split(NameParser.SEPARATOR_COLUMN, -1);
+            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -129,14 +123,12 @@ public class CommunityImporter extends OTUsImporter {
 
     public static void importReferenceSequenceMapping(File referenceMappingFile, OTUs otus) throws IOException, IllegalArgumentException {
 
-        BufferedReader reader = new BufferedReader(new FileReader(referenceMappingFile));
-
-        Logger.getLogger().info("\nImport reference sequence mapping (to OTU) file: " + referenceMappingFile);
+        BufferedReader reader = getReader(referenceMappingFile, "reference sequence mapping (to OTU) from");
 
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = line.split(NameParser.SEPARATOR_COLUMN, -1);
+            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 

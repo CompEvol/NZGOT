@@ -17,8 +17,8 @@ public class NameParser {
         return instance;
     }
 
-    public static final String SEPARATOR_COLUMN = "\t"; // TODO customize?
-    public static final String SEPARATOR_CSV_COLUMN = ",";
+    public static final String COLUMN_SEPARATOR = "\t"; // TODO customize?
+    public static final String CSV_COLUMN_SEPARATOR = ",";
     // eg IDME8NK01ETVXF|DirectSoil|LB1-A
     public static final int READ_INDEX_SAMPLE = 2;
 

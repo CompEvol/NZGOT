@@ -5,11 +5,10 @@ import nzgot.core.community.OTU;
 import nzgot.core.community.OTUs;
 import nzgot.core.community.util.NameParser;
 import nzgot.core.community.util.NameSpace;
-import nzgot.core.logger.Logger;
+import nzgot.core.io.Importer;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -18,7 +17,7 @@ import java.util.List;
  * attempt to store reads as Sequence
  * @author Walter Xie
  */
-public class OTUsImporter {
+public class OTUsImporter extends Importer {
 
     // column index in OTU mapping file
     public static int OTU_MAPPING_INDEX_READ = 0;
@@ -31,15 +30,13 @@ public class OTUsImporter {
     // TODO is this efficient?
     public static void importOTUsAndMapping(File otuMappingFile, OTUs otus, List<Sequence> sequences) throws IOException, IllegalArgumentException {
 
-        BufferedReader reader = new BufferedReader(new FileReader(otuMappingFile));
-
-        Logger.getLogger().info("\nImport OTUs and OTU mapping from file: " + otuMappingFile);
+        BufferedReader reader = getReader(otuMappingFile, "OTUs and OTU mapping from");
 
         OTU otu = null;
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = line.split(NameParser.SEPARATOR_COLUMN, -1);
+            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 

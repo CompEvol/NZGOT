@@ -33,7 +33,7 @@ public class CommunityExporter {
         Logger.getLogger().info("\nReport community matrix " + community.getName() + " in the file : " + outFileAndPath);
 
         for (String sample : community.getSamples()) {
-            out.print(NameParser.SEPARATOR_CSV_COLUMN + sample);
+            out.print(NameParser.CSV_COLUMN_SEPARATOR + sample);
         }
         out.print("\n");
 
@@ -47,7 +47,7 @@ public class CommunityExporter {
                 throw new IllegalArgumentException("Error: cannot AlphaDiversity report for OTU : " + otu);
 
             for (int a : alphaDiversity.getAlphaDiversity()) {
-                out.print(NameParser.SEPARATOR_CSV_COLUMN + a);
+                out.print(NameParser.CSV_COLUMN_SEPARATOR + a);
             }
             out.print("\n");
         }
