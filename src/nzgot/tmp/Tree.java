@@ -1,8 +1,10 @@
 package nzgot.tmp;
 
 import nzgot.core.io.Importer;
+import nzgot.core.util.UCParser;
 
 import java.io.*;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /**
@@ -20,6 +22,10 @@ public class Tree {
         String workPath = args[0];
         System.out.println("\nWorking path = " + workPath);
 
+        File ucFile = new File(workPath + "clusters.uc");
+        UCParser ucParser = new UCParser(ucFile);
+        List<String> driftingOTUs = ucParser.getDriftingOTUs();
+
         File treeFile = new File(workPath + "Tree.newick");
 
         BufferedReader reader = Importer.getReader(treeFile, "tree");
@@ -33,18 +39,23 @@ public class Tree {
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
             if (i % 2 != 0) {
-                label = complementTaxon(token, workPath);
+//                label = complementTaxon(token, workPath);
+                label = simplifyLabel(token);
             }
 
             if (i > 0) {
                 newTree.append("'");
 
                 if (i % 2 == 0) {
-                    char c = label.charAt(0);
-                    if (Character.isDigit(c)) {
-                        newTree.append("[&col=0]");
+                    if (driftingOTUs.contains(label)) {
+                        newTree.append("[&col=blue]");
                     } else {
-                        newTree.append("[&col=1]");
+                        char c = label.charAt(0);
+                        if (Character.isDigit(c)) {
+                            newTree.append("[&col=red]");
+                        } else {
+                            newTree.append("[&col=green]");
+                        }
                     }
                 }
             }
@@ -64,6 +75,16 @@ public class Tree {
         out.write("End;\n");
         out.flush();
         out.close();
+    }
+
+    private static String simplifyLabel(String label) {
+        char c = label.charAt(0);
+        if (Character.isDigit(c)) {
+            String[] fields = label.split("\\|", -1);
+            return fields[0]+"|"+fields[1]+"|"+fields[7]+(fields.length > 9 ? "|"+fields[9] : "");
+        } else {
+            return label;
+        }
     }
 
     private static String complementTaxon(String label, String workPath) throws IOException {

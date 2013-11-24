@@ -30,8 +30,17 @@ public class UCParser {
 
     public static final String COLUMN_SEPARATOR = "\t";
 
-    public static List<String[]> getOverlapSequences(File ucFile) throws IOException {
-        List<String[]> overlapSequences = new ArrayList<>();
+    public List<String[]> driftingSequences = new ArrayList<>();
+
+    public UCParser(File ucFile) {
+        try {
+            findDriftingSequences(ucFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void findDriftingSequences(File ucFile) throws IOException {
 
         BufferedReader reader = Importer.getReader(ucFile, "uc");
 
@@ -43,14 +52,30 @@ public class UCParser {
 
             if (fields[Record_Type_COLUMN_ID].contentEquals(HIT)) {
                 if (!isInSameDatabase(fields[Query_Sequence_COLUMN_ID], fields[Target_Sequence_COLUMN_ID]))
-                    overlapSequences.add(fields);
+                    driftingSequences.add(fields);
             }
 
             line = reader.readLine();
         }
 
         reader.close();
-        return overlapSequences;
+    }
+
+    public List<String> getDriftingOTUs() {
+        List<String> driftingOTUs = new ArrayList<>();
+        for (String[] fields : driftingSequences) {
+            if (!driftingOTUs.contains(fields[Target_Sequence_COLUMN_ID]))
+                driftingOTUs.add(fields[Target_Sequence_COLUMN_ID]);
+        }
+        return driftingOTUs;
+    }
+
+    public void reportDriftingSequences() {
+        System.out.println("\nFind " + driftingSequences.size() + " drifting sequences : ");
+        for (String[] fields : driftingSequences) {
+            System.out.println(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR +
+                    fields[Query_Sequence_COLUMN_ID] + COLUMN_SEPARATOR + fields[Target_Sequence_COLUMN_ID]);
+        }
     }
 
     /**
@@ -73,14 +98,6 @@ public class UCParser {
         return fileName.endsWith(POSTFIX_UC);
     }
 
-    public static void reportOverlapSequences(List<String[]> overlapSequences) {
-        System.out.println("\nFind " + overlapSequences.size() + " sequences overlapping : ");
-        for (String[] fields : overlapSequences) {
-            System.out.println(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR +
-                    fields[Query_Sequence_COLUMN_ID] + COLUMN_SEPARATOR + fields[Target_Sequence_COLUMN_ID]);
-        }
-    }
-
 
     //Main method
     public static void main(final String[] args) throws IOException {
@@ -97,9 +114,8 @@ public class UCParser {
             if (file.isFile()) {
                 String fileName = file.getName();
                 if (isUCFile(fileName)) {
-                    List<String[]> overlapSequences = getOverlapSequences(file);
-
-                    reportOverlapSequences(overlapSequences);
+                    UCParser ucParser = new UCParser(file);
+                    ucParser.reportDriftingSequences();
                 } else {
                     System.out.println("\nIgnore file: " + file);
                 }
