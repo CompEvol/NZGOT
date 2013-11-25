@@ -1,7 +1,6 @@
-package nzgot.tmp;
+package nzgot.core.util;
 
 import nzgot.core.io.Importer;
-import nzgot.core.util.UCParser;
 
 import java.io.*;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.StringTokenizer;
 /**
  * @author Walter Xie
  */
-public class Tree {
+public class TreeUtil {
 
 
 
@@ -25,6 +24,10 @@ public class Tree {
         File ucFile = new File(workPath + "clusters.uc");
         UCParser ucParser = new UCParser(ucFile);
         List<String> driftingOTUs = ucParser.getDriftingOTUs();
+        for (int i = 0; i < driftingOTUs.size(); i++) {
+            driftingOTUs.set(i, simplifyLabel(driftingOTUs.get(i)));
+        }
+        System.out.println(driftingOTUs.size() + " Drifting OTUs = " + driftingOTUs);
 
         File treeFile = new File(workPath + "Tree.newick");
 
@@ -48,13 +51,13 @@ public class Tree {
 
                 if (i % 2 == 0) {
                     if (driftingOTUs.contains(label)) {
-                        newTree.append("[&col=blue]");
+                        newTree.append("[&col=DRIFT]");
                     } else {
                         char c = label.charAt(0);
                         if (Character.isDigit(c)) {
-                            newTree.append("[&col=red]");
+                            newTree.append("[&col=GO]");
                         } else {
-                            newTree.append("[&col=green]");
+                            newTree.append("[&col=BOLD]");
                         }
                     }
                 }
@@ -70,8 +73,8 @@ public class Tree {
         }
 
         BufferedWriter out = new BufferedWriter(new FileWriter(workPath + "newTree.nex"));
-        out.write("Begin trees;\n");
-        out.write(newTree.toString());
+        out.write("#nexus\n" + "Begin trees;\n");
+        out.write("tree = " + newTree.toString() + "\n");
         out.write("End;\n");
         out.flush();
         out.close();
