@@ -14,35 +14,25 @@ import java.util.List;
  */
 public class TreeUtil {
 
+    /**
+     * clean not standard format generated from FastTree
+     * @param newickTree    FastTree output
+     * @return              standard newick tree
+     * @throws IOException
+     */
+    public static String cleanNewickTree(String newickTree) throws IOException {
+        // e.g. Coleoptera:0.13579)0.909:0.03425)0.963:0.04190,
+        // replace )0.909: to ):
+        return newickTree.replaceAll("\\)[0..1]\\.\\d+:", "):");
+    }
 
-
-
-    //Main method
-    public static void main(final String[] args) throws Exception {
-        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
-
-        String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
-
-        List<String> driftingOTUs = getDriftOTUs(workPath + "clusters.uc");
-
-        File treeFile = new File(workPath + "tree.newick");
-
-        BufferedReader reader = Importer.getReader(treeFile, "tree");
-        TreeParser newickTree = new TreeParser(reader.readLine(), false, false, true, 1);
-        reader.close();
-
-        for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
-            Node leafNode = newickTree.getNode(i);
-
-            String label = simplifyLabel(leafNode.getID());
-            String metaDataString = getMetaString(label, driftingOTUs);
-
-            leafNode.setID(label);
-            leafNode.metaDataString = metaDataString;
-        }
-
-        writeNexusTree(workPath+"new-tree.nex", newickTree.toString());
+    public static void writeNexusTree(String nexusFilePath, String newickTree) throws IOException {
+        BufferedWriter out = new BufferedWriter(new FileWriter(nexusFilePath));
+        out.write("#nexus\n" + "Begin trees;\n");
+        out.write("tree = " + newickTree + "\n");
+        out.write("End;\n");
+        out.flush();
+        out.close();
     }
 
     protected static List<String> getDriftOTUs(String ucFilePath) {
@@ -82,15 +72,6 @@ public class TreeUtil {
         }
     }
 
-    protected static void writeNexusTree(String nexusFilePath, String newickTree) throws IOException {
-        BufferedWriter out = new BufferedWriter(new FileWriter(nexusFilePath));
-        out.write("#nexus\n" + "Begin trees;\n");
-        out.write("tree = " + newickTree + "\n");
-        out.write("End;\n");
-        out.flush();
-        out.close();
-    }
-
     protected static String complementTaxon(String label, String workPath) throws IOException {
 
         File sequences = new File(workPath + "all.fasta");
@@ -124,5 +105,40 @@ public class TreeUtil {
 
         return label;
     }
+
+
+
+
+    //Main method
+    public static void main(final String[] args) throws Exception {
+        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
+
+        String workPath = args[0];
+        System.out.println("\nWorking path = " + workPath);
+
+        List<String> driftingOTUs = getDriftOTUs(workPath + "clusters.uc");
+
+        File treeFile = new File(workPath + "tree.newick");
+
+        BufferedReader reader = Importer.getReader(treeFile, "tree");
+        String cleanedNewickTree = cleanNewickTree(reader.readLine());
+        reader.close();
+//        writeNexusTree(workPath+"tree-cleaned.nex", cleanedNewickTree);
+
+        TreeParser newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
+
+        for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
+            Node leafNode = newickTree.getNode(i);
+
+            String label = simplifyLabel(leafNode.getID());
+            String metaDataString = getMetaString(label, driftingOTUs);
+
+            leafNode.setID(label);
+            leafNode.metaDataString = metaDataString;
+        }
+
+        writeNexusTree(workPath+"new-tree.nex", newickTree.getRoot().toNewick() + ";");
+    }
+
 
 }
