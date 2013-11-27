@@ -134,7 +134,10 @@ public class AlignAndCorrect {
         //System.out.println("Optimal found at " + optimal.i + ", " + optimal.j);
 
     }
-
+     
+    public int[] getCorrectionCount() {
+    	 return correctionCounts;
+     }
 
     public String[] getMatch() {
 
@@ -167,9 +170,7 @@ public class AlignAndCorrect {
                     case ins_read_delete:
                         gaps += 1;
                     case match_delete:
-//					node.codon(FType.match_delete, 0);
                         Logger.getLogger().debug(scores.getCodonString(prefix.codon));
-//					Logger.getLogger().debug(dna_read.getState(node.i).toString());
                         correctionDeletions += 1;
                         nuc = scores.getCorrectNuc(prefix);
                         Correction.count(correctionCounts, nuc, prefix.type);
@@ -251,10 +252,12 @@ public class AlignAndCorrect {
     }
     
     /**
-     * 
+     * randomly insert and delete nucleotides
+     *
      * @return random corrected sequence
      */
     public String getRandomCorrection() {
+    	//TODO only affect homopolymers
     	
     	Random rand = new Random();
     	int[] count = correctionCounts;
@@ -332,8 +335,10 @@ public class AlignAndCorrect {
     		default: break;
     		}
     	}
-       	string.append(charList.toArray());
-    	       	
+       	for(int i=0; i < charList.size(); i++) {
+       		string.append(charList.get(i));
+       	}
+    	// random corrected sequence is not in frame!       	
        	return string.toString();
     }
 

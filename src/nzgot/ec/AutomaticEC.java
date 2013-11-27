@@ -17,7 +17,7 @@ import nzgot.core.util.SequenceUtil;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -27,7 +27,8 @@ import java.util.List;
  */
 public class AutomaticEC {
 
-    final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/";
+//    final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil/";
+	final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/";
 //  final String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/errorCorrection/TestScenario/";
 
 	//Sequence files
@@ -53,6 +54,9 @@ public class AutomaticEC {
 	 *Automatic error correction of all sequences given 
 	 *in the <code>fileSeq</code> file which mapped to the <code>fileRef</code> file 
 	 */
+	
+	
+	
 	public void doEC() throws IOException, ImportException{
         File sequenceIn = new File(fileSeq);
         File referenceIn = new File(fileRef);
@@ -60,7 +64,6 @@ public class AutomaticEC {
         File sequenceOut2 = new File(fileControl);
         File sequenceOut3 = new File(fileRand);
 
-//		Mapping map = new Mapping();
 		FastaImporter sequenceImport = new FastaImporter(sequenceIn , SequenceType.NUCLEOTIDE);
 		FastaImporter referenceImport = new FastaImporter(referenceIn, SequenceType.AMINO_ACID);
 		sequences = sequenceImport.importSequences();
@@ -76,17 +79,17 @@ public class AutomaticEC {
         file = new File(mapOtuRef);
         CommunityImporter.importReferenceSequenceMapping(file, otus);
 
-
-//		map.parseSeqOtuTable(mapSeqOtu);
-//		map.parseOtuRefTable(mapOtuRef);
-
         double count = 0;
         double size = sequences.size();
-
+        
         String referenceLabel;
         String referenceSeq;
         
-        HashMap<Taxon,int[]> correctionCountMatrix = new HashMap<Taxon, int[]>();
+        AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, myGeneticCode.INVERTEBRATE_MT);
+
+        Correction cor = new Correction();
+        LinkedHashMap<Taxon,int[]> correctionCountMatrix = new LinkedHashMap<Taxon, int[]>();
+        
 
         for (Sequence seq : sequences) {
         	
@@ -97,24 +100,19 @@ public class AutomaticEC {
             OTU otu = (OTU) otus.getOTUOfSeq(seq.getTaxon().toString());
             if (otu != null && otu.getReference() != null)
                 referenceLabel = otu.getReference().toString();
-//			referenceLabel = map.findReference(seq.getTaxon().toString());
 
 			//reference String 
 			if (referenceLabel != null)
 				referenceSeq = SequenceUtil.getSequenceStringFrom(referenceLabel, references);
-//				referenceSeq = Mapping.getReferenceString(referenceLabel, references);
 				
 			//correct sequence with reference alignment and save in list
 			if (referenceSeq != null) {
-				AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, myGeneticCode.INVERTEBRATE_MT);
+				
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
                     String[] match = ac.getMatch();
-                    correctionCountMatrix.put(seq.getTaxon(), ac.correctionCounts);
-                    //TODO add method to save matrix in file
-                    Correction cor = new Correction();
-                    cor.writeCorrectionMatrix(correctionCountMatrix, fileCorCountMatrix);
-                    Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), match[1]); //replace gaps with '?'...
+                    correctionCountMatrix.put(seq.getTaxon(), ac.getCorrectionCount().clone()); //cloning correctionCounts  
+                    Sequence correctedSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), match[1]); //TODO Delete gaps
                     Sequence randCorSeq = new BasicSequence(SequenceType.NUCLEOTIDE, seq.getTaxon(), ac.getRandomCorrection());
                     ac.doMatch(new SystemOut(), "", match);
 					sequencesCor.add(correctedSeq);
@@ -125,12 +123,10 @@ public class AutomaticEC {
 				catch (NullPointerException e) {
                     Logger.getLogger().debug(seq.getTaxon().toString());
 				}
-
 			}
-
-			//ac.getCorrected(seq);
-			//ac.doMatch(new SystemOut(), "");
 		}
+        
+        cor.writeCorrectionMatrix(correctionCountMatrix, fileCorCountMatrix);
         
         //Corrected sequences
         Writer write = new OutputStreamWriter(new FileOutputStream(sequenceOut));
@@ -146,6 +142,7 @@ public class AutomaticEC {
 		write2.flush();
 		write2.close();
 		
+		//Random corrected sequences
 		Writer write3 = new OutputStreamWriter(new FileOutputStream(sequenceOut3));
 		FastaExporter fe3 = new FastaExporter(write3);
 		fe3.exportSequences(sequencesRand);
@@ -155,7 +152,7 @@ public class AutomaticEC {
 
 
 	public static void main(String[] args) throws ImportException, IOException{
-		// TODO Auto-generated method stub
+
 		AutomaticEC ec = new AutomaticEC();
 		ec.doEC();
 	}

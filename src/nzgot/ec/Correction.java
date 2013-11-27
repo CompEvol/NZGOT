@@ -1,10 +1,9 @@
 package nzgot.ec;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import nzgot.core.logger.Logger;
@@ -18,7 +17,7 @@ import jebl.evolution.taxa.Taxon;
 public class Correction {
 
     public static final String[] correctionHeader = new String[]{"-A","-C","-G","-T","+A","+C","+G","+T"};
-
+        
     /**
      *
      * @param correctionCounts
@@ -84,7 +83,13 @@ public class Correction {
         return -1;
     }
     
-    public void writeCorrectionMatrix(HashMap<Taxon, int[]> correctionCountMatrix, String filePath) throws IOException {
+    /**
+     * writes correctionMatrix from linked HashMap to table file
+     * @param correctionCountMatrix
+     * @param filePath
+     * @throws IOException
+     */
+    public void writeCorrectionMatrix(LinkedHashMap<Taxon, int[]> correctionCountMatrix, String filePath) throws IOException {
         PrintStream out = new PrintStream(new FileOutputStream(filePath));
 
         Logger.getLogger().info("\nSave correction count matrix in file: " + filePath);
@@ -95,7 +100,7 @@ public class Correction {
         }
         out.println(header);
              
-        for(Map.Entry<Taxon, int[]> entry : correctionCountMatrix.entrySet()){
+        for(Map.Entry<Taxon, int[]> entry : correctionCountMatrix.entrySet()) {
         	String value = "";
         	for (int i=0; i<entry.getValue().length; i++) {
         		value = value + "\t" + entry.getValue()[i];
