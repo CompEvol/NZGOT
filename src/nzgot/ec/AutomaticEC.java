@@ -27,22 +27,20 @@ import java.util.List;
  */
 public class AutomaticEC {
 
-//    final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/IndirectSoil/";
-	final String workPath = "/Users/thum167/Documents/Curation/ReRun Clustering/Automatic error correction/TestScenario/";
-//  final String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/errorCorrection/TestScenario/";
+	final String workPath;
 
 	//Sequence files
-	final String fileSeq = workPath + "seq.fasta";
-	final String fileRef = workPath + "ref.fasta";
-	final String fileCor = workPath + "corrected.fasta";
-	final String fileRand = workPath + "randomCorrected.fasta";
-	final String fileControl = workPath + "control.fasta";
+	final String fileSeq;
+	final String fileRef;
+	final String fileCor;
+	final String fileRand;
+	final String fileControl;
 	
 	//Mapping files
-	final String mapSeqOtu = workPath + "seqOtuMap.txt";
-	final String mapOtuRef = workPath + "otuRefMap.txt";
+	final String mapSeqOtu;
+	final String mapOtuRef;
 	
-	final String fileCorCountMatrix = workPath + "correctionCountMatrix.txt";
+	final String fileCorCountMatrix;
 	
 	List<Sequence> sequences;
 	List<Sequence> references;
@@ -50,7 +48,23 @@ public class AutomaticEC {
 	List<Sequence> sequencesRand;
 	List<Sequence> sequencesControl;
 
-	/**
+    public AutomaticEC(String workPath) {
+        this.workPath = workPath;
+
+        fileSeq = workPath + "seq.fasta";
+        fileRef = workPath + "ref.fasta";
+        fileCor = workPath + "corrected.fasta";
+        fileRand = workPath + "randomCorrected.fasta";
+        fileControl = workPath + "control.fasta";
+
+        //Mapping files
+        mapSeqOtu = workPath + "seqOtuMap.txt";
+        mapOtuRef = workPath + "otuRefMap.txt";
+
+        fileCorCountMatrix = workPath + "correctionCountMatrix.txt";
+    }
+
+    /**
 	 *Automatic error correction of all sequences given 
 	 *in the <code>fileSeq</code> file which mapped to the <code>fileRef</code> file 
 	 */
@@ -152,8 +166,12 @@ public class AutomaticEC {
 
 
 	public static void main(String[] args) throws ImportException, IOException{
+        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-		AutomaticEC ec = new AutomaticEC();
+        String workPath = args[0];
+        System.out.println("\nWorking path = " + workPath);
+
+		AutomaticEC ec = new AutomaticEC(workPath);
 		ec.doEC();
 	}
 
