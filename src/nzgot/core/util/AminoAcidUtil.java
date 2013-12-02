@@ -130,8 +130,8 @@ public class AminoAcidUtil {
         String workPath = args[0];
         System.out.println("\nWorking path = " + workPath);
 
-        File inFastaFile = new File(workPath + "co1-97.fasta");
-        File outFastaFile = new File(workPath + "co1-97-frame1.fasta");
+        File inFastaFile = new File(workPath + "NZ-insects-BOLD-2013-11-21-co1-5P.fasta");
+        File outFastaFile = new File(workPath + "BOLD-co1-frame1.fasta");
 
         GeneticCode geneticCode = GeneticCode.INVERTEBRATE_MT;
         System.out.println("Genetic Code = " + geneticCode.getName() + ", " + geneticCode.getDescription());

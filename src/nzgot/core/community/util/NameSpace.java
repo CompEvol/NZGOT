@@ -16,4 +16,7 @@ public class NameSpace {
 
     public static final String BY_PLOT = "by plot";
     public static final String BY_SUBPLOT = "by subplot";
+
+    public static final String POSTFIX_NEWICK = ".newick";
+    public static final String POSTFIX_NEX = ".nex";
 }

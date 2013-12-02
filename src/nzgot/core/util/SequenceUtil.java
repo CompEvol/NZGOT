@@ -75,8 +75,9 @@ public class SequenceUtil {
         String workPath = args[0];
         System.out.println("\nWorking path = " + workPath);
 
-        File inFastaFile = new File(workPath + "NZ-insects-BOLD-2013-11-21.fasta");
-        String regex = ".*\\|28S.*";
+        File inFastaFile = new File(workPath + "NZ-insects-BOLD-2013-11-21-co1.fasta");
+//        String regex = ".*\\|28S.*";
+        String regex = ".*COI-3P.*";
         splitFastaBy(inFastaFile, regex);
     }
 }

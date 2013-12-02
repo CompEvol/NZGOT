@@ -2,6 +2,7 @@ package nzgot.core.util;
 
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
+import nzgot.core.community.util.NameSpace;
 import nzgot.core.io.Importer;
 
 import java.io.*;
@@ -116,9 +117,11 @@ public class TreeUtil {
         String workPath = args[0];
         System.out.println("\nWorking path = " + workPath);
 
+        final String stem = "tree";
+
         List<String> driftingOTUs = getDriftOTUs(workPath + "clusters.uc");
 
-        File treeFile = new File(workPath + "tree.newick");
+        File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
 
         BufferedReader reader = Importer.getReader(treeFile, "tree");
         String cleanedNewickTree = cleanNewickTree(reader.readLine());
@@ -137,7 +140,7 @@ public class TreeUtil {
             leafNode.metaDataString = metaDataString;
         }
 
-        writeNexusTree(workPath+"new-tree.nex", newickTree.getRoot().toNewick() + ";");
+        writeNexusTree(workPath + "new-" + stem + NameSpace.POSTFIX_NEX, newickTree.getRoot().toNewick() + ";");
     }
 
 

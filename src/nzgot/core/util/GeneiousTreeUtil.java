@@ -1,5 +1,6 @@
 package nzgot.core.util;
 
+import nzgot.core.community.util.NameSpace;
 import nzgot.core.io.Importer;
 
 import java.io.BufferedReader;
@@ -25,9 +26,11 @@ public class GeneiousTreeUtil extends TreeUtil{
         String workPath = args[0];
         System.out.println("\nWorking path = " + workPath);
 
+        final String stem = "tree-pairwise-ga-clustering";
+
         List<String> driftingOTUs = getDriftOTUs(workPath + "clusters.uc");
 
-        File treeFile = new File(workPath + "tree-geneious.newick");
+        File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
 
         BufferedReader reader = Importer.getReader(treeFile, "tree");
         StringTokenizer st = new StringTokenizer(reader.readLine(), "'");
@@ -62,7 +65,7 @@ public class GeneiousTreeUtil extends TreeUtil{
             i++;
         }
 
-        writeNexusTree(workPath + "new-tree-geneious.nex", newTree.toString());
+        writeNexusTree(workPath + "new-" + stem + NameSpace.POSTFIX_NEX, newTree.toString());
     }
 
 }
