@@ -1,4 +1,4 @@
-package nzgot.core.util;
+package nzgot.core.uc;
 
 import nzgot.core.io.Importer;
 
@@ -9,30 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * USEARCH cluster format (UC) is a tab-separated text file
- * http://www.drive5.com/usearch/manual/ucout.html
+ * Drifting Sequence is from different database
+ * with the head sequence of its assigned OTU
  * @author Walter Xie
  */
-public class UCParser {
-
-    public static final String POSTFIX_UC = ".uc";
-
-    public static final String HIT = "H";
-    public static final String Centroid = "S";
-    public static final String Cluster_Record = "C";
-    public static final String NO_HIT = "N";
-
-    public static final int Record_Type_COLUMN_ID = 0;
-    public static final int Cluster_Number_COLUMN_ID = 1;
-    public static final int H_Identity_COLUMN_ID = 3;
-    public static final int Query_Sequence_COLUMN_ID = 8;
-    public static final int Target_Sequence_COLUMN_ID = 9;
-
-    public static final String COLUMN_SEPARATOR = "\t";
+public class DriftingSequences extends UCParser{
 
     public List<String[]> driftingSequences = new ArrayList<>();
 
-    public UCParser(File ucFile) {
+    public DriftingSequences(File ucFile) {
         try {
             findDriftingSequences(ucFile);
         } catch (IOException e) {
@@ -40,6 +25,14 @@ public class UCParser {
         }
     }
 
+    /**
+     * find the sequences assigned to a OTU are from the different
+     * database of the head sequence.
+     * (or the different category)
+     * 2 categories are allowed at moment (e.g. BOLD, GOD)
+     * @param ucFile
+     * @throws java.io.IOException
+     */
     public void findDriftingSequences(File ucFile) throws IOException {
 
         BufferedReader reader = Importer.getReader(ucFile, "uc");
@@ -94,11 +87,6 @@ public class UCParser {
         return Character.isDigit(c1) == Character.isDigit(c2);
     }
 
-    public static boolean isUCFile(String fileName) {
-        return fileName.endsWith(POSTFIX_UC);
-    }
-
-
     //Main method
     public static void main(final String[] args) throws IOException {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
@@ -114,8 +102,8 @@ public class UCParser {
             if (file.isFile()) {
                 String fileName = file.getName();
                 if (isUCFile(fileName)) {
-                    UCParser ucParser = new UCParser(file);
-                    ucParser.reportDriftingSequences();
+                    DriftingSequences driftingSequences = new DriftingSequences(file);
+                    driftingSequences.reportDriftingSequences();
                 } else {
                     System.out.println("\nIgnore file: " + file);
                 }

@@ -28,7 +28,7 @@ tools. The main features are:
 * Ecological modelling concepts, such as OTU, community, diversity, etc. (core.community)
 * JEBL Sequence extension, such as translation class (core.sequences)
 * Parsers for related UC files [http://www.drive5.com/], such as importer/export,
-uc parser, etc. (core.community.io, core.io, core.util)
+uc parser, etc. (core.community.io, core.io, core.uc)
 * utils for DNA sequences, Amino Acid sequences, trees, etc. (core.util)
 
 Each tool should contain its main class and build script, and its ownership may be

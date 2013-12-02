@@ -15,6 +15,7 @@ import java.util.List;
 /**
  * OTUs Importer
  * attempt to store reads as Sequence
+ * both OTU and reference mapping file are uc format.
  * @author Walter Xie
  */
 public class OTUsImporter extends Importer {

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Translation relationship class, including translation errors
+ * Translation relationship class, such as translation errors
  * @author Walter Xie
  */
 public class Translation {

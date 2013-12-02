@@ -19,6 +19,12 @@ public class AminoAcidUtil {
 
     public static final int Translation_Frames = 3; // only forward
 
+    /**
+     * get Translation relationship class, such as translation errors
+     * @param forwardSequence
+     * @param geneticCode
+     * @return
+     */
     public static Translation getTranslation(Sequence forwardSequence, GeneticCode geneticCode) {
         List<Integer> frames = new ArrayList<>();
         for (int i=0; i<Translation_Frames; i++) {
@@ -59,6 +65,13 @@ public class AminoAcidUtil {
         return translationList;
     }
 
+    /**
+     * strip List<Sequence> sequences to fit in Frame 1
+     * @param forwardSequences
+     * @param translationList
+     * @param geneticCode
+     * @return
+     */
     public static List<Sequence> stripSequencesInFrame1(List<Sequence> forwardSequences, List<Translation> translationList, GeneticCode geneticCode) {
         assert forwardSequences.size() == translationList.size();
 
@@ -87,7 +100,16 @@ public class AminoAcidUtil {
         return sequencesInFrame1;
     }
 
-
+    /**
+     * strip sequences given in a fasta import file to fit in Frame 1
+     * and output to another fasta file
+     * @param inFastaFile
+     * @param outFastaFile
+     * @param geneticCode
+     * @return
+     * @throws IOException
+     * @throws ImportException
+     */
     public static int[] stripSequencesInFrame1(File inFastaFile, File outFastaFile, GeneticCode geneticCode) throws IOException, ImportException {
         int[] result = new int[2];
 
@@ -109,6 +131,13 @@ public class AminoAcidUtil {
         return result;
     }
 
+    /**
+     * no stop codon in AminoAcidState[]
+     * @param nucStates
+     * @param geneticCode
+     * @param readingFrame
+     * @return
+     */
     public static boolean isTranslatable(State[] nucStates, GeneticCode geneticCode, int readingFrame) {
         AminoAcidState[] aaStates = Utils.translate(nucStates, geneticCode, readingFrame);
 

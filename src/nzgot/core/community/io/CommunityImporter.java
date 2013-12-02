@@ -16,6 +16,7 @@ import java.util.TreeSet;
 /**
  * Community Matrix Importer
  * Not attempt to store reads as Sequence, but as String
+ * both OTU and reference mapping file are uc format.
  * @author Walter Xie
  */
 public class CommunityImporter extends OTUsImporter {
@@ -147,15 +148,4 @@ public class CommunityImporter extends OTUsImporter {
         reader.close();
     }
 
-    public static boolean isOTUsFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTUS_RELABELED) && fileName.endsWith(NameSpace.POSTFIX_OTUS);
-    }
-
-    public static boolean isOTUMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_MAPPING) && fileName.endsWith(NameSpace.POSTFIX_MAPPING);
-    }
-
-    public static boolean isReferenceMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && fileName.endsWith(NameSpace.POSTFIX_MAPPING);
-    }
 }

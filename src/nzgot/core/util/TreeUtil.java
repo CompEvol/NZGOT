@@ -4,6 +4,7 @@ import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 import nzgot.core.community.util.NameSpace;
 import nzgot.core.io.Importer;
+import nzgot.core.uc.DriftingSequences;
 
 import java.io.*;
 import java.util.List;
@@ -27,6 +28,12 @@ public class TreeUtil {
         return newickTree.replaceAll("\\)[0..1]\\.\\d+:", "):");
     }
 
+    /**
+     * change newick tree into nexus tree
+     * @param nexusFilePath
+     * @param newickTree
+     * @throws IOException
+     */
     public static void writeNexusTree(String nexusFilePath, String newickTree) throws IOException {
         BufferedWriter out = new BufferedWriter(new FileWriter(nexusFilePath));
         out.write("#nexus\n" + "Begin trees;\n");
@@ -38,9 +45,9 @@ public class TreeUtil {
 
     protected static List<String> getDriftOTUs(String ucFilePath) {
         File ucFile = new File(ucFilePath);
-        UCParser ucParser = new UCParser(ucFile);
+        DriftingSequences driftingSequences = new DriftingSequences(ucFile);
 
-        List<String> driftingOTUs = ucParser.getDriftingOTUs();
+        List<String> driftingOTUs = driftingSequences.getDriftingOTUs();
         for (int i = 0; i < driftingOTUs.size(); i++) {
             driftingOTUs.set(i, simplifyLabel(driftingOTUs.get(i)));
         }
