@@ -8,7 +8,7 @@
                     walter@cs.auckland.ac.nz
                     alexei@cs.auckland.ac.nz
 
-Last updated: walter@cs.auckland.ac.nz - 22nd October 2013
+Last updated: walter@cs.auckland.ac.nz - 2nd December 2013
 
 
 =====
