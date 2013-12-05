@@ -39,10 +39,10 @@ public class Community<E> extends OTUs<E> {
 
         try {
             CommunityImporter.importOTUs(otusFile, this);
-            CommunityImporter.importOTUMappingBySamples(otuMappingFile, this);
+            CommunityImporter.importOTUMappingFromUCFile(otuMappingFile, this);
 
             if (refSeqMappingFile != null)
-                CommunityImporter.importReferenceSequenceMapping(refSeqMappingFile, this);
+                CommunityImporter.importRefSeqMappingFromUCFile(refSeqMappingFile, this);
         } catch (IOException e) {
             e.printStackTrace();
         }

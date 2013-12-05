@@ -6,6 +6,7 @@ import nzgot.core.community.OTUs;
 import nzgot.core.community.util.NameParser;
 import nzgot.core.community.util.NameSpace;
 import nzgot.core.io.Importer;
+import nzgot.core.uc.UCParser;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,13 +21,13 @@ import java.util.List;
  */
 public class OTUsImporter extends Importer {
 
-    // column index in OTU mapping file
-    public static int OTU_MAPPING_INDEX_READ = 0;
-    public static int OTU_MAPPING_INDEX_OTU_NAME = 1;
-    // column index in reference sequence mapping file
-    public static int REF_SEQ_MAPPING_INDEX_IDENTITY = 0;
-    public static int REF_SEQ_MAPPING_INDEX_OTU_NAME = 1;
-    public static int REF_SEQ_MAPPING_INDEX_REF_SEQ = 2;
+//    // column index in OTU mapping file
+//    public static int OTU_MAPPING_INDEX_READ = 0;
+//    public static int OTU_MAPPING_INDEX_OTU_NAME = 1;
+//    // column index in reference sequence mapping file
+//    public static int REF_SEQ_MAPPING_INDEX_IDENTITY = 0;
+//    public static int REF_SEQ_MAPPING_INDEX_OTU_NAME = 1;
+//    public static int REF_SEQ_MAPPING_INDEX_REF_SEQ = 2;
 
     // TODO is this efficient?
     public static void importOTUsAndMapping(File otuMappingFile, OTUs otus, List<Sequence> sequences) throws IOException, IllegalArgumentException {
@@ -41,14 +42,16 @@ public class OTUsImporter extends Importer {
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            String otuName = fields[OTU_MAPPING_INDEX_OTU_NAME];
-            if (otus.containsOTU(otuName)) {
-                otu = (OTU) otus.getUniqueElement(otuName);
-                otu.addUniqueElement(fields[OTU_MAPPING_INDEX_READ]);
-            } else {
-                otu = new OTU(otuName);
-                otu.addUniqueElement(fields[OTU_MAPPING_INDEX_READ]);
-                otus.addUniqueElement(otu);
+            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
+                String otuName = fields[UCParser.Target_Sequence_COLUMN_ID];
+                if (otus.containsOTU(otuName)) {
+                    otu = (OTU) otus.getUniqueElement(otuName);
+                    otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                } else {
+                    otu = new OTU(otuName);
+                    otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    otus.addUniqueElement(otu);
+                }
             }
 
             line = reader.readLine();
@@ -62,10 +65,10 @@ public class OTUsImporter extends Importer {
     }
 
     public static boolean isOTUMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_MAPPING) && fileName.endsWith(NameSpace.POSTFIX_MAPPING);
+        return fileName.startsWith(NameSpace.PREFIX_OTU_MAPPING) && UCParser.isUCFile(fileName);
     }
 
     public static boolean isReferenceMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && fileName.endsWith(NameSpace.POSTFIX_MAPPING);
+        return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && UCParser.isUCFile(fileName);
     }
 }
