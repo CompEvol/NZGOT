@@ -99,8 +99,6 @@ public class AutomaticEC {
         String referenceLabel;
         String referenceSeq;
         
-        AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, myGeneticCode.INVERTEBRATE_MT);
-
         Correction cor = new Correction();
         LinkedHashMap<Taxon,int[]> correctionCountMatrix = new LinkedHashMap<Taxon, int[]>();
         
@@ -122,6 +120,8 @@ public class AutomaticEC {
 			//correct sequence with reference alignment and save in list
 			if (referenceSeq != null) {
 				
+		        AlignAndCorrect ac = new AlignAndCorrect(new Blosum80(), -10, -10, -100, myGeneticCode.INVERTEBRATE_MT);
+
 				ac.doAlignment(seq.getString(), referenceSeq);
 				try{
                     String[] match = ac.getMatch();
