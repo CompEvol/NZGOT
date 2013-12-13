@@ -29,6 +29,10 @@ public class QuerySequence implements Attributable, Comparable{
         this.name = name;
     }
 
+    public String toString() {
+        return getName();
+    }
+
     public double getIdentity() {
         return identity;
     }
