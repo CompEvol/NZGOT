@@ -34,6 +34,7 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     /**
      * give a sequence to get the OTU it belongs to
+     * TODO: only suit for hard clustering currently
      * @param sequenceName
      * @return
      */
