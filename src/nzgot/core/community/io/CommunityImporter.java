@@ -47,37 +47,18 @@ public class CommunityImporter extends OTUsImporter {
         reader.close();
     }
 
+    // default to create OTUs from mapping file
     public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
+        importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, true, null);
+    }
 
-        BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
-
-        OTU otu = null;
-        String line = reader.readLine();
-        while (line != null) {
-            // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
-
-            if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
-
-            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
-                String otuName = fields[UCParser.Target_Sequence_COLUMN_ID];
-                if (otus.containsOTU(otuName)) {
-                    otu = (OTU) otus.getUniqueElement(otuName);
-                    otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
-                } else {
-                    otu = new OTU(otuName);
-                    otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
-                    otus.addUniqueElement(otu);
-                }
-            }
-
-            line = reader.readLine();
-        }
-
-        reader.close();
+    public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU) throws IOException, IllegalArgumentException {
+        importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, canCreateOTU, null);
     }
 
     /**
+     * Ideally otuMappingUCFile should have all OTUs,
+     * so that the validation assumed to be done before this method
      * 1st set sampleType, default to BY_PLOT
      * 2nd load reads into each OTU, and parse label to get sample array
      * 3rd set sample array, and calculate Alpha diversity for each OTU
@@ -86,17 +67,34 @@ public class CommunityImporter extends OTUsImporter {
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static void importOTUMappingFromUCFile(File otuMappingUCFile, Community community) throws IOException, IllegalArgumentException {
+    public static void importOTUMappingFromUCFile(File otuMappingUCFile, Community community, boolean canCreateOTU) throws IOException, IllegalArgumentException {
         TreeSet<String> samples = new TreeSet<>();
-        NameParser nameParser = NameParser.getInstance();
-
-        BufferedReader reader = getReader(otuMappingUCFile, "OTU mapping (to reads) from");
 
         // 1st, set sampleType, default to BY_PLOT
         community.setSampleType(NameSpace.BY_PLOT);
         Logger.getLogger().info("\nSet sample type: " + community.getSampleType());
 
         // 2nd, parse label to get sample
+        importOTUsAndMappingFromUCFile(otuMappingUCFile, community, canCreateOTU, samples);
+
+        // 3rd, set diversities and samples
+        community.setSamplesAndDiversities(samples);
+    }
+
+    /**
+     *
+     * @param otuMappingUCFile
+     * @param otus
+     * @param canCreateOTU     if use otuMappingUCFile to create OTUs
+     * @param samples          used only for community to store samples
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
+    public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU, TreeSet<String> samples) throws IOException, IllegalArgumentException {
+        NameParser nameParser = NameParser.getInstance();
+
+        BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
+
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
@@ -105,17 +103,30 @@ public class CommunityImporter extends OTUsImporter {
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
-                OTU otu = (OTU) community.getUniqueElement(fields[UCParser.Target_Sequence_COLUMN_ID]);
-                if (otu == null) {
-                    throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
-                            ", from the mapping file which does not exist in OTUs file !");
-                } else {
-                    otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                OTU otu;
+                String otuName = fields[UCParser.Target_Sequence_COLUMN_ID];
+                if (otus.containsOTU(otuName)) {
+                    otu = (OTU) otus.getUniqueElement(otuName);
 
-                    // if by plot, then add plot to TreeSet, otherwise add subplot
-                    String sampleLocation = nameParser.getSampleBy(community.getSampleType(), fields[UCParser.Query_Sequence_COLUMN_ID]);
-                    samples.add(sampleLocation);
+                    if (otu == null) {
+                        throw new IllegalArgumentException("Error: find an invalid OTU " + fields[UCParser.Target_Sequence_COLUMN_ID] +
+                                ", from the mapping file which does not exist in OTUs file !");
+                    } else {
+                        otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+
+                        if (samples != null) {
+                            // if by plot, then add plot to TreeSet, otherwise add subplot
+                            String sampleType = ((Community) otus).getSampleType();
+                            String sampleLocation = nameParser.getSampleBy(sampleType, fields[UCParser.Query_Sequence_COLUMN_ID]);
+                            samples.add(sampleLocation);
+                        }
+                    }
+                } else if (canCreateOTU) {
+                    otu = new OTU(otuName);
+                    otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    otus.addUniqueElement(otu);
                 }
+
             }
 
             line = reader.readLine();
@@ -123,8 +134,6 @@ public class CommunityImporter extends OTUsImporter {
 
         reader.close();
 
-        // 3rd, set diversities and samples
-        community.setSamplesAndDiversities(samples);
     }
 
     public static void importRefSeqMappingFromUCFile(File refSeqMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
@@ -141,7 +150,7 @@ public class CommunityImporter extends OTUsImporter {
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
                 OTU otu = (OTU) otus.getUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
                 if (otu == null) {
-                    throw new IllegalArgumentException("Error: find an invalid OTU " + fields[1] +
+                    throw new IllegalArgumentException("Error: find an invalid OTU " + fields[UCParser.Query_Sequence_COLUMN_ID] +
                             ", from the mapping file which does not exist in OTUs file !");
                 } else {
                     Reference<OTU, String> refSeq = new Reference<>(otu, fields[UCParser.Target_Sequence_COLUMN_ID]);

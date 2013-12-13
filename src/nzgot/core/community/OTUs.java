@@ -74,4 +74,21 @@ public class OTUs<E> extends BioSortedSet<E> {
         return readsCountMap;
     }
 
+    /**
+     * use to check if any OTU imported from otu fasta file
+     * that does not exist in the mapping file
+     * In this case, OTU set is empty
+     * @return
+     */
+    public boolean isValid() {
+        boolean isValid = true;
+        for(E e : this){
+            OTU otu = (OTU) e;
+            if (otu.size() < 1) {
+                isValid = false;
+                System.err.println("Error: empty OTU : " + e.toString());
+            }
+        }
+        return isValid;
+    }
 }

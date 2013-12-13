@@ -39,7 +39,7 @@ public class Community<E> extends OTUs<E> {
 
         try {
             CommunityImporter.importOTUs(otusFile, this);
-            CommunityImporter.importOTUMappingFromUCFile(otuMappingFile, this);
+            CommunityImporter.importOTUMappingFromUCFile(otuMappingFile, this, false);
 
             if (refSeqMappingFile != null)
                 CommunityImporter.importRefSeqMappingFromUCFile(refSeqMappingFile, this);
