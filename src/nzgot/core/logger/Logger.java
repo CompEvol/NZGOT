@@ -3,7 +3,7 @@ package nzgot.core.logger;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * Singleton to get log4j logger
+ * Singleton to get log4j2 logger
  * @author Walter Xie
  */
 public class Logger {
