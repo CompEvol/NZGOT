@@ -15,6 +15,11 @@ public class DereplicatedSequence extends Hit{
         super(name);
     }
 
+    public DereplicatedSequence(String name, int derepSize) {
+        super(name);
+        setDerepSize(derepSize);
+    }
+
     public int getDerepSize() {
         return derepSize;
     }

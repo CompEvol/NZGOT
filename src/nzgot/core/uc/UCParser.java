@@ -30,4 +30,19 @@ public class UCParser {
     public static boolean isNA(String field) {
         return field.trim().contentEquals(NA);
     }
+
+    public static String removeAnnotation(String name) {
+        String regex = ";?size=\\d+;?";
+        return name.replaceAll(regex, "");
+    }
+
+    public static int getSize(String name) {
+        String regex = ".*;?size=(\\d*).*";
+        String size = name.replaceFirst(regex, "$1");
+
+        if (size != null && size.length() > 0)
+            return Integer.parseInt(size);
+        else
+            return 0;
+    }
 }

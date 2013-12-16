@@ -1,9 +1,6 @@
 package nzgot.core.community.io;
 
-import nzgot.core.community.Community;
-import nzgot.core.community.OTU;
-import nzgot.core.community.OTUs;
-import nzgot.core.community.Reference;
+import nzgot.core.community.*;
 import nzgot.core.community.util.NameParser;
 import nzgot.core.community.util.NameSpace;
 import nzgot.core.io.Importer;
@@ -32,7 +29,7 @@ public class OTUsImporter extends Importer {
             if (line.startsWith(">")) {
 //                line.replaceAll("size=", "");
                 // the current label only contains otu name
-                String otuName = line.substring(1);
+                String otuName = UCParser.removeAnnotation(line.substring(1));
                 otu = new OTU(otuName);
 
                 otus.addUniqueElement(otu);
@@ -57,7 +54,9 @@ public class OTUsImporter extends Importer {
     }
 
     /**
-     *
+     * set hits into each OTU, if no OTU is uploaded, then create new OTUs from mapping file
+     * e.g. S	17	300	*	*	*	*	*	HA5K40001BTFNL|IndirectSoil|3-H;size=177;	*
+     * e.g. H	11	300	98.3	+	0	0	300M	G86XGG201B3O46|IndirectSoil|5-I;size=166;	G86XGG201B3YD9|IndirectSoil|5-N;size=248;
      * @param otuMappingUCFile
      * @param otus
      * @param canCreateOTU     if use otuMappingUCFile to create OTUs
@@ -79,28 +78,36 @@ public class OTUsImporter extends Importer {
 
             // important: Centroid is excluded from Hit list
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
-                OTU otu;
-                String otuName = fields[UCParser.Target_Sequence_COLUMN_ID];
+                String otuName = UCParser.removeAnnotation(fields[UCParser.Target_Sequence_COLUMN_ID]);
+                if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid))
+                    otuName = UCParser.removeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+
                 if (!UCParser.isNA(otuName)) {
+
+                    String hitName = UCParser.removeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    int size = UCParser.getSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
+
                     if (otus.containsOTU(otuName)) {
-                        otu = (OTU) otus.getUniqueElement(otuName);
+                        OTU otu = (OTU) otus.getUniqueElement(otuName);
 
                         if (otu == null) {
-                            throw new IllegalArgumentException("Error: find an invalid OTU " + fields[UCParser.Target_Sequence_COLUMN_ID] +
+                            throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
                                     ", from the mapping file which does not exist in OTUs file !");
                         } else {
-                            otu.addElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                            DereplicatedSequence hit = new DereplicatedSequence(hitName, size);
+                            otu.addElement(hit);
 
                             if (samples != null) {
                                 // if by plot, then add plot to TreeSet, otherwise add subplot
                                 String sampleType = ((Community) otus).getSampleType();
-                                String sampleLocation = nameParser.getSampleBy(sampleType, fields[UCParser.Query_Sequence_COLUMN_ID]);
+                                String sampleLocation = nameParser.getSampleBy(sampleType, hitName);
                                 samples.add(sampleLocation);
                             }
                         }
                     } else if (canCreateOTU) {
-                        otu = new OTU(otuName);
-                        otu.addElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                        OTU otu = new OTU(otuName);
+                        DereplicatedSequence hit = new DereplicatedSequence(hitName, size);
+                        otu.addElement(hit);
                         otus.addUniqueElement(otu);
                     }
                 }
@@ -113,6 +120,14 @@ public class OTUsImporter extends Importer {
 
     }
 
+    /**
+     * create reference instance between OTUs and reference sequences from reference sequence mapping file
+     * e.g. H	24428	300	82.7	+	0	0	D155MI144M357I	HCHCI1P01B1RDE|IndirectSoil|LBI-E;size=742;	1194713|Arthropoda|Insecta|Lepidoptera|Lepidoptera|BOLD:AAH9129
+     * @param refSeqMappingUCFile
+     * @param otus
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
     public static void importRefSeqMappingFromUCFile(File refSeqMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
 
         BufferedReader reader = getReader(refSeqMappingUCFile, "reference sequence mapping (to OTU) from");
@@ -126,9 +141,10 @@ public class OTUsImporter extends Importer {
 
             // important: only Hit or N in this mapping file
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
-                OTU otu = (OTU) otus.getUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                String otuName = UCParser.removeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                OTU otu = (OTU) otus.getUniqueElement(otuName);
                 if (otu == null) {
-                    throw new IllegalArgumentException("Error: find an invalid OTU " + fields[UCParser.Query_Sequence_COLUMN_ID] +
+                    throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
                             ", from the mapping file which does not exist in OTUs file !");
                 } else {
                     Reference<OTU, String> refSeq = new Reference<>(otu, fields[UCParser.Target_Sequence_COLUMN_ID]);

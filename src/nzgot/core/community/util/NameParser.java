@@ -36,6 +36,7 @@ public class NameParser {
 
     /**
      * parse read name into sample location, e.g. 2-C
+     * only suit for NZ GO database
      * @param readName
      * @return
      */
