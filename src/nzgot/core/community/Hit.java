@@ -51,12 +51,18 @@ public class Hit implements Attributable, Comparable{
 
     @Override
     public int compareTo(Object o) {
-        return name.compareTo(o.toString());
+        if (o instanceof Hit)
+            return compareTo( ((Hit) o).getIdentity() );
+        else
+            return name.compareTo(o.toString());
     }
 
     public int compareTo(Hit hit) {
         return Double.compare(this.identity, hit.getIdentity());
     }
+
+    // Taxonomy
+    // TODO
 
     // Attributable IMPLEMENTATION
 
