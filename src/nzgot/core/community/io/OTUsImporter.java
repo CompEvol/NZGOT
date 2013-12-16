@@ -161,6 +161,7 @@ public class OTUsImporter extends Importer {
         reader.close();
     }
 
+    //TODO developing: replace OTU to Target
     public static void importDBSearchFromUCFile(File databaseSearchUCFile, OTUs otus) throws IOException, IllegalArgumentException {
 
         BufferedReader reader = getReader(databaseSearchUCFile, "reference sequence mapping (to OTU) from");
