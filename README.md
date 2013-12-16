@@ -36,11 +36,11 @@ maintained by different collaborators or research groups.
 It contains the following tools at the current version:
 
 1) Community matrix analysis.
-Core package: nzgot.cma
+Core package: nzgo.cma
 Owners: Walter Xie, Alexei Drummond
 
 2) Error correction tool for the next-generation sequencing data.
-Core package: nzgot.ec
+Core package: nzgo.ec
 Owners: Thomas Hummel, Alexei Drummond, Walter Xie
 
 
