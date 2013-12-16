@@ -8,15 +8,17 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Query Sequence
+ * Hit: Represents a query-target alignment.
+ * For clustering, indicates the cluster assignment for the query.
+ * http://drive5.com/usearch/manual/ucout.html
  * @author Walter Xie
  */
-public class QuerySequence implements Attributable, Comparable{
+public class Hit implements Attributable, Comparable{
 
     protected String name;
     protected double identity = 0;
 
-    public QuerySequence(String name) {
+    public Hit(String name) {
         setName(name);
     }
 
@@ -46,8 +48,8 @@ public class QuerySequence implements Attributable, Comparable{
         return name.compareTo(o.toString());
     }
 
-    public int compareTo(QuerySequence querySequence) {
-        return Double.compare(this.identity, querySequence.getIdentity());
+    public int compareTo(Hit hit) {
+        return Double.compare(this.identity, hit.getIdentity());
     }
 
     // Attributable IMPLEMENTATION

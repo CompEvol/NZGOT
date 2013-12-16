@@ -28,19 +28,25 @@ public class Community<E> extends OTUs<E> {
     protected final File otuMappingFile;
     protected final File refSeqMappingFile; // optional: Sanger sequence for reference
 
-    public Community(File otusFile, File otuMappingFile) {
-        this(otusFile, otuMappingFile, null);
+    public Community(File otuMappingFile) {
+        this(null, otuMappingFile, null);
+    }
+
+    public Community(File otuMappingFile, File refSeqMappingFile) {
+        this(null, otuMappingFile, refSeqMappingFile);
     }
 
     public Community(File otusFile, File otuMappingFile, File refSeqMappingFile) {
-        super(otusFile.getName());
+        super(otusFile != null ? otusFile.getName() : otuMappingFile.getName());
         this.otusFile = otusFile;
         this.otuMappingFile = otuMappingFile;
         this.refSeqMappingFile = refSeqMappingFile;
 
         try {
-            OTUsImporter.importOTUs(otusFile, this);
-            CommunityImporter.importOTUMappingFromUCFile(otuMappingFile, this, false);
+            if (otusFile != null)
+                OTUsImporter.importOTUs(otusFile, this);
+
+            CommunityImporter.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null);
 
             if (refSeqMappingFile != null)
                 OTUsImporter.importRefSeqMappingFromUCFile(refSeqMappingFile, this);

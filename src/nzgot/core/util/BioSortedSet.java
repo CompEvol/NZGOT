@@ -20,6 +20,15 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
     }
 
     /**
+     * no exception to find duplication
+     * @param e
+     */
+    public void addElement(E e) {
+        if (!add(e))
+            System.out.println("Warning: find duplicate " + e.toString() + " in " + getName() + " !");
+    }
+
+    /**
      * add a unique element to the set, if duplication found, then throw Exception
      * @param e
      * @throws IllegalArgumentException

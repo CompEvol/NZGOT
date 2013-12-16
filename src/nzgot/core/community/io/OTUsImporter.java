@@ -49,7 +49,7 @@ public class OTUsImporter extends Importer {
 
     // default to create OTUs from mapping file
     public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
-        importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, true, null);
+        importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, true);
     }
 
     public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU) throws IOException, IllegalArgumentException {
@@ -77,31 +77,33 @@ public class OTUsImporter extends Importer {
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
-            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
+            // important: Centroid is excluded from Hit list
+            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
                 OTU otu;
                 String otuName = fields[UCParser.Target_Sequence_COLUMN_ID];
-                if (otus.containsOTU(otuName)) {
-                    otu = (OTU) otus.getUniqueElement(otuName);
+                if (!UCParser.isNA(otuName)) {
+                    if (otus.containsOTU(otuName)) {
+                        otu = (OTU) otus.getUniqueElement(otuName);
 
-                    if (otu == null) {
-                        throw new IllegalArgumentException("Error: find an invalid OTU " + fields[UCParser.Target_Sequence_COLUMN_ID] +
-                                ", from the mapping file which does not exist in OTUs file !");
-                    } else {
-                        otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                        if (otu == null) {
+                            throw new IllegalArgumentException("Error: find an invalid OTU " + fields[UCParser.Target_Sequence_COLUMN_ID] +
+                                    ", from the mapping file which does not exist in OTUs file !");
+                        } else {
+                            otu.addElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
-                        if (samples != null) {
-                            // if by plot, then add plot to TreeSet, otherwise add subplot
-                            String sampleType = ((Community) otus).getSampleType();
-                            String sampleLocation = nameParser.getSampleBy(sampleType, fields[UCParser.Query_Sequence_COLUMN_ID]);
-                            samples.add(sampleLocation);
+                            if (samples != null) {
+                                // if by plot, then add plot to TreeSet, otherwise add subplot
+                                String sampleType = ((Community) otus).getSampleType();
+                                String sampleLocation = nameParser.getSampleBy(sampleType, fields[UCParser.Query_Sequence_COLUMN_ID]);
+                                samples.add(sampleLocation);
+                            }
                         }
+                    } else if (canCreateOTU) {
+                        otu = new OTU(otuName);
+                        otu.addElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                        otus.addUniqueElement(otu);
                     }
-                } else if (canCreateOTU) {
-                    otu = new OTU(otuName);
-                    otu.addUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
-                    otus.addUniqueElement(otu);
                 }
-
             }
 
             line = reader.readLine();
@@ -122,6 +124,7 @@ public class OTUsImporter extends Importer {
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
+            // important: only Hit or N in this mapping file
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
                 OTU otu = (OTU) otus.getUniqueElement(fields[UCParser.Query_Sequence_COLUMN_ID]);
                 if (otu == null) {

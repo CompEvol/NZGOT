@@ -27,7 +27,7 @@ public class CommunityImporter extends OTUsImporter {
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static void importOTUMappingFromUCFile(File otuMappingUCFile, Community community, boolean canCreateOTU) throws IOException, IllegalArgumentException {
+    public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, Community community, boolean canCreateOTU) throws IOException, IllegalArgumentException {
         TreeSet<String> samples = new TreeSet<>();
 
         // 1st, set sampleType, default to BY_PLOT

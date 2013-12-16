@@ -52,21 +52,25 @@ public class CommunityMatrixAnalysis {
             }
         }
 
-        if (otusFile == null) throw new IllegalArgumentException("Error: cannot find OTUs file !");
         if (otuMappingFile == null) throw new IllegalArgumentException("Error: cannot find OTU mapping file !");
 
         Community community;
         String outFileAndPath;
-        if (referenceMappingFile == null) {
-            System.out.println("\nWarning: create community analysis without providing reference sequence. ");
 
-            community = new Community(otusFile, otuMappingFile);
-
+        if (otusFile != null) {
+            System.out.println("\nCreate OTUs from otu file. " + otusFile);
         } else {
-            community = new Community(otusFile, otuMappingFile, referenceMappingFile);
+            System.out.println("\nCreate OTUs from mapping file. " + otuMappingFile);
+        }
 
+        community = new Community(otusFile, otuMappingFile, referenceMappingFile);
+
+        if (referenceMappingFile != null) {
             outFileAndPath = workPath + File.separator + "report_ref_reads.txt";
             CommunityExporter.writeRefReads(outFileAndPath, community);
+
+        } else {
+            System.out.println("\nWarning: create community analysis without providing reference sequence. ");
         }
 
         outFileAndPath = workPath + File.separator + "community_matrix.csv";

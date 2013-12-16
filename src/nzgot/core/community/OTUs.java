@@ -42,9 +42,13 @@ public class OTUs<E> extends BioSortedSet<E> {
         Object sequence;
         for(E e : this){
             OTU otu = (OTU) e;
-            sequence = otu.getUniqueElement(sequenceName);
-            if (sequence != null)
+            if (sequenceName.contentEquals(otu.getName())) {
                 return e;
+            } else {
+                sequence = otu.getUniqueElement(sequenceName);
+                if (sequence != null)
+                    return e;
+            }
         }
         return null;
     }

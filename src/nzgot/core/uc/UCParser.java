@@ -13,6 +13,7 @@ public class UCParser {
     public static final String Centroid = "S";
     public static final String Cluster_Record = "C";
     public static final String NO_HIT = "N";
+    public static final String NA = "*";
 
     public static final int Record_Type_COLUMN_ID = 0;
     public static final int Cluster_Number_COLUMN_ID = 1;
@@ -26,4 +27,7 @@ public class UCParser {
         return fileName.endsWith(POSTFIX_UC);
     }
 
+    public static boolean isNA(String field) {
+        return field.trim().contentEquals(NA);
+    }
 }
