@@ -3,6 +3,7 @@ package nzgot.core.community;
 import jebl.evolution.sequences.Sequence;
 
 /**
+ * @deprecated plan to be replaced by Target
  * A mapping class to keep the relationship
  * between OTU and reference sequence
  * @author Walter Xie

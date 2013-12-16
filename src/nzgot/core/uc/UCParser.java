@@ -31,11 +31,23 @@ public class UCParser {
         return field.trim().contentEquals(NA);
     }
 
-    public static String removeAnnotation(String name) {
+    public static String getLabelNoAnnotation(String name) {
         String regex = ";?size=\\d+;?";
         return name.replaceAll(regex, "");
     }
 
+    public static double getIdentity(String identity) {
+        if (identity.length() > 0 && !UCParser.isNA(identity))
+            return Double.parseDouble(identity);
+        else
+            return 0;
+    }
+
+    /**
+     * deal with size annotation from UC file
+     * @param name
+     * @return
+     */
     public static int getSize(String name) {
         String regex = ".*;?size=(\\d*).*";
         String size = name.replaceFirst(regex, "$1");

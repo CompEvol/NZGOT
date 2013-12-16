@@ -11,6 +11,7 @@ import java.util.Set;
  * Hit: Represents a query-target alignment.
  * For clustering, indicates the cluster assignment for the query.
  * http://drive5.com/usearch/manual/ucout.html
+ * similar to BasicSequence with sequence string
  * @author Walter Xie
  */
 public class Hit implements Attributable, Comparable{
@@ -20,6 +21,11 @@ public class Hit implements Attributable, Comparable{
 
     public Hit(String name) {
         setName(name);
+    }
+
+    public Hit(String name, double identity) {
+        setName(name);
+        setIdentity(identity);
     }
 
     public String getName() {

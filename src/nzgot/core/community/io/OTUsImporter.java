@@ -29,7 +29,7 @@ public class OTUsImporter extends Importer {
             if (line.startsWith(">")) {
 //                line.replaceAll("size=", "");
                 // the current label only contains otu name
-                String otuName = UCParser.removeAnnotation(line.substring(1));
+                String otuName = UCParser.getLabelNoAnnotation(line.substring(1));
                 otu = new OTU(otuName);
 
                 otus.addUniqueElement(otu);
@@ -78,13 +78,14 @@ public class OTUsImporter extends Importer {
 
             // important: Centroid is excluded from Hit list
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
-                String otuName = UCParser.removeAnnotation(fields[UCParser.Target_Sequence_COLUMN_ID]);
+                String otuName = UCParser.getLabelNoAnnotation(fields[UCParser.Target_Sequence_COLUMN_ID]);
                 if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid))
-                    otuName = UCParser.removeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    otuName = UCParser.getLabelNoAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
                 if (!UCParser.isNA(otuName)) {
 
-                    String hitName = UCParser.removeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    String hitName = UCParser.getLabelNoAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    double identity = UCParser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
                     int size = UCParser.getSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
                     if (otus.containsOTU(otuName)) {
@@ -94,7 +95,8 @@ public class OTUsImporter extends Importer {
                             throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
                                     ", from the mapping file which does not exist in OTUs file !");
                         } else {
-                            DereplicatedSequence hit = new DereplicatedSequence(hitName, size);
+                            DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, size);
+
                             otu.addElement(hit);
 
                             if (samples != null) {
@@ -106,7 +108,7 @@ public class OTUsImporter extends Importer {
                         }
                     } else if (canCreateOTU) {
                         OTU otu = new OTU(otuName);
-                        DereplicatedSequence hit = new DereplicatedSequence(hitName, size);
+                        DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, size);
                         otu.addElement(hit);
                         otus.addUniqueElement(otu);
                     }
@@ -121,7 +123,8 @@ public class OTUsImporter extends Importer {
     }
 
     /**
-     * create reference instance between OTUs and reference sequences from reference sequence mapping file
+     * the fast way to create reference instance between OTUs and reference sequences
+     * from reference sequence mapping file
      * e.g. H	24428	300	82.7	+	0	0	D155MI144M357I	HCHCI1P01B1RDE|IndirectSoil|LBI-E;size=742;	1194713|Arthropoda|Insecta|Lepidoptera|Lepidoptera|BOLD:AAH9129
      * @param refSeqMappingUCFile
      * @param otus
@@ -141,7 +144,37 @@ public class OTUsImporter extends Importer {
 
             // important: only Hit or N in this mapping file
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
-                String otuName = UCParser.removeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                String otuName = UCParser.getLabelNoAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                OTU otu = (OTU) otus.getUniqueElement(otuName);
+                if (otu == null) {
+                    throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
+                            ", from the mapping file which does not exist in OTUs file !");
+                } else {
+                    Reference<OTU, String> refSeq = new Reference<>(otu, fields[UCParser.Target_Sequence_COLUMN_ID]);
+                    otu.setReference(refSeq);
+                }
+            }
+
+            line = reader.readLine();
+        }
+
+        reader.close();
+    }
+
+    public static void importDBSearchFromUCFile(File databaseSearchUCFile, OTUs otus) throws IOException, IllegalArgumentException {
+
+        BufferedReader reader = getReader(databaseSearchUCFile, "reference sequence mapping (to OTU) from");
+
+        String line = reader.readLine();
+        while (line != null) {
+            // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
+            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
+
+            if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
+
+            // important: only Hit or N in this mapping file
+            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
+                String otuName = UCParser.getLabelNoAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
                 OTU otu = (OTU) otus.getUniqueElement(otuName);
                 if (otu == null) {
                     throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
