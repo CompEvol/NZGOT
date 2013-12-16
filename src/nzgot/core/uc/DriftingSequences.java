@@ -1,6 +1,7 @@
 package nzgot.core.uc;
 
 import nzgot.core.io.Importer;
+import nzgot.core.logger.MyLogger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -64,9 +65,9 @@ public class DriftingSequences extends UCParser{
     }
 
     public void reportDriftingSequences() {
-        System.out.println("\nFind " + driftingSequences.size() + " drifting sequences : ");
+        MyLogger.info("\nFind " + driftingSequences.size() + " drifting sequences : ");
         for (String[] fields : driftingSequences) {
-            System.out.println(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR +
+            MyLogger.info(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR +
                     fields[Query_Sequence_COLUMN_ID] + COLUMN_SEPARATOR + fields[Target_Sequence_COLUMN_ID]);
         }
     }
@@ -92,7 +93,7 @@ public class DriftingSequences extends UCParser{
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
         File folder = new File(workPath);
         File[] listOfFiles = folder.listFiles();
@@ -105,7 +106,7 @@ public class DriftingSequences extends UCParser{
                     DriftingSequences driftingSequences = new DriftingSequences(file);
                     driftingSequences.reportDriftingSequences();
                 } else {
-                    System.out.println("\nIgnore file: " + file);
+                    MyLogger.info("\nIgnore file: " + file);
                 }
             }
         }

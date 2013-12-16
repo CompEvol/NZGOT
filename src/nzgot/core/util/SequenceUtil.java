@@ -2,6 +2,7 @@ package nzgot.core.util;
 
 import jebl.evolution.sequences.Sequence;
 import nzgot.core.community.io.OTUsImporter;
+import nzgot.core.logger.MyLogger;
 
 import java.io.*;
 import java.util.List;
@@ -73,7 +74,7 @@ public class SequenceUtil {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
         File inFastaFile = new File(workPath + "NZ-insects-BOLD-2013-11-21-co1.fasta");
 //        String regex = ".*\\|28S.*";

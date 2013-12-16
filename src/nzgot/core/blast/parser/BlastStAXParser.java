@@ -3,6 +3,7 @@ package nzgot.core.blast.parser;
 import nzgot.core.blast.Hit;
 import nzgot.core.blast.Iteration;
 import nzgot.core.blast.IterationHits;
+import nzgot.core.logger.MyLogger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -60,18 +61,23 @@ public class BlastStAXParser {
     }
 
     public static void main(String[] args) {
+        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
+
+        String workPath = args[0];
+        MyLogger.info("\nWorking path = " + workPath);
+
         try {
-            File xmlFile = new File("/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/Combined_CO1_CO1Soil/Indirect/blast/IndirectSoil_otus1.xml");
+            File xmlFile = new File(workPath + "IndirectSoil_otus1.xml");
             List<Iteration> iterationList = parse(xmlFile);
 
             for(Iteration iteration: iterationList) {
-                System.out.println("iteration:"+iteration.getIterationQueryDef());
+                MyLogger.info("iteration:" + iteration.getIterationQueryDef());
 
                 IterationHits hits = iteration.getIterationHits();
                 for(Hit hit:hits.getHit()) {
-                    System.out.println("def:"+hit.getHitDef());
-                    System.out.println("len:"+hit.getHitLen());
-                    System.out.println();
+                    MyLogger.info("def:" + hit.getHitDef());
+                    MyLogger.info("len:" + hit.getHitLen());
+                    MyLogger.info("\n");
                 }
             }
         }

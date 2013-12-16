@@ -12,7 +12,7 @@ import jebl.evolution.taxa.Taxon;
 import nzgot.core.community.OTU;
 import nzgot.core.community.OTUs;
 import nzgot.core.community.io.OTUsImporter;
-import nzgot.core.logger.Logger;
+import nzgot.core.logger.MyLogger;
 import nzgot.core.util.SequenceUtil;
 
 import java.io.*;
@@ -132,10 +132,10 @@ public class AutomaticEC {
 					sequencesCor.add(correctedSeq);
 					sequencesRand.add(randCorSeq);
 					sequencesControl.add(seq);
-                    Logger.getLogger().debug(String.format("%.5g", ((count / size)) * 100) + "%");
+                    MyLogger.debug(String.format("%.5g", ((count / size)) * 100) + "%");
 				}
 				catch (NullPointerException e) {
-                    Logger.getLogger().debug(seq.getTaxon().toString());
+                    MyLogger.debug(seq.getTaxon().toString());
 				}
 			}
 		}
@@ -169,7 +169,7 @@ public class AutomaticEC {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
 		AutomaticEC ec = new AutomaticEC(workPath);
 		ec.doEC();

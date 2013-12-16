@@ -1,5 +1,7 @@
 package nzgot.core.util;
 
+import nzgot.core.logger.MyLogger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -25,7 +27,7 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
      */
     public void addElement(E e) {
         if (!add(e))
-            System.out.println("Warning: find duplicate " + e.toString() + " in " + getName() + " !");
+            MyLogger.warn("find duplicate " + e.toString() + " in " + getName() + " !");
     }
 
     /**

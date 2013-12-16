@@ -9,20 +9,9 @@
 
 package nzgot.ec;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import jebl.evolution.sequences.*;
 
-import jebl.evolution.sequences.AminoAcidState;
-import jebl.evolution.sequences.AminoAcids;
-import jebl.evolution.sequences.Codons;
-import jebl.evolution.sequences.NucleotideState;
-import jebl.evolution.sequences.Nucleotides;
-import jebl.util.MaybeBoolean;
+import java.util.*;
 
 /**
  * A set of standard genetic codes.
@@ -195,7 +184,7 @@ public final class myGeneticCode {
 	 * @return '?' if codon unknown
 	 */
 	public AminoAcidState getTranslation(myCodonState codonState) {
-        //System.out.println(codonState.getCode());
+        //MyLogger.info(codonState.getCode());
         return translationMap.get(codonState);
 	}
 

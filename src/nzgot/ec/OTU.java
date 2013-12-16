@@ -1,5 +1,7 @@
 package nzgot.ec;
 
+import nzgot.core.logger.MyLogger;
+
 import java.util.*;
 
 /**
@@ -13,7 +15,7 @@ public class OTU {
 		Set<String> uniqueSet = new HashSet<String>(otu);
 		
 		for(String temp : uniqueSet) {
-			System.out.println(temp+": "+ Collections.frequency(otu, temp));
+			MyLogger.info(temp + ": " + Collections.frequency(otu, temp));
 		}
 	}
 	

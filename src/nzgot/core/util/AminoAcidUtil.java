@@ -4,6 +4,7 @@ import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.*;
+import nzgot.core.logger.MyLogger;
 import nzgot.core.sequences.Translation;
 
 import java.io.*;
@@ -157,16 +158,16 @@ public class AminoAcidUtil {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
         File inFastaFile = new File(workPath + "NZ-insects-BOLD-2013-11-21-co1-5P.fasta");
         File outFastaFile = new File(workPath + "BOLD-co1-frame1.fasta");
 
         GeneticCode geneticCode = GeneticCode.INVERTEBRATE_MT;
-        System.out.println("Genetic Code = " + geneticCode.getName() + ", " + geneticCode.getDescription());
+        MyLogger.info("Genetic Code = " + geneticCode.getName() + ", " + geneticCode.getDescription());
 
         int[] result = stripSequencesInFrame1(inFastaFile, outFastaFile, geneticCode);
 
-        System.out.println("\nTotal " + result[0] + " sequences, " + result[1] + " are translatable.");
+        MyLogger.info("\nTotal " + result[0] + " sequences, " + result[1] + " are translatable.");
     }
 }

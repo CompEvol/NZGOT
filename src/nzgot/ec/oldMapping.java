@@ -1,5 +1,7 @@
 package nzgot.ec;
 
+import nzgot.core.logger.MyLogger;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -42,9 +44,9 @@ public class oldMapping {
 			file.close();
 
 		} catch (FileNotFoundException e) {
-			System.out.println(e);
+			MyLogger.error(e.toString());
 		} catch (IOException e) {
-			System.out.println("I/O-error");
+			MyLogger.error("I/O-error");
 		}
 	}
 	
@@ -81,9 +83,9 @@ public class oldMapping {
 
 
 		} catch (FileNotFoundException e) {
-			System.out.println(e);
+			MyLogger.error(e.toString());
 		} catch (IOException e) {
-			System.out.println("I/O-error");
+			MyLogger.error("I/O-error");
 		}
 	}
 	
@@ -119,9 +121,9 @@ public class oldMapping {
 
 
 		} catch (FileNotFoundException e) {
-			System.out.println(e);
+			MyLogger.error(e.toString());
 		} catch (IOException e) {
-			System.out.println("I/O-error");
+			MyLogger.error("I/O-error");
 		}
 	}
 	

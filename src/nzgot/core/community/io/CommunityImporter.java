@@ -2,7 +2,7 @@ package nzgot.core.community.io;
 
 import nzgot.core.community.Community;
 import nzgot.core.community.util.NameSpace;
-import nzgot.core.logger.Logger;
+import nzgot.core.logger.MyLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class CommunityImporter extends OTUsImporter {
 
         // 1st, set sampleType, default to BY_PLOT
         community.setSampleType(NameSpace.BY_PLOT);
-        Logger.getLogger().info("\nSet sample type: " + community.getSampleType());
+        MyLogger.info("\nSet sample type: " + community.getSampleType());
 
         // 2nd, parse label to get sample
         importOTUsAndMappingFromUCFile(otuMappingUCFile, community, canCreateOTU, samples);

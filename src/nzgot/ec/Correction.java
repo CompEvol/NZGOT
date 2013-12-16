@@ -1,13 +1,13 @@
 package nzgot.ec;
 
+import jebl.evolution.taxa.Taxon;
+import nzgot.core.logger.MyLogger;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import nzgot.core.logger.Logger;
-import jebl.evolution.taxa.Taxon;
 
 /**
  * Correction to reads
@@ -92,7 +92,7 @@ public class Correction {
     public void writeCorrectionMatrix(LinkedHashMap<Taxon, int[]> correctionCountMatrix, String filePath) throws IOException {
         PrintStream out = new PrintStream(new FileOutputStream(filePath));
 
-        Logger.getLogger().info("\nSave correction count matrix in file: " + filePath);
+        MyLogger.info("\nSave correction count matrix in file: " + filePath);
         
         String header = "";
         for (int i=0; i<correctionHeader.length; i++) {

@@ -2,6 +2,7 @@ package nzgot.core.util;
 
 import nzgot.core.community.util.NameSpace;
 import nzgot.core.io.Importer;
+import nzgot.core.logger.MyLogger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,7 +25,7 @@ public class GeneiousTreeUtil extends TreeUtil{
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
         final String stem = "tree-pairwise-ga-clustering";
 

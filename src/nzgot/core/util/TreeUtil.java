@@ -4,6 +4,7 @@ import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 import nzgot.core.community.util.NameSpace;
 import nzgot.core.io.Importer;
+import nzgot.core.logger.MyLogger;
 import nzgot.core.uc.DriftingSequences;
 
 import java.io.*;
@@ -52,7 +53,7 @@ public class TreeUtil {
             driftingOTUs.set(i, simplifyLabel(driftingOTUs.get(i)));
         }
 
-        System.out.println(driftingOTUs.size() + " Drifting OTUs = " + driftingOTUs);
+        MyLogger.info(driftingOTUs.size() + " Drifting OTUs = " + driftingOTUs);
 
         return driftingOTUs;
     }
@@ -122,7 +123,7 @@ public class TreeUtil {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
         final String stem = "tree";
 

@@ -1,19 +1,15 @@
 package nzgot.ec.io;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.List;
-
 import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.AminoAcidState;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
+import nzgot.core.logger.MyLogger;
+
+import java.io.*;
+import java.util.List;
 
 //TODO Fix the class, is not working yet
 public class FastaReferenceCleaner  {
@@ -44,7 +40,7 @@ public class FastaReferenceCleaner  {
 		fe.exportSequences(exportRefSeqs);
 		write.flush();
 		write.close();
-		System.out.println("Done!");
+		MyLogger.info("Done!");
 		
 	}
 	

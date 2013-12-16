@@ -1,5 +1,8 @@
 package nzgot.ec;
 
+import jebl.evolution.sequences.Sequence;
+import nzgot.core.logger.MyLogger;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,8 +10,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import jebl.evolution.sequences.Sequence;
 
 
 /**
@@ -48,9 +49,9 @@ public class Mapping {
 			file.close();
 
 		} catch (FileNotFoundException e) {
-			System.out.println(e);
-		} catch (IOException e) {
-			System.out.println("I/O-error");
+            MyLogger.error(e.toString());
+        } catch (IOException e) {
+            MyLogger.error("I/O-error");
 		}
 	}
 	
@@ -81,9 +82,9 @@ public class Mapping {
 
 
 		} catch (FileNotFoundException e) {
-			System.out.println(e);
+			MyLogger.error(e.toString());
 		} catch (IOException e) {
-			System.out.println("I/O-error");
+			MyLogger.error("I/O-error");
 		}
 	}
 	

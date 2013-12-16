@@ -5,7 +5,7 @@ import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
-import nzgot.core.logger.Logger;
+import nzgot.core.logger.MyLogger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -36,16 +36,16 @@ public class SeqSearch {
 
 		File sequenceIn1 = new File(filePathIn1);
 		File sequenceIn2 = new File(filePathIn2);
-		
-		Logger.getLogger().debug("\nImport: "+filePathIn1);
+
+        MyLogger.debug("\nImport: "+filePathIn1);
 		FastaImporter sequenceImport1 = new FastaImporter(sequenceIn1 , SequenceType.NUCLEOTIDE);
 		sequencesIn1 = sequenceImport1.importSequences();
 		
-		Logger.getLogger().debug("\nImport: "+filePathIn2);
+		MyLogger.debug("\nImport: "+filePathIn2);
 		FastaImporter sequenceImport2 = new FastaImporter(sequenceIn2 , SequenceType.NUCLEOTIDE);
 		sequencesIn2 = sequenceImport2.importSequences();
 
-		Logger.getLogger().debug("\nSearch...");
+		MyLogger.debug("\nSearch...");
 		for (Sequence seqQuery : sequencesIn1) {
 
 			for(Sequence seqDB : sequencesIn2) {
@@ -54,18 +54,18 @@ public class SeqSearch {
 						sequencesOut.add(seqDB);
 					}
 					catch(NullPointerException e) {
-						Logger.getLogger().debug("Error: " +seqDB.getTaxon().toString());
+						MyLogger.debug("Error: " +seqDB.getTaxon().toString());
 					}
 				}
 			}
 		}
-		Logger.getLogger().debug("Write...");
+		MyLogger.debug("Write...");
 		Writer write = new OutputStreamWriter(new FileOutputStream(filePathOut));
 		FastaExporter fe = new FastaExporter(write);
 		fe.exportSequences(sequencesOut);
 		write.flush();
 		write.close();
-		Logger.getLogger().debug("Done");
+		MyLogger.debug("Done");
 	}
 
 	public static void main(String[] args) throws IOException, ImportException {

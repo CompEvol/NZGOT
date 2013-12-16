@@ -1,6 +1,6 @@
 package nzgot.core.io;
 
-import nzgot.core.logger.Logger;
+import nzgot.core.logger.MyLogger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,7 +19,7 @@ public class Importer {
         BufferedReader reader = new BufferedReader(new FileReader(file));
 
         if (msg != null)
-            Logger.getLogger().info("\nImport " + msg + " file: " + file);
+            MyLogger.info("\nImport " + msg + " file: " + file);
 
         return reader;
     }

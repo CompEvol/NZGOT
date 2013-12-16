@@ -3,6 +3,7 @@ package nzgot.cma;
 import nzgot.core.community.Community;
 import nzgot.core.community.io.CommunityExporter;
 import nzgot.core.community.io.OTUsImporter;
+import nzgot.core.logger.MyLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +19,7 @@ public class CommunityMatrixAnalysis {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-        System.out.println("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
         File otusFile = null;
         File otuMappingFile = null;
@@ -32,22 +33,22 @@ public class CommunityMatrixAnalysis {
             if (file.isFile()) {
                 String fileName = file.getName();
                 if (OTUsImporter.isOTUsFile(fileName)) {
-                    System.out.println("\nFind OTUs file: " + file);
+                    MyLogger.info("\nFind OTUs file: " + file);
 
                     otusFile = file;
 
                 } else if (OTUsImporter.isOTUMappingFile(fileName)) {
-                    System.out.println("\nFind OTU mapping file: " + file);
+                    MyLogger.info("\nFind OTU mapping file: " + file);
 
                     otuMappingFile = file;
 
                 } else if (OTUsImporter.isReferenceMappingFile(fileName)) {
-                    System.out.println("\nFind reference sequence mapping file: " + file);
+                    MyLogger.info("\nFind reference sequence mapping file: " + file);
 
                     referenceMappingFile = file;
 
                 } else {
-                    System.out.println("\nIgnore file: " + file);
+                    MyLogger.info("\nIgnore file: " + file);
                 }
             }
         }
@@ -58,9 +59,9 @@ public class CommunityMatrixAnalysis {
         String outFileAndPath;
 
         if (otusFile != null) {
-            System.out.println("\nCreate OTUs from otu file. " + otusFile);
+            MyLogger.info("\nCreate OTUs from otu file. " + otusFile);
         } else {
-            System.out.println("\nCreate OTUs from mapping file. " + otuMappingFile);
+            MyLogger.info("\nCreate OTUs from mapping file. " + otuMappingFile);
         }
 
         community = new Community(otusFile, otuMappingFile, referenceMappingFile);
@@ -70,7 +71,7 @@ public class CommunityMatrixAnalysis {
             CommunityExporter.writeRefReads(outFileAndPath, community);
 
         } else {
-            System.out.println("\nWarning: create community analysis without providing reference sequence. ");
+            MyLogger.info("\nWarning: create community analysis without providing reference sequence. ");
         }
 
         outFileAndPath = workPath + File.separator + "community_matrix.csv";

@@ -1,9 +1,5 @@
 package nzgot.ec;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import jebl.evolution.align.Output;
 import jebl.evolution.align.scores.Blosum45;
 import jebl.evolution.align.scores.Scores;
@@ -12,7 +8,11 @@ import jebl.evolution.sequences.BasicSequence;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
-import nzgot.core.logger.Logger;
+import nzgot.core.logger.MyLogger;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author Alexei Drummond
@@ -66,8 +66,8 @@ public class AlignAndCorrect {
         m = dna_read.getLength();
         n = aa_ref.getLength();
 
-        //System.out.println("Nucleotide read of length      :" + m);
-        //System.out.println("Amino acid reference of length :" + n);
+        //MyLogger.info("Nucleotide read of length      :" + m);
+        //MyLogger.info("Amino acid reference of length :" + n);
 
         //first time
         // running this alignment. Create all new matrices.
@@ -123,15 +123,15 @@ public class AlignAndCorrect {
             }
         }
 
-        //System.out.println("Maximum score = " + maxval);
-        Logger.getLogger().debug("Maximum score = " + maxval);
+        //MyLogger.info("Maximum score = " + maxval);
+        MyLogger.debug("Maximum score = " + maxval);
         if (maxj != -1) {            // the maximum score was F[m][maxj]
             optimal = nodes[m][maxj];
         } else {                       // the maximum score was F[maxi][n]
             optimal = nodes[maxi][n];
         }
-        Logger.getLogger().debug("Optimal found at " + optimal.i + ", " + optimal.j);
-        //System.out.println("Optimal found at " + optimal.i + ", " + optimal.j);
+        MyLogger.debug("Optimal found at " + optimal.i + ", " + optimal.j);
+        //MyLogger.info("Optimal found at " + optimal.i + ", " + optimal.j);
 
     }
      
@@ -163,14 +163,14 @@ public class AlignAndCorrect {
 
             if (prefix == null) {
                 return null;
-                //System.out.println("finished at node " + node);
+                //MyLogger.info("finished at node " + node);
             } else {
                 String nuc = null;
                 switch (prefix.type) {
                     case ins_read_delete:
                         gaps += 1;
                     case match_delete:
-                        Logger.getLogger().debug(scores.getCodonString(prefix.codon));
+                        MyLogger.debug(scores.getCodonString(prefix.codon).toString());
                         correctionDeletions += 1;
                         nuc = scores.getCorrectNuc(prefix);
                         Correction.count(correctionCounts, nuc, prefix.type);
@@ -240,8 +240,8 @@ public class AlignAndCorrect {
             }
         }
 
-        Logger.getLogger().debug("Del: " + correctionDeletions);
-        Logger.getLogger().debug("Ins: " + correctionInsertions);
+        MyLogger.debug("Del: " + correctionDeletions);
+        MyLogger.debug("Ins: " + correctionInsertions);
 
         String[] result = new String[]{ code.reverse().toString(), alignedRead.reverse().toString(),
                 translatedRead.reverse().toString(), alignedRef.reverse().toString(),
