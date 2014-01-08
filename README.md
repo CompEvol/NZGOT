@@ -8,7 +8,7 @@
                     walter@cs.auckland.ac.nz
                     alexei@cs.auckland.ac.nz
 
-Last updated: walter@cs.auckland.ac.nz - 2nd December 2013
+Last updated: walter@cs.auckland.ac.nz - 9th January 2014
 
 
 =====
@@ -22,8 +22,8 @@ The minimum version of Java 1.7 is required. The whole software has the dependen
 on JEBL (http://jebl.sourceforge.net) and BEAST 2 (http://code.google.com/p/beast2/).
 The 3rd party libraries are included in the /lib folder.
 
-Core package in the project is to provide a framework for the development of these
-tools. The main features are:
+Core package in this project is to provide a framework for an easy development of other
+packages. Its main features are:
 * BLAST+ xml output parser (core.blast)
 * Ecological modelling concepts, such as OTU, community, diversity, etc. (core.community)
 * JEBL Sequence extension, such as translation class (core.sequences)
@@ -31,17 +31,22 @@ tools. The main features are:
 uc parser, etc. (core.community.io, core.io, core.uc)
 * utils for DNA sequences, Amino Acid sequences, trees, etc. (core.util)
 
-Each tool should contain its main class and build script, and its ownership may be
-maintained by different collaborators or research groups.
-It contains the following tools at the current version:
+Each of other packages represents an independent project, but it may share the code with
+others. Core package is always on the top of dependency, it cannot contain any code of
+other packages.
+The available packages at the current version are:
 
 1) Community matrix analysis.
-Core package: nzgo.cma
+Main package: nzgo.cma
 Owners: Walter Xie, Alexei Drummond
 
 2) Error correction tool for the next-generation sequencing data.
-Core package: nzgo.ec
+Main package: nzgo.ec
 Owners: Thomas Hummel, Alexei Drummond, Walter Xie
+
+3) Useful tools for BEAST 2 project.
+Main package: nzgo.beast
+Owners: Walter Xie
 
 
 
