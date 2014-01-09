@@ -46,16 +46,16 @@ public class TreeUtil {
 
     protected static List<String> getMixedOTUs(String ucFilePath) {
         File ucFile = new File(ucFilePath);
-        MixedOTUs mixedSequences = new MixedOTUs(ucFile);
+        MixedOTUs mixedOTUs = new MixedOTUs(ucFile);
 
-        List<String> mixedOTUs = mixedSequences.getMixedOTUs();
-        for (int i = 0; i < mixedOTUs.size(); i++) {
-            mixedOTUs.set(i, simplifyLabel(mixedOTUs.get(i)));
+        List<String> mixedOTUsList = mixedOTUs.getMixedOTUs();
+        for (int i = 0; i < mixedOTUsList.size(); i++) {
+            mixedOTUsList.set(i, simplifyLabel(mixedOTUsList.get(i)));
         }
 
-        MyLogger.info(mixedOTUs.size() + " Mixed OTUs = " + mixedOTUs);
+//        MyLogger.info(mixedOTUsList.size() + " Mixed OTUs = " + mixedOTUsList);
 
-        return mixedOTUs;
+        return mixedOTUsList;
     }
 
     protected static String simplifyLabel(String label) {

@@ -16,8 +16,8 @@ import java.util.List;
  */
 public class MixedOTUs extends UCParser{
 
-    // head sequences of OTUs containing mixed sequences from diff database
-    public List<String[]> mixedOTUs = new ArrayList<>();
+    // rows from uc file containing mixed sequences from diff database
+    public List<String[]> rowsOfMixedSequences = new ArrayList<>();
 
     public MixedOTUs(File ucFile) {
         try {
@@ -25,11 +25,13 @@ public class MixedOTUs extends UCParser{
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        reportMixedSequences();
     }
 
     /**
-     * find OTUs having mixed sequences, which are from the different
-     * database of the head sequence.
+     * find rows of uc file having mixed sequences, which contains sequences
+     * from the different database of the head sequence.
      * (or the different category)
      * 2 categories are allowed at moment (e.g. BOLD, GOD)
      * @param ucFile
@@ -47,7 +49,7 @@ public class MixedOTUs extends UCParser{
 
             if (fields[Record_Type_COLUMN_ID].contentEquals(HIT)) {
                 if (!isInSameDatabase(fields[Query_Sequence_COLUMN_ID], fields[Target_Sequence_COLUMN_ID]))
-                    mixedOTUs.add(fields);
+                    rowsOfMixedSequences.add(fields);
             }
 
             line = reader.readLine();
@@ -56,20 +58,24 @@ public class MixedOTUs extends UCParser{
         reader.close();
     }
 
+    /**
+     * get only OTUs
+     * @return
+     */
     public List<String> getMixedOTUs() {
         List<String> mixedOTUs = new ArrayList<>();
-        for (String[] fields : this.mixedOTUs) {
+        for (String[] fields : this.rowsOfMixedSequences) {
             if (!mixedOTUs.contains(fields[Target_Sequence_COLUMN_ID]))
                 mixedOTUs.add(fields[Target_Sequence_COLUMN_ID]);
         }
         return mixedOTUs;
     }
 
-    public void reportMixedOTUs() {
-        MyLogger.info("\nFind " + mixedOTUs.size() + " drifting sequences : ");
-        for (String[] fields : mixedOTUs) {
-            MyLogger.info(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR +
-                    fields[Query_Sequence_COLUMN_ID] + COLUMN_SEPARATOR + fields[Target_Sequence_COLUMN_ID]);
+    public void reportMixedSequences() {
+        MyLogger.info("\nFind " + rowsOfMixedSequences.size() + " mixed sequences in " + getMixedOTUs().size() + " OTUs : ");
+        for (String[] fields : rowsOfMixedSequences) {
+            MyLogger.info(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR + fields[Target_Sequence_COLUMN_ID] +
+                    COLUMN_SEPARATOR + fields[Query_Sequence_COLUMN_ID] );
         }
     }
 
@@ -105,7 +111,6 @@ public class MixedOTUs extends UCParser{
                 String fileName = file.getName();
                 if (isUCFile(fileName)) {
                     MixedOTUs mixedOTUs = new MixedOTUs(file);
-                    mixedOTUs.reportMixedOTUs();
                 } else {
                     MyLogger.info("\nIgnore file: " + file);
                 }
