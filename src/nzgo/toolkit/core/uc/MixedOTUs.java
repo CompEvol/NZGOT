@@ -10,31 +10,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Drifting Sequence is from different database
+ * Mixed Sequence is from different database
  * with the head sequence of its assigned OTU
  * @author Walter Xie
  */
-public class DriftingSequences extends UCParser{
+public class MixedOTUs extends UCParser{
 
-    public List<String[]> driftingSequences = new ArrayList<>();
+    // head sequences of OTUs containing mixed sequences from diff database
+    public List<String[]> mixedOTUs = new ArrayList<>();
 
-    public DriftingSequences(File ucFile) {
+    public MixedOTUs(File ucFile) {
         try {
-            findDriftingSequences(ucFile);
+            findMixedOTUs(ucFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * find the sequences assigned to a OTU are from the different
+     * find OTUs having mixed sequences, which are from the different
      * database of the head sequence.
      * (or the different category)
      * 2 categories are allowed at moment (e.g. BOLD, GOD)
      * @param ucFile
      * @throws java.io.IOException
      */
-    public void findDriftingSequences(File ucFile) throws IOException {
+    public void findMixedOTUs(File ucFile) throws IOException {
 
         BufferedReader reader = Importer.getReader(ucFile, "uc");
 
@@ -46,7 +47,7 @@ public class DriftingSequences extends UCParser{
 
             if (fields[Record_Type_COLUMN_ID].contentEquals(HIT)) {
                 if (!isInSameDatabase(fields[Query_Sequence_COLUMN_ID], fields[Target_Sequence_COLUMN_ID]))
-                    driftingSequences.add(fields);
+                    mixedOTUs.add(fields);
             }
 
             line = reader.readLine();
@@ -55,18 +56,18 @@ public class DriftingSequences extends UCParser{
         reader.close();
     }
 
-    public List<String> getDriftingOTUs() {
-        List<String> driftingOTUs = new ArrayList<>();
-        for (String[] fields : driftingSequences) {
-            if (!driftingOTUs.contains(fields[Target_Sequence_COLUMN_ID]))
-                driftingOTUs.add(fields[Target_Sequence_COLUMN_ID]);
+    public List<String> getMixedOTUs() {
+        List<String> mixedOTUs = new ArrayList<>();
+        for (String[] fields : this.mixedOTUs) {
+            if (!mixedOTUs.contains(fields[Target_Sequence_COLUMN_ID]))
+                mixedOTUs.add(fields[Target_Sequence_COLUMN_ID]);
         }
-        return driftingOTUs;
+        return mixedOTUs;
     }
 
-    public void reportDriftingSequences() {
-        MyLogger.info("\nFind " + driftingSequences.size() + " drifting sequences : ");
-        for (String[] fields : driftingSequences) {
+    public void reportMixedOTUs() {
+        MyLogger.info("\nFind " + mixedOTUs.size() + " drifting sequences : ");
+        for (String[] fields : mixedOTUs) {
             MyLogger.info(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR +
                     fields[Query_Sequence_COLUMN_ID] + COLUMN_SEPARATOR + fields[Target_Sequence_COLUMN_ID]);
         }
@@ -103,8 +104,8 @@ public class DriftingSequences extends UCParser{
             if (file.isFile()) {
                 String fileName = file.getName();
                 if (isUCFile(fileName)) {
-                    DriftingSequences driftingSequences = new DriftingSequences(file);
-                    driftingSequences.reportDriftingSequences();
+                    MixedOTUs mixedOTUs = new MixedOTUs(file);
+                    mixedOTUs.reportMixedOTUs();
                 } else {
                     MyLogger.info("\nIgnore file: " + file);
                 }

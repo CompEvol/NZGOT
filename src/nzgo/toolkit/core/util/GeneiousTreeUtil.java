@@ -29,7 +29,7 @@ public class GeneiousTreeUtil extends TreeUtil{
 
         final String stem = "tree-pairwise-ga-clustering";
 
-        List<String> driftingOTUs = getDriftOTUs(workPath + "clusters.uc");
+        List<String> driftingOTUs = getMixedOTUs(workPath + "clusters.uc");
 
         File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
 

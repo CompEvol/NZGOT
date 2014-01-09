@@ -5,7 +5,7 @@ import beast.util.TreeParser;
 import nzgo.toolkit.core.community.util.NameSpace;
 import nzgo.toolkit.core.io.Importer;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.uc.DriftingSequences;
+import nzgo.toolkit.core.uc.MixedOTUs;
 
 import java.io.*;
 import java.util.List;
@@ -44,18 +44,18 @@ public class TreeUtil {
         out.close();
     }
 
-    protected static List<String> getDriftOTUs(String ucFilePath) {
+    protected static List<String> getMixedOTUs(String ucFilePath) {
         File ucFile = new File(ucFilePath);
-        DriftingSequences driftingSequences = new DriftingSequences(ucFile);
+        MixedOTUs mixedSequences = new MixedOTUs(ucFile);
 
-        List<String> driftingOTUs = driftingSequences.getDriftingOTUs();
-        for (int i = 0; i < driftingOTUs.size(); i++) {
-            driftingOTUs.set(i, simplifyLabel(driftingOTUs.get(i)));
+        List<String> mixedOTUs = mixedSequences.getMixedOTUs();
+        for (int i = 0; i < mixedOTUs.size(); i++) {
+            mixedOTUs.set(i, simplifyLabel(mixedOTUs.get(i)));
         }
 
-        MyLogger.info(driftingOTUs.size() + " Drifting OTUs = " + driftingOTUs);
+        MyLogger.info(mixedOTUs.size() + " Mixed OTUs = " + mixedOTUs);
 
-        return driftingOTUs;
+        return mixedOTUs;
     }
 
     protected static String simplifyLabel(String label) {
@@ -68,9 +68,9 @@ public class TreeUtil {
         }
     }
 
-    protected static String getMetaString(String label, List<String> driftingOTUs) {
-        if (driftingOTUs.contains(label)) {
-            return "col=DRIFT";
+    protected static String getMetaString(String label, List<String> mixedOTUs) {
+        if (mixedOTUs.contains(label)) {
+            return "col=MIXED";
         } else {
             char c = label.charAt(0);
             if (Character.isDigit(c)) {
@@ -127,7 +127,7 @@ public class TreeUtil {
 
         final String stem = "tree";
 
-        List<String> driftingOTUs = getDriftOTUs(workPath + "clusters.uc");
+        List<String> mixedOTUs = getMixedOTUs(workPath + "clusters.uc");
 
         File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
 
@@ -142,7 +142,7 @@ public class TreeUtil {
             Node leafNode = newickTree.getNode(i);
 
             String label = simplifyLabel(leafNode.getID());
-            String metaDataString = getMetaString(label, driftingOTUs);
+            String metaDataString = getMetaString(label, mixedOTUs);
 
             leafNode.setID(label);
             leafNode.metaDataString = metaDataString;
