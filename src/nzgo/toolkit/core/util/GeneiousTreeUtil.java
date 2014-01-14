@@ -6,7 +6,6 @@ import nzgo.toolkit.core.logger.MyLogger;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -17,11 +16,8 @@ import java.util.StringTokenizer;
  */
 public class GeneiousTreeUtil extends TreeUtil{
 
-
-
-
     //Main method
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws Exception {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
@@ -34,7 +30,10 @@ public class GeneiousTreeUtil extends TreeUtil{
         File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
 
         BufferedReader reader = Importer.getReader(treeFile, "tree");
-        StringTokenizer st = new StringTokenizer(reader.readLine(), "'");
+        String tree = reader.readLine();
+        printTraits(tree);
+
+        StringTokenizer st = new StringTokenizer(tree, "'");
         reader.close();
 
         StringBuffer newTree = new StringBuffer();
@@ -67,6 +66,7 @@ public class GeneiousTreeUtil extends TreeUtil{
         }
 
         writeNexusTree(workPath + "new-" + stem + NameSpace.POSTFIX_NEX, newTree.toString());
+
     }
 
 }

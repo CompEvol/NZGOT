@@ -8,6 +8,7 @@ import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.uc.MixedOTUs;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +37,8 @@ public class TreeUtil {
      * @throws IOException
      */
     public static void writeNexusTree(String nexusFilePath, String newickTree) throws IOException {
+        MyLogger.info("\nCreating Nexus tree ...");
+
         BufferedWriter out = new BufferedWriter(new FileWriter(nexusFilePath));
         out.write("#nexus\n" + "Begin trees;\n");
         out.write("tree = " + newickTree + "\n");
@@ -65,6 +68,19 @@ public class TreeUtil {
             return fields[0]+"|"+fields[1]+"|"+fields[7]+(fields.length > 9 ? "|"+fields[9] : "");
         } else {
             return label;
+        }
+    }
+
+    protected static String getTaxon(String label) {
+        char c = label.charAt(0);
+        String[] fields = label.split("\\|", -1);
+        if (Character.isDigit(c)) {
+            if (fields.length < 10) return fields[8];
+            if (fields[9] == null) return fields[8];
+            if (fields[9].contentEquals("null")) return fields[8];
+            return fields[9];
+        } else {
+            return fields[1];
         }
     }
 
@@ -115,8 +131,31 @@ public class TreeUtil {
         return label;
     }
 
+    protected static List<String> getTraits(TreeParser newickTree) {
+        List<String> traits = new ArrayList<>();
+
+        for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
+            Node leafNode = newickTree.getNode(i);
+
+            String taxon = getTaxon(leafNode.getID());
+
+            if (!traits.contains(taxon)) traits.add(taxon);
+        }
+
+        return traits;
+    }
 
 
+    protected static void printTraits(String tree) throws Exception {
+
+        TreeParser newickTree = new TreeParser(tree.replaceAll("'", ""), false, false, true, 1);
+        List<String> traits = getTraits(newickTree);
+
+        MyLogger.info("\n" + traits.size() + " Taxa extracted from tree tips labels : ");
+        for (String taxon : traits) {
+            MyLogger.info(taxon);
+        }
+    }
 
     //Main method
     public static void main(final String[] args) throws Exception {
