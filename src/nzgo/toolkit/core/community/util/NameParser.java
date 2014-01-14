@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.community.util;
 
 /**
- * Name Space
+ * Name Parser
  * @author Walter Xie
  */
 public class NameParser {

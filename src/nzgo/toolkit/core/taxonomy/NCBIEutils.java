@@ -43,6 +43,14 @@ public class NCBIEUtils {
         return XMLUtil.isTag("TaxId", name);
     }
 
+    public static boolean isScientificName(String name) {
+        return XMLUtil.isTag("ScientificName", name);
+    }
+
+    public static boolean isParentTaxId(String name) {
+        return XMLUtil.isTag("ParentTaxId", name);
+    }
+
     public static boolean isRank(String name) {
         return XMLUtil.isTag("Rank", name);
     }

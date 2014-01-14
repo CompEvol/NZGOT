@@ -2,6 +2,7 @@ package nzgo.toolkit.core.taxonomy.parser;
 
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.taxonomy.NCBIEUtils;
+import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.stream.XMLStreamConstants;
@@ -18,30 +19,39 @@ import java.util.List;
  */
 public class EFetchStAXParser {
 
-    public static List<String> getIdList(String scientificName) throws XMLStreamException, IOException {
-        URL url = NCBIEUtils.eFetch(scientificName);
+    /**
+     * mostly 1 Taxon, there may be multi-result because of duplicate names but different id
+     * @param scientificName
+     * @return
+     * @throws XMLStreamException
+     * @throws IOException
+     */
+    public static List<Taxon> getTaxonByName(String scientificName) throws XMLStreamException, IOException {
+        List<Taxon> taxonList = new ArrayList<>();
+        List<String> idList = ESearchStAXParser.getIdList(scientificName);
+
+        MyLogger.debug("\neFetch " + scientificName + " get : " + idList);
+
+        for (String taxId : idList) {
+            Taxon taxon = getTaxonById(taxId);
+            if (taxon != null) taxonList.add(taxon);
+        }
+
+        return taxonList;
+    }
+
+    public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
+        URL url = NCBIEUtils.eFetch(taxId);
         XMLStreamReader xmlStreamReader = XMLUtil.parse(url);
 
-        int count = 0;
-        List<String> idList = new ArrayList<>();
         try {
             while(xmlStreamReader.hasNext()){
-//                xmlStreamReader.next();
-                xmlStreamReader.nextTag();
+                xmlStreamReader.next();
 
                 if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                     String elementName = xmlStreamReader.getLocalName();
-                    if (NCBIEUtils.isCount(elementName)) {
-                        String elementText = xmlStreamReader.getElementText();
-                        count = Integer.parseInt(elementText);
-
-                        if (count < 1) break; // quick exist from loop, if no result
-
-                    } else if (count > 0 && NCBIEUtils.isIdList(elementName)) {
-                        idList = parseIdList(xmlStreamReader);
-
-                        if (count != idList.size())
-                            throw new IllegalArgumentException("Inconsistent count in the eSearch result !");
+                    if (NCBIEUtils.isTaxon(elementName)) {
+                        return parseTaxon(xmlStreamReader);
                     }
                 }
             }
@@ -49,25 +59,53 @@ public class EFetchStAXParser {
             xmlStreamReader.close();
         }
 
-        return idList;
+        return null;
     }
 
-    protected static List<String> parseIdList(XMLStreamReader xmlStreamReader) throws XMLStreamException {
-        List<String> idList = new ArrayList<>();
+    protected static Taxon parseTaxon(XMLStreamReader xmlStreamReader) throws XMLStreamException {
+        Taxon taxon = new Taxon();
         while(xmlStreamReader.hasNext()){
-            xmlStreamReader.nextTag();
+            xmlStreamReader.next();
 
-            String elementName = xmlStreamReader.getLocalName();
             if(xmlStreamReader.getEventType() == XMLStreamReader.END_ELEMENT){
-                if(NCBIEUtils.isIdList(elementName)){
-                    return idList;
+                String elementName = xmlStreamReader.getLocalName();
+                if(NCBIEUtils.isTaxon(elementName)) return taxon;
+
+            } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT){
+                String elementName = xmlStreamReader.getLocalName();
+                if (NCBIEUtils.isTaxId(elementName)) {
+                    taxon.setTaxId(xmlStreamReader.getElementText()); // required
+                } else if (NCBIEUtils.isScientificName(elementName)) {
+                    taxon.setScientificName(xmlStreamReader.getElementText());
+                } else if (NCBIEUtils.isParentTaxId(elementName)) {
+                    taxon.setParentTaxId(xmlStreamReader.getElementText());
+                } else if (NCBIEUtils.isRank(elementName)) {
+                    taxon.setRank(xmlStreamReader.getElementText());
+                } else if (NCBIEUtils.isLineageEx(elementName)) {
+                    List<Taxon> lineage = parseLineage(xmlStreamReader);
+                    taxon.lineage.addAll(lineage);
                 }
-            } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT && NCBIEUtils.isId(elementName)){
-                String elementText = xmlStreamReader.getElementText();
-                idList.add(elementText);
             }
         }
-        return idList;
+        return taxon;
+    }
+
+    protected static List<Taxon> parseLineage(XMLStreamReader xmlStreamReader) throws XMLStreamException {
+        List<Taxon> lineage = new ArrayList<>();
+        while(xmlStreamReader.hasNext()){
+            xmlStreamReader.next();
+
+            if(xmlStreamReader.getEventType() == XMLStreamReader.END_ELEMENT){
+                if(NCBIEUtils.isLineageEx(xmlStreamReader.getLocalName())) return lineage;
+
+            } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT){
+                if(NCBIEUtils.isTaxon(xmlStreamReader.getLocalName())) {
+                    Taxon taxon = parseTaxon(xmlStreamReader);
+                    lineage.add(taxon);
+                }
+            }
+        }
+        return lineage;
     }
 
     public static void main(String[] args) {

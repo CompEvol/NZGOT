@@ -26,8 +26,7 @@ public class ESearchStAXParser {
         List<String> idList = new ArrayList<>();
         try {
             while(xmlStreamReader.hasNext()){
-//                xmlStreamReader.next();
-                xmlStreamReader.nextTag();
+                xmlStreamReader.next();
 
                 if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                     String elementName = xmlStreamReader.getLocalName();
@@ -55,16 +54,16 @@ public class ESearchStAXParser {
     protected static List<String> parseIdList(XMLStreamReader xmlStreamReader) throws XMLStreamException {
         List<String> idList = new ArrayList<>();
         while(xmlStreamReader.hasNext()){
-            xmlStreamReader.nextTag();
+            xmlStreamReader.next();
 
-            String elementName = xmlStreamReader.getLocalName();
             if(xmlStreamReader.getEventType() == XMLStreamReader.END_ELEMENT){
-                if(NCBIEUtils.isIdList(elementName)){
-                    return idList;
+                if(NCBIEUtils.isIdList(xmlStreamReader.getLocalName())) return idList;
+
+            } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT){
+                if(NCBIEUtils.isId(xmlStreamReader.getLocalName())) {
+                    String elementText = xmlStreamReader.getElementText();
+                    idList.add(elementText);
                 }
-            } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT && NCBIEUtils.isId(elementName)){
-                String elementText = xmlStreamReader.getElementText();
-                idList.add(elementText);
             }
         }
         return idList;
