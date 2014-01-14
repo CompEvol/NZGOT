@@ -4,16 +4,16 @@ import nzgo.toolkit.core.blast.Hit;
 import nzgo.toolkit.core.blast.Iteration;
 import nzgo.toolkit.core.blast.IterationHits;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +29,12 @@ public class BlastStAXParser {
      * @param xmlFile
      * @return
      * @throws JAXBException
-     * @throws FileNotFoundException
+     * @throws IOException
      * @throws XMLStreamException
      */
-    public static List<Iteration> parse(File xmlFile) throws JAXBException, FileNotFoundException, XMLStreamException {
+    public static List<Iteration> parse(File xmlFile) throws JAXBException, IOException, XMLStreamException {
 
-        XMLInputFactory xif = XMLInputFactory.newInstance();
-        XMLStreamReader xmlStreamReader = xif.createXMLStreamReader(new FileReader(xmlFile));
+        XMLStreamReader xmlStreamReader = XMLUtil.parse(xmlFile);
 
         JAXBContext jc = JAXBContext.newInstance(Iteration.class);
         Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -47,7 +46,7 @@ public class BlastStAXParser {
         while(xmlStreamReader.hasNext()){
             xmlStreamReader.next();
 
-            if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT){
+            if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                 String elementName = xmlStreamReader.getLocalName();
                 if(iterationTag.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
