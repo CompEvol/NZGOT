@@ -2,6 +2,8 @@ package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
+import nzgo.toolkit.core.util.Element;
+import nzgo.toolkit.core.util.NameSpace;
 import nzgo.toolkit.core.util.NameUtil;
 
 import javax.xml.stream.XMLStreamException;
@@ -17,13 +19,20 @@ import java.util.List;
  */
 public class TaxaBreak {
 
-    protected Rank rankToBreak;
     protected final Taxa taxa;
-    protected Taxa taxaOnRank;
+
+    protected Rank rankToBreak;
+    protected Taxon bioClassification;
+    //    protected Taxa taxaOnRank; // TODO equivalent List taxaOnGivenRank
+    protected List<String> taxaOnGivenRank = new ArrayList<>();
 
     public TaxaBreak(Taxa taxa, Rank rankToBreak) {
         this.taxa = taxa;
         setRankToBreak(rankToBreak);
+    }
+
+    public List<String> getTaxaOnGivenRank() {
+        return taxaOnGivenRank;
     }
 
     public Rank getRankToBreak() {
@@ -36,6 +45,14 @@ public class TaxaBreak {
         this.rankToBreak = rankToBreak;
     }
 
+    public Taxon getBioClassification() {
+        return bioClassification;
+    }
+
+    public void setBioClassification(Taxon bioClassification) {
+        this.bioClassification = bioClassification;
+    }
+
     /**
      * create taxa break table by a given rank
      * @param workPath
@@ -43,14 +60,17 @@ public class TaxaBreak {
      * @throws javax.xml.stream.XMLStreamException
      */
     public void writeTaxaBreakTable(String workPath) throws IOException, XMLStreamException {
-        List<String> taxaOnGivenRank = new ArrayList<>();
+        taxaOnGivenRank.clear();
         MyLogger.info("\n" + taxa.size() + " Taxa extracted from tree tips labels : ");
 
-        String outputFilePath = workPath + "taxaBreakTable.txt";
+        String outputFilePath = workPath + "taxaBreakTable" + NameSpace.POSTFIX_TSV;
         BufferedWriter out = new BufferedWriter(new FileWriter(outputFilePath));
         // column head
-        out.write("# taxa\tguess\t" + rankToBreak + "\n");
+        out.write("# count\ttaxa\tguess\t" + rankToBreak + "\n");
         for (Object name : taxa) {
+            // 0th column
+            if (name instanceof Element)
+                out.write(((Element) name).getCount() + "\t");
             // 1st column
             out.write(name.toString());
             List<Taxon> taxonList = EFetchStAXParser.getTaxonByName(name.toString());
@@ -62,27 +82,16 @@ public class TaxaBreak {
                     taxonList = EFetchStAXParser.getTaxonByName(prefix);
                     out.write("\t" + prefix);
                     // 3rd column, or more if multi-result
-                    for (Taxon taxon : taxonList) {
-                        Taxon t = taxon.getParentTaxonOn(rankToBreak);
-                        out.write("\t" + t);
-                        if (t != null && !taxaOnGivenRank.contains(t.getScientificName())) {
-                            taxaOnGivenRank.add(t.getScientificName());
-                        }
-                    }
+                    writeParentTaxon(taxonList, taxaOnGivenRank, out);
                 } else {
                     out.write("\t");
                 }
+            } else {
+                // 2nd column empty
+                // 3rd column, or more if multi-result
+                out.write("\t");
+                writeParentTaxon(taxonList, taxaOnGivenRank, out);
             }
-            // 2nd column empty
-            // 3rd column, or more if multi-result
-            for (Taxon taxon : taxonList) {
-                Taxon t = taxon.getParentTaxonOn(rankToBreak);
-                out.write("\t\t" + t);
-                if (t != null && !taxaOnGivenRank.contains(t.getScientificName())) {
-                    taxaOnGivenRank.add(t.getScientificName());
-                }
-            }
-
             out.write("\n");
         }
 
@@ -90,7 +99,7 @@ public class TaxaBreak {
         out.close();
 
         // 2nd output file for summary
-        outputFilePath = workPath + "taxaBreakSummary.txt";
+        outputFilePath = workPath + "taxaBreakSummary" + NameSpace.POSTFIX_TSV;
         out = new BufferedWriter(new FileWriter(outputFilePath));
 
         out.write("# " + taxa.size() + " taxa belong to " + taxaOnGivenRank.size() + " " + rankToBreak + "s\n");
@@ -101,6 +110,19 @@ public class TaxaBreak {
         out.flush();
         out.close();
 
+    }
+
+    protected void writeParentTaxon(List<Taxon> taxonList, List<String> taxaOnGivenRank, BufferedWriter out) throws IOException {
+        for (Taxon taxon : taxonList) {
+            // filter out taxon not belong to bioClassification, but always true if bioClassification == null
+            if (taxon.belongsTo(bioClassification)) {
+                Taxon t = taxon.getParentTaxonOn(rankToBreak);
+                out.write("\t" + t);
+                if (t != null && !taxaOnGivenRank.contains(t.getScientificName())) {
+                    taxaOnGivenRank.add(t.getScientificName());
+                }
+            }
+        }
     }
 
 }

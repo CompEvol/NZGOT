@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.community.util;
+package nzgo.toolkit.core.util;
 
 /**
  * Name Space
@@ -19,4 +19,7 @@ public class NameSpace {
 
     public static final String POSTFIX_NEWICK = ".newick";
     public static final String POSTFIX_NEX = ".nex";
+
+    public static final String POSTFIX_CSV = ".csv";
+    public static final String POSTFIX_TSV = ".tsv";
 }

@@ -1,8 +1,8 @@
 package nzgo.toolkit.core.community.io;
 
 import nzgo.toolkit.core.community.Community;
-import nzgo.toolkit.core.community.util.NameSpace;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.util.NameSpace;
 
 import java.io.File;
 import java.io.IOException;

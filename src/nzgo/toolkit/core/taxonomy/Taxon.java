@@ -25,6 +25,29 @@ public class Taxon extends Element {
         super(scientificName);
     }
 
+    public Taxon(String scientificName, String taxId) {
+        super(scientificName);
+        setTaxId(taxId);
+    }
+
+    /**
+     * if this taxon belong to given biology classification
+     * if give null return true
+     * @param bioClassification
+     * @return
+     */
+    public boolean belongsTo (Taxon bioClassification) {
+        if (bioClassification == null)
+            return true;
+        if (getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
+            return true;
+        for (Taxon parentTaxon : lineage) {
+            if (parentTaxon.getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * get taxon from lineage on the given rank
      * if failed, return this taxon
@@ -36,7 +59,8 @@ public class Taxon extends Element {
             if (rank.equals(parentTaxon.getRank()))
                 return parentTaxon;
         }
-        return this;
+        if (this.rank.compareTo(rank) >= 0) return this;
+        return null;
     }
 
     public String getScientificName() {
@@ -49,7 +73,7 @@ public class Taxon extends Element {
 
     public String getTaxId() {
         if (taxId == null )
-            throw new IllegalArgumentException("Taxon require a unique id ! ");
+            throw new IllegalArgumentException("Taxon " + this + " requires a unique id ! ");
         return taxId;
     }
 

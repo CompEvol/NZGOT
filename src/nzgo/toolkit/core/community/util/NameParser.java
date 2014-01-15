@@ -1,5 +1,7 @@
 package nzgo.toolkit.core.community.util;
 
+import nzgo.toolkit.core.util.NameSpace;
+
 /**
  * Name Parser
  * @author Walter Xie
