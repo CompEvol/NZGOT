@@ -6,29 +6,63 @@ package nzgo.toolkit.core.util;
  */
 public class NameParser {
 
-    //create an object of SingleObject
-    private static NameParser instance = new NameParser();
-
-    //make the constructor private so that this class cannot be instantiated
-    protected NameParser(){}
-
-    //Get the only object available
-    public static NameParser getInstance(){
-        return instance;
-    }
-
-    public static final String COLUMN_SEPARATOR = "\t"; // TODO customize?
-
     // parse name by mutli-separators in different naming level
-    // allow to customize separator according to index
-    protected String[] separators = new String[]{"\\|", "-", "_"};
+    protected String separator = "\t"; // primary separator default tab
+    protected String secondarySeparator = "\\|"; // secondary separator default |
 
-    public String getSeparator(int index) {
-        return separators[index];
+    public NameParser(){}
+
+    public NameParser(String separator){
+        setSeparator(separator);
     }
 
-    public void setSeparator(int index, String separator) {
-        this.separators[index] = separator;
+    public NameParser(String separator, String secondarySeparator){
+        this(separator);
+        setSecondarySeparator(secondarySeparator);
     }
 
+    public String getPrefix(String name) {
+        int index = name.indexOf(separator);
+        if (index > 0)
+            return name.substring(0, index);
+        return name;
+    }
+
+    /**
+     * apply primary separator
+     * @param line
+     * @return
+     */
+    public String[] parse (String line) {
+        if (line == null)
+            throw new IllegalArgumentException("Cannot parse null string !");
+        return line.split(getSeparator(), -1);
+    }
+
+    /**
+     * apply primary separator to substring parsed by primary separator
+     * @param substring
+     * @return
+     */
+    public String[] secondaryParse (String substring) {
+        if (substring == null)
+            throw new IllegalArgumentException("Cannot parse null substring !");
+        return substring.split(getSecondarySeparator(), -1);
+    }
+
+    public String getSeparator() {
+        return separator;
+    }
+
+    public void setSeparator(String separator) {
+        this.separator = separator;
+    }
+
+    public String getSecondarySeparator() {
+        return secondarySeparator;
+    }
+
+    public void setSecondarySeparator(String secondarySeparator) {
+        this.secondarySeparator = secondarySeparator;
+    }
 }

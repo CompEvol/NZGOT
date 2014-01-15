@@ -65,14 +65,14 @@ public class OTUsImporter extends Importer {
      * @throws IllegalArgumentException
      */
     public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU, TreeSet<String> samples) throws IOException, IllegalArgumentException {
-        SampleNameParser sampleNameParser = SampleNameParser.getInstance();
+        SampleNameParser sampleNameParser = new SampleNameParser();
 
         BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
 
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
+            String[] fields = nameParser.parse(line);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -138,7 +138,7 @@ public class OTUsImporter extends Importer {
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
+            String[] fields = nameParser.parse(line);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -169,7 +169,7 @@ public class OTUsImporter extends Importer {
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
+            String[] fields = nameParser.parse(line);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -213,7 +213,7 @@ public class OTUsImporter extends Importer {
 //        String line = reader.readLine();
 //        while (line != null) {
 //            // 2 columns: 1st -> read id, 2nd -> otu name
-//            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
+//            String[] fields = line.split(SampleNameParser.columnSeparator, -1);
 //
 //            if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 //

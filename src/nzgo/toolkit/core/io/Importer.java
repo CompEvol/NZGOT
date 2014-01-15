@@ -1,6 +1,7 @@
 package nzgo.toolkit.core.io;
 
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.util.NameParser;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.io.IOException;
  */
 public class Importer {
 
+    public static NameParser nameParser = new NameParser(); // default tab
 
     public static BufferedReader getReader(File file, String msg) throws IOException {
 

@@ -2,6 +2,7 @@ package nzgo.toolkit.core.util;
 
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
+import nzgo.toolkit.core.community.util.SampleNameParser;
 import nzgo.toolkit.core.io.Importer;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.taxonomy.Rank;
@@ -19,6 +20,8 @@ import java.util.List;
  * @author Walter Xie
  */
 public class TreeUtil {
+
+    public static SampleNameParser sampleNameParser = new SampleNameParser(); //"\\|", "-"
 
     /**
      * clean not standard format generated from FastTree
@@ -97,7 +100,7 @@ public class TreeUtil {
      */
     protected static String getTaxon(String label) {
         char c = label.charAt(0);
-        String[] fields = label.split("\\|", -1);
+        String[] fields = sampleNameParser.parse(label);
         if (Character.isDigit(c)) {
 //            if (fields.length < 10) return fields[8];
 //            if (fields[9] == null) return fields[8];
@@ -124,7 +127,7 @@ public class TreeUtil {
     protected static String simplifyLabel(String label) {
         char c = label.charAt(0);
         if (Character.isDigit(c)) {
-            String[] fields = label.split("\\|", -1);
+            String[] fields = sampleNameParser.parse(label);
             String taxon = fields[8];
             if (fields.length > 9 && fields[9] != null && !fields[9].contentEquals("null"))
                 taxon = fields[9];
@@ -188,7 +191,7 @@ public class TreeUtil {
         while (line != null) {
             if (line.startsWith(">")) {
                 line = line.substring(1);
-                String[] fields = line.split("\\|", -1);
+                String[] fields = sampleNameParser.parse(line);
 
                 if (fields.length < 2)
                     throw new IllegalArgumentException("Error: invalid sequence label in the line: " + line);

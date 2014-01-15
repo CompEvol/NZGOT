@@ -43,7 +43,7 @@ public class MixedOTUs extends UCParser{
 
         String line = reader.readLine();
         while (line != null) {
-            String[] fields = line.split(COLUMN_SEPARATOR, -1);
+            String[] fields = Importer.nameParser.parse(line); // use same separator in Importer.getReader
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid uc file in the line: " + line);
 

@@ -8,16 +8,17 @@ import nzgo.toolkit.core.util.NameSpace;
  * @author Walter Xie
  */
 public class SampleNameParser extends NameParser {
-    //create an object of SingleObject
-    private static SampleNameParser instance = new SampleNameParser();
-
-    //Get the only object available
-    public static SampleNameParser getInstance(){
-        return instance;
-    }
 
     // eg IDME8NK01ETVXF|DirectSoil|LB1-A
-    public static final int READ_INDEX_SAMPLE = 2;
+    private static final int READ_INDEX_SAMPLE = 2;
+
+    public SampleNameParser (String separator, String secondarySeparator){
+        super(separator, secondarySeparator);
+    }
+
+    public SampleNameParser () {
+        super("\\|", "-");
+    }
 
     /**
      * parse read name into sample location, e.g. 2-C
@@ -27,7 +28,7 @@ public class SampleNameParser extends NameParser {
      */
     public String getSampleFromRead(String readName) {
         // 3 fields in read name
-        String[] fields = readName.split(separators[0], -1);
+        String[] fields = parse(readName);
         if (fields.length < 3)
             throw new IllegalArgumentException("Error: invalid read name : " + readName);
 
@@ -41,7 +42,7 @@ public class SampleNameParser extends NameParser {
      */
     public String[] getPlotFromSample(String sample) {
         // plot_subplot, subplot
-        String[] plot_subplot = sample.split(separators[1], -1);
+        String[] plot_subplot = secondaryParse(sample);
         if (plot_subplot.length != 2)
             throw new IllegalArgumentException("Error: invalid sample location in the read name : " + sample);
 
