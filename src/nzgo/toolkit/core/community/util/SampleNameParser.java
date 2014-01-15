@@ -1,40 +1,23 @@
 package nzgo.toolkit.core.community.util;
 
+import nzgo.toolkit.core.util.NameParser;
 import nzgo.toolkit.core.util.NameSpace;
 
 /**
- * Name Parser
+ * Sample Name Parser
  * @author Walter Xie
  */
-public class NameParser {
-
+public class SampleNameParser extends NameParser {
     //create an object of SingleObject
-    private static NameParser instance = new NameParser();
-
-    //make the constructor private so that this class cannot be instantiated
-    private NameParser(){}
+    private static SampleNameParser instance = new SampleNameParser();
 
     //Get the only object available
-    public static NameParser getInstance(){
+    public static SampleNameParser getInstance(){
         return instance;
     }
 
-    public static final String COLUMN_SEPARATOR = "\t"; // TODO customize?
-    public static final String CSV_COLUMN_SEPARATOR = ",";
     // eg IDME8NK01ETVXF|DirectSoil|LB1-A
     public static final int READ_INDEX_SAMPLE = 2;
-
-    // parse name by mutli-separators in different naming level
-    // allow to customize separator according to index
-    private String[] separators = new String[]{"\\|", "-", "_"};
-
-    public String getSeparator(int index) {
-        return separators[index];
-    }
-
-    public void setSeparator(int index, String separator) {
-        this.separators[index] = separator;
-    }
 
     /**
      * parse read name into sample location, e.g. 2-C

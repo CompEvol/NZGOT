@@ -40,7 +40,8 @@ public class GeneiousTreeUtil extends TreeUtil{
 //        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
 
         // taxa break
-        Taxa taxa = new Taxa(getTraits(newickTree));
+        BioSortedSet<Element> taxaFromTree = getTaxaFromTree(newickTree);
+        Taxa taxa = new Taxa(taxaFromTree);
         TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
         Taxon bioClassification = new Taxon("Insecta", "50557");
         taxaBreak.setBioClassification(bioClassification);
@@ -68,7 +69,7 @@ public class GeneiousTreeUtil extends TreeUtil{
 //        BufferedReader reader = Importer.getReader(treeFile, "tree");
 //        String tree = reader.readLine();
 //        TreeParser newickTree = cleanGeneiousTreeOutput(tree);
-//        List<String> traits = getTraits(newickTree);
+//        List<String> traits = getTaxaFromTree(newickTree);
 //        printTraits(traits);
 //
 //        StringTokenizer st = new StringTokenizer(tree, "'");

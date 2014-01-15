@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.community;
 
 import jebl.evolution.sequences.Sequence;
-import nzgo.toolkit.core.community.util.NameParser;
+import nzgo.toolkit.core.community.util.SampleNameParser;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.util.Arrays;
@@ -32,7 +32,7 @@ public class AlphaDiversity {
                label = sequence.toString();
             }
 
-            String sampleLocation = NameParser.getInstance().getSampleBy(samplesBy, label);
+            String sampleLocation = SampleNameParser.getInstance().getSampleBy(samplesBy, label);
             int i = ArrayUtil.indexOf(sampleLocation, samples);
             if (i < 0) {
                 throw new IllegalArgumentException("Error: missing sample location : " + sampleLocation +

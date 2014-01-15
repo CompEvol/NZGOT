@@ -57,7 +57,7 @@ public class TreeUtil {
      * @param newickTree
      * @return
      */
-    public static BioSortedSet<Element> getTraits(TreeParser newickTree) {
+    public static BioSortedSet<Element> getTaxaFromTree(TreeParser newickTree) {
         BioSortedSet<Element> traits = new BioSortedSet<>("taxa");
 
         Element notIdentified = new Element("Not identified");
@@ -264,7 +264,8 @@ public class TreeUtil {
 //        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
 
         // taxa break
-        Taxa taxa = new Taxa(getTraits(newickTree));
+        BioSortedSet<Element> taxaFromTree = getTaxaFromTree(newickTree);
+        Taxa taxa = new Taxa(taxaFromTree);
         TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
         Taxon bioClassification = new Taxon("Insecta", "50557");
         taxaBreak.setBioClassification(bioClassification);

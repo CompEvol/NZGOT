@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.community.io;
 
 import nzgo.toolkit.core.community.*;
-import nzgo.toolkit.core.community.util.NameParser;
+import nzgo.toolkit.core.community.util.SampleNameParser;
 import nzgo.toolkit.core.io.Importer;
 import nzgo.toolkit.core.uc.UCParser;
 import nzgo.toolkit.core.util.NameSpace;
@@ -65,14 +65,14 @@ public class OTUsImporter extends Importer {
      * @throws IllegalArgumentException
      */
     public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU, TreeSet<String> samples) throws IOException, IllegalArgumentException {
-        NameParser nameParser = NameParser.getInstance();
+        SampleNameParser sampleNameParser = SampleNameParser.getInstance();
 
         BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
 
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
+            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -102,7 +102,7 @@ public class OTUsImporter extends Importer {
                             if (samples != null) {
                                 // if by plot, then add plot to TreeSet, otherwise add subplot
                                 String sampleType = ((Community) otus).getSampleType();
-                                String sampleLocation = nameParser.getSampleBy(sampleType, hitName);
+                                String sampleLocation = sampleNameParser.getSampleBy(sampleType, hitName);
                                 samples.add(sampleLocation);
                             }
                         }
@@ -138,7 +138,7 @@ public class OTUsImporter extends Importer {
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
+            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -169,7 +169,7 @@ public class OTUsImporter extends Importer {
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
+            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -213,7 +213,7 @@ public class OTUsImporter extends Importer {
 //        String line = reader.readLine();
 //        while (line != null) {
 //            // 2 columns: 1st -> read id, 2nd -> otu name
-//            String[] fields = line.split(NameParser.COLUMN_SEPARATOR, -1);
+//            String[] fields = line.split(SampleNameParser.COLUMN_SEPARATOR, -1);
 //
 //            if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 //

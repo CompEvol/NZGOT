@@ -4,7 +4,6 @@ import nzgo.toolkit.core.community.AlphaDiversity;
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
-import nzgo.toolkit.core.community.util.NameParser;
 import nzgo.toolkit.core.logger.MyLogger;
 
 import java.io.FileOutputStream;
@@ -33,7 +32,7 @@ public class CommunityExporter {
         MyLogger.info("\nReport community matrix " + community.getName() + " in the file : " + outFileAndPath);
 
         for (String sample : community.getSamples()) {
-            out.print(NameParser.CSV_COLUMN_SEPARATOR + sample);
+            out.print("," + sample);
         }
         out.print("\n");
 
@@ -47,7 +46,7 @@ public class CommunityExporter {
                 throw new IllegalArgumentException("Error: cannot AlphaDiversity report for OTU : " + otu);
 
             for (int a : alphaDiversity.getAlphaDiversity()) {
-                out.print(NameParser.CSV_COLUMN_SEPARATOR + a);
+                out.print("," + a);
             }
             out.print("\n");
         }
