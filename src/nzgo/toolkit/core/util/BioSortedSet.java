@@ -3,6 +3,7 @@ package nzgo.toolkit.core.util;
 import nzgo.toolkit.core.logger.MyLogger;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -19,6 +20,10 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
     public BioSortedSet(String name) {
         super();
         setName(name);
+    }
+
+    public BioSortedSet(Collection<? extends E> c) {
+        super(c);
     }
 
     /**
@@ -53,6 +58,14 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
                 return e;
         }
         return null;
+    }
+
+    public boolean containsUniqueElement(String name) throws IllegalArgumentException {
+        for (E e : this) {
+            if (e.toString().contentEquals(name))
+                return true;
+        }
+        return false;
     }
 
     public String getName() {

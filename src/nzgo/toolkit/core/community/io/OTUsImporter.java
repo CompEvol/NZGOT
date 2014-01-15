@@ -88,7 +88,7 @@ public class OTUsImporter extends Importer {
                     double identity = UCParser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
                     int size = UCParser.getSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
-                    if (otus.containsOTU(otuName)) {
+                    if (otus.containsUniqueElement(otuName)) {
                         OTU otu = (OTU) otus.getUniqueElement(otuName);
 
                         if (otu == null) {

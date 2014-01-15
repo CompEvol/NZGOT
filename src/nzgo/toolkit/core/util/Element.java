@@ -4,9 +4,12 @@ package nzgo.toolkit.core.util;
  * Element: basic class for naming
  * @author Walter Xie
  */
-public class Element {
+public class Element implements Comparable, Countable{
 
     protected String name;
+    protected int count = 0;
+
+    public Element() { }
 
     public Element(String name) {
         setName(name);
@@ -21,4 +24,30 @@ public class Element {
         this.name = name;
     }
 
+    public int getCount() {
+        return count;
+    }
+
+    @Override
+    public void incrementCount(int step) {
+        this.count = count + step;
+    }
+
+    @Override
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public String toString() {
+        return getName();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return name.compareTo(o.toString());
+    }
+
+    public int compareCountTo(Element element) {
+        return Integer.compare(this.count, element.getCount());
+    }
 }

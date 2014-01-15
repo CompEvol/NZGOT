@@ -1,5 +1,7 @@
 package nzgo.toolkit.core.taxonomy;
 
+import nzgo.toolkit.core.util.Element;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,36 +9,42 @@ import java.util.List;
  * Taxon
  * @author Walter Xie
  */
-public class Taxon implements Comparable {
+public class Taxon extends Element {
 
-    protected String scientificName;
     protected String taxId;
-    protected String rank;
+    protected Rank rank;
     protected String parentTaxId;
 
     public List<Taxon> lineage = new ArrayList<>();
 
-    public Taxon() {  }
-
-    public Taxon(String scientificName) {
-        setScientificName(scientificName);
+    public Taxon() {
+        super();
     }
 
-    public Taxon getParentTaxonOn(String rank) {
+    public Taxon(String scientificName) {
+        super(scientificName);
+    }
+
+    /**
+     * get taxon from lineage on the given rank
+     * if failed, return this taxon
+     * @param rank
+     * @return
+     */
+    public Taxon getParentTaxonOn(Rank rank) {
         for (Taxon parentTaxon : lineage) {
-            if (rank.equalsIgnoreCase(parentTaxon.getRank()))
+            if (rank.equals(parentTaxon.getRank()))
                 return parentTaxon;
         }
-        return null;
+        return this;
     }
 
     public String getScientificName() {
-        if (scientificName == null ) setScientificName("Unknown");
-        return scientificName;
+        return getName();
     }
 
     public void setScientificName(String scientificName) {
-        this.scientificName = scientificName;
+        setName(scientificName);
     }
 
     public String getTaxId() {
@@ -57,21 +65,12 @@ public class Taxon implements Comparable {
         this.parentTaxId = parentTaxId;
     }
 
-    public String getRank() {
+    public Rank getRank() {
         return rank;
     }
 
-    public void setRank(String rank) {
+    public void setRank(Rank rank) {
         this.rank = rank;
     }
 
-    @Override
-    public String toString() {
-        return getScientificName(); // getTaxId();
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        return scientificName.compareTo(o.toString());
-    }
 }

@@ -52,7 +52,7 @@ public class Hit implements Attributable, Comparable{
     @Override
     public int compareTo(Object o) {
         if (o instanceof Hit)
-            return compareTo( ((Hit) o).getIdentity() );
+            return compareTo((Hit) o);
         else
             return name.compareTo(o.toString());
     }

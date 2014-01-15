@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.taxonomy.parser;
 
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.taxonomy.NCBIEUtils;
+import nzgo.toolkit.core.taxonomy.NCBIeUtils;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.stream.XMLStreamConstants;
@@ -19,7 +19,7 @@ import java.util.List;
 public class ESearchStAXParser {
 
     public static List<String> getIdList(String scientificName) throws XMLStreamException, IOException {
-        URL url = NCBIEUtils.eSearch(scientificName);
+        URL url = NCBIeUtils.eSearch(scientificName);
         XMLStreamReader xmlStreamReader = XMLUtil.parse(url);
 
         int count = 0;
@@ -30,13 +30,13 @@ public class ESearchStAXParser {
 
                 if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                     String elementName = xmlStreamReader.getLocalName();
-                    if (NCBIEUtils.isCount(elementName)) {
+                    if (NCBIeUtils.isCount(elementName)) {
                         String elementText = xmlStreamReader.getElementText();
                         count = Integer.parseInt(elementText);
 
                         if (count < 1) break; // quick exist from loop, if no result
 
-                    } else if (count > 0 && NCBIEUtils.isIdList(elementName)) {
+                    } else if (count > 0 && NCBIeUtils.isIdList(elementName)) {
                         idList = parseIdList(xmlStreamReader);
 
                         if (count != idList.size())
@@ -57,10 +57,10 @@ public class ESearchStAXParser {
             xmlStreamReader.next();
 
             if(xmlStreamReader.getEventType() == XMLStreamReader.END_ELEMENT){
-                if(NCBIEUtils.isIdList(xmlStreamReader.getLocalName())) return idList;
+                if(NCBIeUtils.isIdList(xmlStreamReader.getLocalName())) return idList;
 
             } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT){
-                if(NCBIEUtils.isId(xmlStreamReader.getLocalName())) {
+                if(NCBIeUtils.isId(xmlStreamReader.getLocalName())) {
                     String elementText = xmlStreamReader.getElementText();
                     idList.add(elementText);
                 }

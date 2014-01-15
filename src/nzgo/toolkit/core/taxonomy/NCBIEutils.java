@@ -6,17 +6,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- *
+ * NCBI eUtils
  * @author Walter Xie
  */
-public class NCBIEUtils {
+public class NCBIeUtils {
 
     //++++++++++++ eSearch +++++++++++++
 
-    public static String E_SEARCH = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term=\"";
+    protected static String E_SEARCH_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term=\"";
 
     public static URL eSearch(String scientificName) throws MalformedURLException {
-        return new URL(E_SEARCH + scientificName + "\"");
+        return new URL(E_SEARCH_URL + scientificName + "\"");
     }
 
     public static boolean isCount(String name) {
@@ -33,10 +33,10 @@ public class NCBIEUtils {
 
     //++++++++++++ eFetch +++++++++++++
 
-    public static String E_FETCH = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=";
+    protected static String E_FETCH_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=";
 
     public static URL eFetch(String taxonId) throws MalformedURLException {
-        return new URL(E_FETCH + taxonId);
+        return new URL(E_FETCH_URL + taxonId);
     }
 
     public static boolean isTaxId(String name) {

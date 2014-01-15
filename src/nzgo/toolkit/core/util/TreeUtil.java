@@ -5,16 +5,10 @@ import beast.util.TreeParser;
 import nzgo.toolkit.core.community.util.NameSpace;
 import nzgo.toolkit.core.io.Importer;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.taxonomy.Taxon;
-import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.uc.MixedOTUs;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * standard newick tree
@@ -54,64 +48,37 @@ public class TreeUtil {
         out.close();
     }
 
-    public static List<String> getTraits(TreeParser newickTree) {
-        List<String> traits = new ArrayList<>();
+    /**
+     * get traits from the tree leave nodes' labels
+     * TODO generalize to select any type of trait
+     * @param newickTree
+     * @return
+     */
+    public static BioSortedSet<Element> getTraits(TreeParser newickTree) {
+        BioSortedSet<Element> traits = new BioSortedSet<>("traits");
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
 
+            // only work for taxon at moment
             String taxon = getTaxon(leafNode.getID());
 
-            if (!traits.contains(taxon)) traits.add(taxon);
+            Element notIdentified = new Element("Not identified");
+            if (taxon == null || "null".equalsIgnoreCase(taxon)) {
+//                MyLogger.warn("Find invalid taxon " + taxon + " from tip " + leafNode.getID());
+                notIdentified.incrementCount(1);
+            } else {
+                if (!traits.containsUniqueElement(taxon)) {
+                    Element countableTaxon = new Element(taxon);
+                    traits.add(countableTaxon);
+                } else {
+                    Element countableTaxon = traits.getUniqueElement(taxon);
+                    countableTaxon.incrementCount(1);
+                }
+            }
         }
 
         return traits;
-    }
-
-    public static void writeTaxaTable(List<String> traits, String rank, String outputFilePath) throws IOException, XMLStreamException {
-        SortedSet<String> taxonSortedSet = new TreeSet<>(traits);
-        List<String> taxaOnGivenRank = new ArrayList<>();
-        MyLogger.info("\n" + taxonSortedSet.size() + " Taxa extracted from tree tips labels : ");
-
-        BufferedWriter out = new BufferedWriter(new FileWriter(outputFilePath));
-        out.write("# " + taxonSortedSet.size() + " taxa\n");
-        for (String name : taxonSortedSet) {
-            out.write(name);
-            List<Taxon> taxonList = EFetchStAXParser.getTaxonByName(name);
-            for (Taxon taxon : taxonList) {
-                Taxon t = taxon.getParentTaxonOn(rank);
-                out.write("\t" + t);
-                if (t != null && !taxaOnGivenRank.contains(t.getScientificName())) {
-                    taxaOnGivenRank.add(t.getScientificName());
-                }
-            }
-            // try prefix, such as Cotesia_ruficrus
-            if (taxonList.size() < 1) {
-                String prefix = NameUtil.getPrefix(name, "_");
-                if (!prefix.contentEquals(name)) {
-                    taxonList = EFetchStAXParser.getTaxonByName(prefix);
-                    out.write("\t" + prefix);
-                    for (Taxon taxon : taxonList) {
-                        Taxon t = taxon.getParentTaxonOn(rank);
-                        out.write("\t" + t);
-                        if (t != null && !taxaOnGivenRank.contains(t.getScientificName())) {
-                            taxaOnGivenRank.add(t.getScientificName());
-                        }
-                    }
-                }
-            }
-            out.write("\n");
-        }
-
-        out.write("# they belong to " + taxaOnGivenRank.size() + " " + rank + "s:\n");
-        out.write("# ");
-        for (String t : taxaOnGivenRank) {
-            out.write(t + "\t");
-        }
-        out.write("\n");
-
-        out.flush();
-        out.close();
     }
 
     protected static void printTraits(List<String> traits) {

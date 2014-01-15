@@ -13,11 +13,11 @@ public class Targets<E> extends OTUs<E> {
     }
 
     public boolean containsTarget(String targetName) {
-        return super.containsOTU(targetName);
+        return super.containsUniqueElement(targetName);
     }
 
     public E getTarget(String targetName) {
-        return super.getOTU(targetName);
+        return super.getUniqueElement(targetName);
     }
 
 }

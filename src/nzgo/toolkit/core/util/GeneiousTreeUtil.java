@@ -2,8 +2,9 @@ package nzgo.toolkit.core.util;
 
 import beast.util.TreeParser;
 import nzgo.toolkit.core.logger.MyLogger;
-
-import java.util.List;
+import nzgo.toolkit.core.taxonomy.Rank;
+import nzgo.toolkit.core.taxonomy.Taxa;
+import nzgo.toolkit.core.taxonomy.TaxaBreak;
 
 /**
  * manipulate newick tree exported from Geneious,
@@ -31,8 +32,9 @@ public class GeneiousTreeUtil extends TreeUtil{
 
 //        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
 
-        List<String> traits = getTraits(newickTree);
-        writeTaxaTable(traits, "order", workPath + "taxaTable.txt");
+        Taxa taxa = new Taxa(getTraits(newickTree));
+        TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
+        taxaBreak.writeTaxaBreakTable(workPath);
     }
 
     //Main method: Uncleaned Geneious Tree

@@ -16,22 +16,6 @@ public class OTUs<E> extends BioSortedSet<E> {
         super(name);
     }
 
-    public boolean containsOTU(String otuName) {
-        for(E e : this){
-            if (e.toString().contentEquals(otuName))
-                return true;
-        }
-        return false;
-    }
-
-    public E getOTU(String otuName) {
-        for(E e : this){
-            if (e.toString().contentEquals(otuName))
-                return e;
-        }
-        return null;
-    }
-
     /**
      * give a sequence to get the OTU it belongs to
      * TODO: only suit for hard clustering currently

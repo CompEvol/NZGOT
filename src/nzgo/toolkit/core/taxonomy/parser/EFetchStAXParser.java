@@ -1,7 +1,8 @@
 package nzgo.toolkit.core.taxonomy.parser;
 
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.taxonomy.NCBIEUtils;
+import nzgo.toolkit.core.taxonomy.NCBIeUtils;
+import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.util.XMLUtil;
 
@@ -41,7 +42,7 @@ public class EFetchStAXParser {
     }
 
     public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
-        URL url = NCBIEUtils.eFetch(taxId);
+        URL url = NCBIeUtils.eFetch(taxId);
         XMLStreamReader xmlStreamReader = XMLUtil.parse(url);
 
         try {
@@ -50,7 +51,7 @@ public class EFetchStAXParser {
 
                 if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                     String elementName = xmlStreamReader.getLocalName();
-                    if (NCBIEUtils.isTaxon(elementName)) {
+                    if (NCBIeUtils.isTaxon(elementName)) {
                         return parseTaxon(xmlStreamReader);
                     }
                 }
@@ -69,19 +70,20 @@ public class EFetchStAXParser {
 
             if(xmlStreamReader.getEventType() == XMLStreamReader.END_ELEMENT){
                 String elementName = xmlStreamReader.getLocalName();
-                if(NCBIEUtils.isTaxon(elementName)) return taxon;
+                if(NCBIeUtils.isTaxon(elementName)) return taxon;
 
             } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT){
                 String elementName = xmlStreamReader.getLocalName();
-                if (NCBIEUtils.isTaxId(elementName)) {
+                if (NCBIeUtils.isTaxId(elementName)) {
                     taxon.setTaxId(xmlStreamReader.getElementText()); // required
-                } else if (NCBIEUtils.isScientificName(elementName)) {
+                } else if (NCBIeUtils.isScientificName(elementName)) {
                     taxon.setScientificName(xmlStreamReader.getElementText());
-                } else if (NCBIEUtils.isParentTaxId(elementName)) {
+                } else if (NCBIeUtils.isParentTaxId(elementName)) {
                     taxon.setParentTaxId(xmlStreamReader.getElementText());
-                } else if (NCBIEUtils.isRank(elementName)) {
-                    taxon.setRank(xmlStreamReader.getElementText());
-                } else if (NCBIEUtils.isLineageEx(elementName)) {
+                } else if (NCBIeUtils.isRank(elementName)) {
+                    Rank rank = Rank.fromString(xmlStreamReader.getElementText());
+                    taxon.setRank(rank); // if text not included in Rank, then rank == null
+                } else if (NCBIeUtils.isLineageEx(elementName)) {
                     List<Taxon> lineage = parseLineage(xmlStreamReader);
                     taxon.lineage.addAll(lineage);
                 }
@@ -96,10 +98,10 @@ public class EFetchStAXParser {
             xmlStreamReader.next();
 
             if(xmlStreamReader.getEventType() == XMLStreamReader.END_ELEMENT){
-                if(NCBIEUtils.isLineageEx(xmlStreamReader.getLocalName())) return lineage;
+                if(NCBIeUtils.isLineageEx(xmlStreamReader.getLocalName())) return lineage;
 
             } else if(xmlStreamReader.getEventType() == XMLStreamReader.START_ELEMENT){
-                if(NCBIEUtils.isTaxon(xmlStreamReader.getLocalName())) {
+                if(NCBIeUtils.isTaxon(xmlStreamReader.getLocalName())) {
                     Taxon taxon = parseTaxon(xmlStreamReader);
                     lineage.add(taxon);
                 }

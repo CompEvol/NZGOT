@@ -12,4 +12,13 @@ public class NameUtil {
             return name.substring(0, index);
         return name;
     }
+
+    public static boolean isNumber(String label) {
+        for (char c : label.toCharArray()) {
+            if (!Character.isDigit(c))
+                return false;
+        }
+        return true;
+    }
+
 }
