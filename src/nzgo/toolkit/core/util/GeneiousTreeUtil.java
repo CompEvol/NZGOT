@@ -1,13 +1,6 @@
 package nzgo.toolkit.core.util;
 
-import beast.util.TreeParser;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.taxonomy.Rank;
-import nzgo.toolkit.core.taxonomy.Taxa;
-import nzgo.toolkit.core.taxonomy.TaxaBreak;
-import nzgo.toolkit.core.taxonomy.Taxon;
-
-import java.util.List;
 
 /**
  * manipulate newick tree exported from Geneious,
@@ -31,26 +24,8 @@ public class GeneiousTreeUtil extends TreeUtil{
 
         String rawNewickTree = getRawNewickTree(workPath, stem);
         String cleanedNewickTree = cleanGeneiousTreeOutput(rawNewickTree);
-        TreeParser newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
-        simplifyLabelsOfTree(newickTree);
 
-        // annotate tree by database
-//        List<String> mixedOTUs = getMixedOTUs(workPath + "clusters.uc");
-//        annotateTreeByOTUs(newickTree, mixedOTUs);
-//        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
-
-        // taxa break
-        BioSortedSet<Element> taxaFromTree = getTaxaFromTree(newickTree);
-        Taxa taxa = new Taxa(taxaFromTree);
-        TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
-        Taxon bioClassification = new Taxon("Insecta", "50557");
-        taxaBreak.setBioClassification(bioClassification);
-        taxaBreak.writeTaxaBreakTable(workPath);
-
-        // annotate tree by traits (taxa)
-        List traits = taxaBreak.getTaxaOnGivenRank();
-        annotateTree(newickTree, traits);
-        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.POSTFIX_NEX);
+        createTaxaBreakAndAnnotateTree(workPath, stem, cleanedNewickTree);
     }
 
     //Main method: Uncleaned Geneious Tree

@@ -11,6 +11,8 @@ import java.util.Collection;
  */
 public class Taxa<E> extends BioSortedSet<E> {
 
+    public Taxa() { }
+
     public Taxa(Collection<? extends E> c) {
         super(c);
     }

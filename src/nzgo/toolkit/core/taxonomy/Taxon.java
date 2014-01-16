@@ -97,4 +97,7 @@ public class Taxon extends Element {
         this.rank = rank;
     }
 
+    public boolean taxIdEquals(Taxon taxon) {
+        return this.getTaxId().equals(taxon.getTaxId());
+    }
 }

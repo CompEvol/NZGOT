@@ -12,12 +12,11 @@ public class SampleNameParser extends NameParser {
     // eg IDME8NK01ETVXF|DirectSoil|LB1-A
     private static final int READ_INDEX_SAMPLE = 2;
 
-    public SampleNameParser (String separator, String secondarySeparator){
-        super(separator, secondarySeparator);
-    }
-
     public SampleNameParser () {
-        super("\\|", "-");
+        this("\\|", "-");
+    }
+    public SampleNameParser(String separator, String secondarySeparator){
+        super(separator, secondarySeparator);
     }
 
     /**

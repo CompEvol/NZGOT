@@ -17,8 +17,12 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
 
     protected String name;
 
-    public BioSortedSet(String name) {
+    public BioSortedSet() {
         super();
+    }
+
+    public BioSortedSet(String name) {
+        this();
         setName(name);
     }
 

@@ -21,6 +21,13 @@ public class NameParser {
         setSecondarySeparator(secondarySeparator);
     }
 
+    public static String getPrefix(String name, String separator) {
+        int index = name.indexOf(separator);
+        if (index > 0)
+            return name.substring(0, index);
+        return name;
+    }
+
     public String getPrefix(String name) {
         int index = name.indexOf(separator);
         if (index > 0)

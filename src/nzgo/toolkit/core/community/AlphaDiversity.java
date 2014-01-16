@@ -12,6 +12,8 @@ import java.util.Arrays;
  */
 public class AlphaDiversity {
 
+    SampleNameParser sampleNameParser = new SampleNameParser();
+
     protected int[] alphaDiversity; // only valid for given sample array
 
     public AlphaDiversity(String samplesBy, String[] samples, OTU otu) {
@@ -32,7 +34,7 @@ public class AlphaDiversity {
                label = sequence.toString();
             }
 
-            String sampleLocation = SampleNameParser.getInstance().getSampleBy(samplesBy, label);
+            String sampleLocation = sampleNameParser.getSampleBy(samplesBy, label);
             int i = ArrayUtil.indexOf(sampleLocation, samples);
             if (i < 0) {
                 throw new IllegalArgumentException("Error: missing sample location : " + sampleLocation +

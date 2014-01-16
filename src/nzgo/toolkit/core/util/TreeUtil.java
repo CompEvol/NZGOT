@@ -13,6 +13,7 @@ import nzgo.toolkit.core.uc.MixedOTUs;
 
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * standard newick tree
@@ -63,7 +64,7 @@ public class TreeUtil {
     public static BioSortedSet<Element> getTaxaFromTree(TreeParser newickTree) {
         BioSortedSet<Element> traits = new BioSortedSet<>("taxa");
 
-        Element notIdentified = new Element("Not identified");
+        Element notIdentified = new Element(TaxaBreak.OTHER);
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
@@ -151,7 +152,16 @@ public class TreeUtil {
             if (label.contains(tr.toString()))
                 return "trait=" + tr.toString();
         }
-        return "trait=Not identified";
+        return "trait=" + TaxaBreak.OTHER;
+    }
+
+    protected static <T, E> String getMetaString(String label, Map<T, E> traits) {
+        for (Map.Entry<T, E> entry : traits.entrySet()) {
+            if (label.contains(entry.getKey().toString())) {
+                return "trait=" + entry.getValue().toString();
+            }
+        }
+        return "trait=" + TaxaBreak.OTHER;
     }
 
     protected static List<String> getMixedOTUs(String ucFilePath) {
@@ -231,6 +241,23 @@ public class TreeUtil {
             Node leafNode = newickTree.getNode(i);
 
             String metaDataString = getMetaString(leafNode.getID(), traits);
+            if (leafNode.metaDataString != null && leafNode.metaDataString.length() > 1)
+                metaDataString = ", " + metaDataString;
+
+            leafNode.metaDataString = metaDataString;
+        }
+
+    }
+
+    protected static void annotateTree(TreeParser newickTree, Map traits) {
+
+        for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
+            Node leafNode = newickTree.getNode(i);
+
+            String metaDataString = getMetaString(leafNode.getID(), traits);
+            if (leafNode.metaDataString != null && leafNode.metaDataString.length() > 1)
+                metaDataString = leafNode.metaDataString + ", " + metaDataString;
+
             leafNode.metaDataString = metaDataString;
         }
 
@@ -247,6 +274,30 @@ public class TreeUtil {
 
     }
 
+    protected static void createTaxaBreakAndAnnotateTree(String workPath, String stem, String cleanedNewickTree) throws Exception {
+        TreeParser newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
+        simplifyLabelsOfTree(newickTree);
+
+        // annotate tree by database
+        List<String> mixedOTUs = getMixedOTUs(workPath + "clusters.uc");
+        annotateTreeByOTUs(newickTree, mixedOTUs);
+        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
+
+        // taxa break
+        BioSortedSet<Element> taxaFromTree = getTaxaFromTree(newickTree);
+        Taxa taxa = new Taxa(taxaFromTree);
+        TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
+        Taxon bioClassification = new Taxon("Insecta", "50557");
+        taxaBreak.setBioClassification(bioClassification);
+        taxaBreak.getTaxaBreakMap(); // default to check prefix
+        taxaBreak.writeTaxaBreakTable(workPath);
+
+        // annotate tree by traits (taxa)
+        annotateTree(newickTree, taxaBreak.taxaBreakMap);
+        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.POSTFIX_NEX);
+    }
+
+
     //Main method
     public static void main(final String[] args) throws Exception {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
@@ -258,28 +309,9 @@ public class TreeUtil {
 
         String rawNewickTree = getRawNewickTree(workPath, stem);
         String cleanedNewickTree = cleanFastTreeOutput(rawNewickTree);
-        TreeParser newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
-        simplifyLabelsOfTree(newickTree);
 
-        // annotate tree by database
-//        List<String> mixedOTUs = getMixedOTUs(workPath + "clusters.uc");
-//        annotateTreeByOTUs(newickTree, mixedOTUs);
-//        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
-
-        // taxa break
-        BioSortedSet<Element> taxaFromTree = getTaxaFromTree(newickTree);
-        Taxa taxa = new Taxa(taxaFromTree);
-        TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
-        Taxon bioClassification = new Taxon("Insecta", "50557");
-        taxaBreak.setBioClassification(bioClassification);
-        taxaBreak.writeTaxaBreakTable(workPath);
-
-        // annotate tree by traits (taxa)
-        List traits = taxaBreak.getTaxaOnGivenRank();
-        annotateTree(newickTree, traits);
-        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.POSTFIX_NEX);
+        createTaxaBreakAndAnnotateTree(workPath, stem, cleanedNewickTree);
 
     }
-
 
 }
