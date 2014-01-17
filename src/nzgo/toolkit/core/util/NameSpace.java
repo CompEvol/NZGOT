@@ -11,7 +11,8 @@ public class NameSpace {
     public static final String PREFIX_OTU_MAPPING = "otu_map_";
     public static final String PREFIX_OTU_REFERENCE = "reference_";
 
-    public static final String POSTFIX_OTUS = ".fasta";
+    public static final String POSTFIX_SEQUENCES = ".fasta";
+    public static final String POSTFIX_OTUS = POSTFIX_SEQUENCES;
     public static final String POSTFIX_MAPPING = ".m8";
 
     public static final String BY_PLOT = "by plot";

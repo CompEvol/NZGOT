@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class AminoAcidUtil {
 
-    public static final int Translation_Frames = 3; // only forward
+    public static final int NUM_Translation_Frames = 3; // only forward
 
     /**
      * get Translation relationship class, such as translation errors
@@ -28,7 +28,7 @@ public class AminoAcidUtil {
      */
     public static Translation getTranslation(Sequence forwardSequence, GeneticCode geneticCode) {
         List<Integer> frames = new ArrayList<>();
-        for (int i=0; i<Translation_Frames; i++) {
+        for (int i=0; i< NUM_Translation_Frames; i++) {
             // Translation Frame = i + 1
             boolean isTranslatable = isTranslatable(forwardSequence.getStates(), geneticCode, i+1);
             if (isTranslatable) {
@@ -67,43 +67,50 @@ public class AminoAcidUtil {
     }
 
     /**
-     * strip List<Sequence> sequences to fit in Frame 1
+     * get translatable List<Sequence> sequences
+     * if stripSequencesInFrame1 is true, strip sequences to fit in Frame 1
      * @param forwardSequences
      * @param translationList
      * @param geneticCode
+     * @param stripSequencesInFrame1
      * @return
      */
-    public static List<Sequence> stripSequencesInFrame1(List<Sequence> forwardSequences, List<Translation> translationList, GeneticCode geneticCode) {
+    public static List<Sequence> getTranslatableSequences(List<Sequence> forwardSequences, List<Translation> translationList, GeneticCode geneticCode, boolean stripSequencesInFrame1) {
         assert forwardSequences.size() == translationList.size();
 
-        List<Sequence> sequencesInFrame1 = new ArrayList<>();
+        List<Sequence> sequencesTranslated = new ArrayList<>();
 
         for (int i=0; i<forwardSequences.size(); i++) {
             Translation translation = translationList.get(i);
             if (translation.isTranslatable()) {
                 Sequence sequence = forwardSequences.get(i);
 
-                if (translation.getFrame() == 1) {
-                    sequencesInFrame1.add(sequence);
+                if (stripSequencesInFrame1) {
+                    if (translation.getFrame() == 1) {
+                        sequencesTranslated.add(sequence);
+                    } else {
+                        int offset = translation.getFrame() - 1;
+                        State[] states = sequence.getStates();
+                        BasicSequence newSeq = new BasicSequence(sequence.getSequenceType(), sequence.getTaxon(), Arrays.copyOfRange(states, offset, states.length));
+
+                        boolean isTranslatable = isTranslatable(newSeq.getStates(), geneticCode, 1);
+                        if (!isTranslatable) throw new IllegalArgumentException("Strip sequence from frame " + translation.getFrame() + " to frame 1 becomes not translated !");
+
+                        sequencesTranslated.add(newSeq);
+                    }
                 } else {
-                    int offset = translation.getFrame() - 1;
-                    State[] states = sequence.getStates();
-                    BasicSequence newSeq = new BasicSequence(sequence.getSequenceType(), sequence.getTaxon(), Arrays.copyOfRange(states, offset, states.length));
-
-                    boolean isTranslatable = isTranslatable(newSeq.getStates(), geneticCode, 1);
-                    if (!isTranslatable) throw new IllegalArgumentException("Strip sequence from frame " + translation.getFrame() + " to frame 1 becomes not translated !");
-
-                    sequencesInFrame1.add(newSeq);
+                    sequencesTranslated.add(sequence);
                 }
             }
         }
 
-        return sequencesInFrame1;
+        return sequencesTranslated;
     }
 
     /**
-     * strip sequences given in a fasta import file to fit in Frame 1
-     * and output to another fasta file
+     * copy translatable sequences from a given fasta file to another fasta file
+     * get translatable List<Sequence> sequences
+     * if stripSequencesInFrame1 is true, strip sequences to fit in Frame 1
      * @param inFastaFile
      * @param outFastaFile
      * @param geneticCode
@@ -111,7 +118,7 @@ public class AminoAcidUtil {
      * @throws IOException
      * @throws ImportException
      */
-    public static int[] stripSequencesInFrame1(File inFastaFile, File outFastaFile, GeneticCode geneticCode) throws IOException, ImportException {
+    public static int[] writeTranslatableSequences(File inFastaFile, File outFastaFile, GeneticCode geneticCode, boolean stripSequencesInFrame1) throws IOException, ImportException {
         int[] result = new int[2];
 
         FastaImporter sequenceImport = new FastaImporter(inFastaFile , SequenceType.NUCLEOTIDE);
@@ -119,13 +126,13 @@ public class AminoAcidUtil {
         List<Sequence> forwardSequences = sequenceImport.importSequences();
         result[0] = forwardSequences.size();
         List<Translation> translationList = getTranslations(forwardSequences, geneticCode);
-        List<Sequence> sequencesInFrame1 = stripSequencesInFrame1(forwardSequences, translationList, geneticCode);
-        result[1] = sequencesInFrame1.size();
+        List<Sequence> sequencesTranslated = getTranslatableSequences(forwardSequences, translationList, geneticCode, stripSequencesInFrame1);
+        result[1] = sequencesTranslated.size();
 
         //Corrected sequences
         Writer write = new OutputStreamWriter(new FileOutputStream(outFastaFile));
         FastaExporter fe = new FastaExporter(write);
-        fe.exportSequences(sequencesInFrame1);
+        fe.exportSequences(sequencesTranslated);
         write.flush();
         write.close();
 
@@ -160,13 +167,14 @@ public class AminoAcidUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        File inFastaFile = new File(workPath + "NZ-insects-BOLD-2013-11-21-co1-5P.fasta");
-        File outFastaFile = new File(workPath + "BOLD-co1-frame1.fasta");
+        File inFastaFile = new File(workPath + "co1.fasta");
+        File outFastaFile = new File(workPath + "co1-translate.fasta");
 
         GeneticCode geneticCode = GeneticCode.INVERTEBRATE_MT;
         MyLogger.info("Genetic Code = " + geneticCode.getName() + ", " + geneticCode.getDescription());
 
-        int[] result = stripSequencesInFrame1(inFastaFile, outFastaFile, geneticCode);
+        boolean stripSequencesInFrame1 = false;
+        int[] result = writeTranslatableSequences(inFastaFile, outFastaFile, geneticCode, stripSequencesInFrame1);
 
         MyLogger.info("\nTotal " + result[0] + " sequences, " + result[1] + " are translatable.");
     }
