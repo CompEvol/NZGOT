@@ -13,6 +13,7 @@ public class MyLogger {
 
     //create an object of SingleObject
     private static Logger LOGGER;
+    private static StreamHandler handler;
 
     //make the constructor private so that this class cannot be instantiated
     private MyLogger(){ }
@@ -25,7 +26,7 @@ public class MyLogger {
             LOGGER.setUseParentHandlers(false);
 
             LogFormatter formatter = new LogFormatter();
-            StreamHandler handler = new StreamHandler(System.out, formatter);
+            handler = new StreamHandler(System.out, formatter);
             handler.setLevel(level);
             LOGGER.addHandler(handler);
         }
@@ -38,6 +39,7 @@ public class MyLogger {
      */
     public static void debug(String msg) {
         getLogger().fine(msg);
+        handler.flush();
     }
 
     /**
@@ -46,6 +48,7 @@ public class MyLogger {
      */
     public static void info(String msg) {
         getLogger().info(msg);
+        handler.flush();
     }
 
     /**
@@ -54,6 +57,7 @@ public class MyLogger {
      */
     public static void warn(String msg) {
         getLogger().warning(msg);
+        handler.flush();
     }
 
     /**
@@ -62,6 +66,7 @@ public class MyLogger {
      */
     public static void error(String msg) {
         getLogger().severe(msg);
+        handler.flush();
     }
 
     public static void main(String[] args) {
