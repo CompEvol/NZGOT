@@ -4,120 +4,95 @@ import beast.app.util.Arguments;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.GeneticCode;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.sequences.GeneticCodeUtil;
 import nzgo.toolkit.core.util.AminoAcidUtil;
 import nzgo.toolkit.core.util.NameSpace;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Sequences Quality Control
  * @author Walter Xie
  */
-public class SequencesQualityControl {
+public class SequencesQualityControl extends Module{
 
-    public static void printTitle() {
-
-
+    public SequencesQualityControl() {
+        super("SequencesQualityControl");
     }
 
-    public static void printUsage(final Arguments arguments) {
-        String program = "SequencesQualityControl";
+    /**
+     * Model constructor
+     * @param inputFile
+     * @param outFile
+     * @param geneticCode
+     * @param stripSequencesInFrame1
+     */
+    private SequencesQualityControl(File inputFile, File outFile, GeneticCode geneticCode, boolean stripSequencesInFrame1) {
+        super();
+        // print msg
+        MyLogger.info("\nWorking path is " + FileSystems.getDefault());
+        MyLogger.info("Input file is " + inputFile);
+        MyLogger.info("Output file is " + outFile);
+        MyLogger.info("Genetic code set to " + geneticCode.getName() + ", " + geneticCode.getDescription());
+        if (stripSequencesInFrame1)
+            MyLogger.info("Strip sequences to fit in Frame 1 ");
 
-        arguments.printUsage(program, "[<input-file-name>]");
+        int[] result = new int[2];
+        try {
+            result = AminoAcidUtil.writeTranslatableSequences(inputFile, outFile, geneticCode, stripSequencesInFrame1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ImportException e) {
+            e.printStackTrace();
+        }
+
+        MyLogger.info("\nTotal " + result[0] + " sequences, " + result[1] + " are translatable.");
+    }
+
+    public void printUsage(final Arguments arguments) {
+        arguments.printUsage(getName(), "[<input-file-name>]");
         System.out.println();
-        System.out.println("  Example: " + program + " co1.fasta");
-        System.out.println("  Example: " + program + " -out co1_translate.fasta -genetic_code invertebrateMitochondrial co1.fasta");
-        System.out.println("  Example: " + program + " -help");
+        System.out.println("  Example: " + getName() + " co1.fasta");
+        System.out.println("  Example: " + getName() + " -out co1_translate.fasta -genetic_code invertebrateMitochondrial co1.fasta");
+        System.out.println("  Example: " + getName() + " -help");
         System.out.println();
     }
 
     // main
-    public static void main(String[] args) throws ImportException, IOException{
+    public static void main(String[] args) {
+        Module module = new SequencesQualityControl();
 
-        final Arguments arguments = new Arguments(
-                new Arguments.Option[]{
-                        new Arguments.Option("working", "Change working directory (user.dir) to input file's directory"),
-                        new Arguments.Option("overwrite", "Allow overwriting of output files"),
-//                        new Arguments.Option("options", "Display an options dialog"),
-//                        new Arguments.Option("window", "Provide a console window"),
-//                        new Arguments.Option("verbose", "Give verbose parsing messages"),
-
+        Arguments.Option[] newOptions = new Arguments.Option[]{
 //                        new Arguments.StringOption("in", "input-file-name", "Input file (*.fasta) name including a correct postfix"),
-                        new Arguments.StringOption("out", "output-file-name", "Output file (*.fasta) name including a correct postfix"),
-                        new Arguments.StringOption("genetic_code", GeneticCodeUtil.getGeneticCodeNames(),
-                                false, "A set of standard genetic codes, default to universal standard code"),
-                        new Arguments.Option("strip", "strip sequences to fit in Frame 1"),
+                new Arguments.StringOption("out", "output-file-name", "Output file (*.fasta) name including a correct postfix"),
+                new Arguments.StringOption("genetic_code", GeneticCodeUtil.getGeneticCodeNames(),
+                        false, "A set of standard genetic codes, default to universal standard code"),
+                new Arguments.Option("strip", "strip sequences to fit in Frame 1"),
 //                        new Arguments.Option("allow_reverse", "Allow reverse sequences into the program"), //TODO
 
-                        new Arguments.Option("print_genetic_code", "Print available genetic codes"),
-                        new Arguments.Option("help", "Print this information and stop"),
-                });
+                new Arguments.Option("print_genetic_code", "Print available genetic codes"),
+        };
+        final Arguments arguments = module.getArguments(newOptions);
 
-        try {
-            arguments.parseArguments(args);
-        } catch (Arguments.ArgumentException ae) {
-            System.out.println();
-            System.out.println(ae.getMessage());
-            System.out.println();
-            printUsage(arguments);
-            System.exit(1);
-        }
-
-        if (arguments.hasOption("help")) {
-            printUsage(arguments);
-            System.exit(0);
-        } else if (arguments.hasOption("print_genetic_code")) {
+        if (arguments.hasOption("print_genetic_code")) {
             GeneticCodeUtil.printGeneticCodes();
             System.exit(0);
         }
 
-        printTitle();
-
-        String inputFileName = null;
-
-        // check args[]
-        final String[] args2 = arguments.getLeftoverArguments();
-        if (args2.length > 1) {
-            MyLogger.error("Unknown option: " + args2[1]);
-            printUsage(arguments);
-            System.exit(0);
-        } else if (args2.length > 0) {
-            inputFileName = args2[0];
-        }
-
-        if (inputFileName == null || !inputFileName.endsWith(NameSpace.POSTFIX_SEQUENCES)) {
-            MyLogger.error("Invalid input file name : " + inputFileName + ", which *.fasta is required");
-            System.exit(0);
-        }
-
-        // input
-        Path inputFile = Paths.get(inputFileName);
-        if (inputFile == null || Files.notExists(inputFile)) {
-            MyLogger.error("Cannot find input file : " + inputFileName);
-            System.exit(0);
-        }
-
-        // set working directory
-        if (inputFile.toFile().getParent() != null && arguments.hasOption("working")) {
-            System.setProperty("user.dir", inputFile.toFile().getParentFile().getAbsolutePath());
-        }
+        Path inputFile = module.getInputFile(args, arguments, NameSpace.POSTFIX_SEQUENCES);
 
         // output
-        String outFileName = inputFileName.replace(".fasta", "_translate.fasta");
+        String outFileName = inputFile.getFileName().toString().replace(".fasta", "_translate.fasta");
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-        if (outFileName == null || !outFileName.endsWith(NameSpace.POSTFIX_SEQUENCES)) {
-            MyLogger.error("Invalid output file name : " + outFileName + ", which *.fasta is required");
-            System.exit(0);
-        }
 
-        Path outFile = FileSystems.getDefault().getPath(".", outFileName);
+        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_SEQUENCES);
         if (!arguments.hasOption("overwrite") && Files.exists(outFile)) {
             MyLogger.error("Output file exists, please use \"-overwrite\" to allow overwrite output");
             System.exit(0);
@@ -131,17 +106,6 @@ public class SequencesQualityControl {
         }
         final boolean stripSequencesInFrame1 = arguments.hasOption("strip");
 
-        // print msg
-        MyLogger.info("\nWorking path is " + FileSystems.getDefault());
-        MyLogger.info("Input file is " + inputFile.getFileName());
-        MyLogger.info("Output file is " + outFile.getFileName());
-        MyLogger.info("Genetic code set to " + geneticCode.getName() + ", " + geneticCode.getDescription());
-        if (stripSequencesInFrame1)
-            MyLogger.info("Strip sequences to fit in Frame 1 ");
-
-        int[] result = AminoAcidUtil.writeTranslatableSequences(inputFile.toFile(), outFile.toFile(), geneticCode, stripSequencesInFrame1);
-
-        MyLogger.info("\nTotal " + result[0] + " sequences, " + result[1] + " are translatable.");
-
+        new SequencesQualityControl(inputFile.toFile(), outFile.toFile(), geneticCode, stripSequencesInFrame1);
     }
 }
