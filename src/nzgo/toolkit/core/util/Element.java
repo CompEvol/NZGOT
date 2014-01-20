@@ -50,4 +50,9 @@ public class Element implements Comparable, Countable{
     public int compareCountTo(Element element) {
         return Integer.compare(this.count, element.getCount());
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (name.equalsIgnoreCase(obj.toString()));
+    }
 }

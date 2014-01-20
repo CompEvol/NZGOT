@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.util;
+package nzgo.toolkit.core.sequences;
 
 import jebl.evolution.sequences.Sequence;
 import nzgo.toolkit.core.community.io.OTUsImporter;

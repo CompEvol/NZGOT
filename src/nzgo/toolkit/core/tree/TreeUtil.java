@@ -1,18 +1,21 @@
-package nzgo.toolkit.core.util;
+package nzgo.toolkit.core.tree;
 
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 import nzgo.toolkit.core.community.util.SampleNameParser;
 import nzgo.toolkit.core.io.Importer;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxa;
 import nzgo.toolkit.core.taxonomy.TaxaBreak;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.uc.MixedOTUs;
-import nzgo.toolkit.tree.DirtyTree;
+import nzgo.toolkit.core.util.BioSortedSet;
+import nzgo.toolkit.core.util.Element;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -110,6 +113,49 @@ public class TreeUtil {
         } else {
             return fields[1];
         }
+    }
+
+    public static List<Element> getTaxaTraits(TreeParser newickTree) {
+        List<Element> taxaTraits = new ArrayList<>();
+
+        Element notIdentified = new Element(TaxaBreak.OTHER);
+
+        for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
+            Node leafNode = newickTree.getNode(i);
+
+            // only work for taxon at moment
+            String taxon = sampleNameParser.getTrait(leafNode.getID());
+
+            if (taxon == null || "null".equalsIgnoreCase(taxon)) {
+//                MyLogger.warn("Find invalid taxon " + taxon + " from tip " + leafNode.getID());
+                notIdentified.incrementCount(1);
+                taxaTraits.set(i, notIdentified);
+            } else {
+                Element countableTaxon;
+                if (taxaTraits.contains(taxon)) {
+                    countableTaxon = taxaTraits.get(i);
+                } else {
+                    countableTaxon = new Element(taxon);
+                }
+                countableTaxon.incrementCount(1);
+
+//                for (Element trait : taxaTraits) {
+//                    if (trait.compareTo(taxon) == 0) {
+//                        countableTaxon = taxaTraits.get(i);
+//                        countableTaxon.incrementCount(1);
+//                        break;
+//                    }
+//                }
+//                if (countableTaxon == null) {
+//                    countableTaxon = new Element(taxon);
+//                    countableTaxon.incrementCount(1);
+//                }
+
+                taxaTraits.set(i, countableTaxon);
+            }
+        }
+
+        return taxaTraits;
     }
 
     protected static void printTraits(List traits) {

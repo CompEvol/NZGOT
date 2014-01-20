@@ -5,10 +5,10 @@ import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.GeneticCode;
 import nzgo.toolkit.NZGOToolkit;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.sequences.AminoAcidUtil;
 import nzgo.toolkit.core.sequences.GeneticCodeUtil;
-import nzgo.toolkit.core.util.AminoAcidUtil;
-import nzgo.toolkit.core.util.NameSpace;
 
 import java.io.File;
 import java.io.IOException;

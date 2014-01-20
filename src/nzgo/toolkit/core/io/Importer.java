@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.io;
 
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.util.NameParser;
+import nzgo.toolkit.core.naming.NameParser;
 
 import java.io.BufferedReader;
 import java.io.File;

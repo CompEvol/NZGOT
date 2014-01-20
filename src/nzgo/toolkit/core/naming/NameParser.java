@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.util;
+package nzgo.toolkit.core.naming;
 
 /**
  * Name Parser
@@ -10,10 +10,18 @@ public class NameParser {
     protected String separator = "\t"; // primary separator default tab
     protected String secondarySeparator = "\\|"; // secondary separator default |
 
+    protected int index = 0; // start from 0
+    protected int secondaryIndex = 0;
+
     public NameParser(){}
 
     public NameParser(String separator){
         setSeparator(separator);
+    }
+
+    public NameParser(String separator, int index){
+        setSeparator(separator);
+        setIndex(index);
     }
 
     public NameParser(String separator, String secondarySeparator){
@@ -36,13 +44,27 @@ public class NameParser {
     }
 
     /**
+     * use sampleNameParser to parse label and get element at index
+     * default separator "\\|", "-", default index 0
+     * @param label
+     * @return
+     */
+    public String getTrait(String label) {
+        String[] fields = parse(label);
+        if (fields == null || index >= fields.length)
+            return null;
+
+        return fields[index];
+    }
+
+    /**
      * apply primary separator
      * @param line
      * @return
      */
     public String[] parse (String line) {
         if (line == null)
-            throw new IllegalArgumentException("Cannot parse null string !");
+            throw new IllegalArgumentException("Cannot parse null !");
         return line.split(getSeparator(), -1);
     }
 
@@ -71,5 +93,21 @@ public class NameParser {
 
     public void setSecondarySeparator(String secondarySeparator) {
         this.secondarySeparator = secondarySeparator;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getSecondaryIndex() {
+        return secondaryIndex;
+    }
+
+    public void setSecondaryIndex(int secondaryIndex) {
+        this.secondaryIndex = secondaryIndex;
     }
 }

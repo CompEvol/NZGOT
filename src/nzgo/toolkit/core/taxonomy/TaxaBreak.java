@@ -1,10 +1,10 @@
 package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameParser;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.util.Element;
-import nzgo.toolkit.core.util.NameParser;
-import nzgo.toolkit.core.util.NameSpace;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedWriter;

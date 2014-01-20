@@ -1,11 +1,12 @@
-package nzgo.toolkit.tree;
+package nzgo.toolkit.labelregex;
 
 import beast.app.util.Arguments;
 import nzgo.toolkit.NZGOToolkit;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
-import nzgo.toolkit.core.util.NameSpace;
-import nzgo.toolkit.core.util.TreeUtil;
+import nzgo.toolkit.core.tree.DirtyTree;
+import nzgo.toolkit.core.tree.TreeUtil;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -69,6 +70,8 @@ public class TreeRegex extends Module{
                 new Arguments.StringOption("dirty_input", DirtyTree.valuesToString(), false,
                         "The dirty newick tree input from other tools, which contains invalid characters. " +
                         "This option is not required for a standard newick format."),
+
+
         };
         final Arguments arguments = module.getArguments(newOptions);
         String outFileName = "tree" + NameSpace.POSTFIX_NEX;

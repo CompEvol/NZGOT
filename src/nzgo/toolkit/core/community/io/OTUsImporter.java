@@ -3,8 +3,8 @@ package nzgo.toolkit.core.community.io;
 import nzgo.toolkit.core.community.*;
 import nzgo.toolkit.core.community.util.SampleNameParser;
 import nzgo.toolkit.core.io.Importer;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.uc.UCParser;
-import nzgo.toolkit.core.util.NameSpace;
 
 import java.io.BufferedReader;
 import java.io.File;

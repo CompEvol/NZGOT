@@ -1,11 +1,10 @@
-package nzgo.toolkit.core.util;
+package nzgo.toolkit.core.sequences;
 
 import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.*;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.sequences.Translation;
 
 import java.io.*;
 import java.util.ArrayList;

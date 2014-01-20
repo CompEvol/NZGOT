@@ -1,4 +1,4 @@
-package nzgo.toolkit.tree;
+package nzgo.toolkit.core.tree;
 
 import java.util.Arrays;
 

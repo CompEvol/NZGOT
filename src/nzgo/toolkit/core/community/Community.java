@@ -2,7 +2,7 @@ package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.community.io.CommunityImporter;
 import nzgo.toolkit.core.community.io.OTUsImporter;
-import nzgo.toolkit.core.util.NameSpace;
+import nzgo.toolkit.core.naming.NameSpace;
 
 import java.io.File;
 import java.io.IOException;

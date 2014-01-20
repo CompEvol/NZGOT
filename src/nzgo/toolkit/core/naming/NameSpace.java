@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.util;
+package nzgo.toolkit.core.naming;
 
 /**
  * Name Space
