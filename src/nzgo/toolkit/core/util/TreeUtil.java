@@ -10,6 +10,7 @@ import nzgo.toolkit.core.taxonomy.Taxa;
 import nzgo.toolkit.core.taxonomy.TaxaBreak;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.uc.MixedOTUs;
+import nzgo.toolkit.tree.DirtyTree;
 
 import java.io.*;
 import java.util.List;
@@ -25,19 +26,6 @@ public class TreeUtil {
     public static SampleNameParser sampleNameParser = new SampleNameParser(); //"\\|", "-"
 
     /**
-     * clean not standard format generated from FastTree
-     *
-     * @param newickTree    FastTree output
-     * @return              standard newick tree
-     * @throws IOException
-     */
-    public static String cleanFastTreeOutput(String newickTree) {
-        // e.g. Coleoptera:0.13579)0.909:0.03425)0.963:0.04190,
-        // replace )0.909: to ):
-        return newickTree.replaceAll("\\)[0..1]\\.\\d+:", "):");
-    }
-
-    /**
      * change newick tree into nexus tree
      *
      * @param newickTree
@@ -48,6 +36,17 @@ public class TreeUtil {
         MyLogger.info("\nCreating Nexus tree ...");
 
         BufferedWriter out = new BufferedWriter(new FileWriter(nexusFilePath));
+        out.write("#nexus\n" + "Begin trees;\n");
+        out.write("tree = " + newickTree + "\n");
+        out.write("End;\n");
+        out.flush();
+        out.close();
+    }
+
+    public static void writeNexusTree(String newickTree, File outFile) throws IOException {
+        MyLogger.info("\nCreating Nexus tree : " + outFile);
+
+        BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
         out.write("#nexus\n" + "Begin trees;\n");
         out.write("tree = " + newickTree + "\n");
         out.write("End;\n");
@@ -225,17 +224,15 @@ public class TreeUtil {
         return label;
     }
 
-    protected static String getRawNewickTree(String workPath, String stem) throws Exception {
-        File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
-
+    public static String getNewickTreeFromFile(File treeFile) throws IOException {
         BufferedReader reader = Importer.getReader(treeFile, "tree");
-        String rawNewickTree = reader.readLine();
+        String newickTree = reader.readLine();
         reader.close();
 
-        return rawNewickTree;
+        return newickTree;
     }
 
-    protected static void annotateTree(TreeParser newickTree, List traits) {
+    public static void annotateTree(TreeParser newickTree, List traits) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
@@ -249,7 +246,7 @@ public class TreeUtil {
 
     }
 
-    protected static void annotateTree(TreeParser newickTree, Map traits) {
+    public static void annotateTree(TreeParser newickTree, Map traits) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
@@ -274,7 +271,7 @@ public class TreeUtil {
 
     }
 
-    protected static void createTaxaBreakAndAnnotateTree(String workPath, String stem, String cleanedNewickTree) throws Exception {
+    public static void createTaxaBreakAndAnnotateTree(String workPath, String stem, String cleanedNewickTree) throws Exception {
         TreeParser newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
         simplifyLabelsOfTree(newickTree);
 
@@ -305,12 +302,14 @@ public class TreeUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        final String stem = "tree";
+        final String stem = "tree-pairwise-ga-clustering";
 
-        String rawNewickTree = getRawNewickTree(workPath, stem);
-        String cleanedNewickTree = cleanFastTreeOutput(rawNewickTree);
+        File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
+        String newickTree = getNewickTreeFromFile(treeFile);
 
-        createTaxaBreakAndAnnotateTree(workPath, stem, cleanedNewickTree);
+        DirtyTree.cleanDirtyTreeOutput(newickTree, DirtyTree.GENEIOUS.toString());
+
+        createTaxaBreakAndAnnotateTree(workPath, stem, newickTree);
 
     }
 

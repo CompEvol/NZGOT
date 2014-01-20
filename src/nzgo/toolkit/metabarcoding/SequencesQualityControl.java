@@ -3,6 +3,7 @@ package nzgo.toolkit.metabarcoding;
 import beast.app.util.Arguments;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.GeneticCode;
+import nzgo.toolkit.NZGOToolkit;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.sequences.GeneticCodeUtil;
@@ -22,7 +23,7 @@ import java.nio.file.Path;
 public class SequencesQualityControl extends Module{
 
     public SequencesQualityControl() {
-        super("SequencesQualityControl");
+        super("SequencesQualityControl", NZGOToolkit.TOOLKIT[1]);
     }
 
     /**
@@ -55,7 +56,7 @@ public class SequencesQualityControl extends Module{
     }
 
     public void printUsage(final Arguments arguments) {
-        arguments.printUsage(getName(), "[<input-file-name>]");
+        arguments.printUsage(getName(), "[<*.fasta>]");
         System.out.println();
         System.out.println("  Example: " + getName() + " co1.fasta");
         System.out.println("  Example: " + getName() + " -out co1_translate.fasta -genetic_code invertebrateMitochondrial co1.fasta");
@@ -68,8 +69,8 @@ public class SequencesQualityControl extends Module{
         Module module = new SequencesQualityControl();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
-//                        new Arguments.StringOption("in", "input-file-name", "Input file (*.fasta) name including a correct postfix"),
-                new Arguments.StringOption("out", "output-file-name", "Output file (*.fasta) name including a correct postfix"),
+//                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct postfix"),
+                new Arguments.StringOption("out", "output-file-name", "Output file name (*.fasta) including a correct postfix"),
                 new Arguments.StringOption("genetic_code", GeneticCodeUtil.getGeneticCodeNames(),
                         false, "A set of standard genetic codes, default to universal standard code"),
                 new Arguments.Option("strip", "strip sequences to fit in Frame 1"),
@@ -84,7 +85,9 @@ public class SequencesQualityControl extends Module{
             System.exit(0);
         }
 
-        Path inputFile = module.getInputFile(args, arguments, NameSpace.POSTFIX_SEQUENCES);
+        module.init(arguments, args);
+        String inputFileName = module.getFirstArg(arguments);
+        Path inputFile = module.getInputFile(arguments, inputFileName, NameSpace.POSTFIX_SEQUENCES);
 
         // output
         String outFileName = inputFile.getFileName().toString().replace(".fasta", "_translate.fasta");

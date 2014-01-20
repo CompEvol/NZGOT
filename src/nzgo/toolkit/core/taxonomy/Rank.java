@@ -32,7 +32,7 @@ public enum Rank {
     KINGDOM("kingdom"),
     NO_RANK("no rank");
 
-    protected String rank;
+    private String rank;
 
     private Rank(String rank) {
         this.rank = rank;

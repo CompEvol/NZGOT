@@ -18,72 +18,28 @@ import java.nio.file.Paths;
 public class Module {
 
     private final static Version version = new NZGOTVersion();
-    protected String name = "NZGOToolkit";
+    protected final String[] names = new String[2];
 
     public Module() {  }
 
-    public Module(String name) {
-        setName(name);
+    public Module(String name, String fullName) {
+        setName(name, fullName);
     }
 
     protected String getName() {
-        return name;
+        return names[0];
     }
 
-    protected void setName(String name) {
-        this.name = name;
+    protected String getFullName() {
+        return names[1];
     }
 
-    public Arguments getArguments(Arguments.Option[] newOptions) {
-        Arguments.Option[] commonOptions = new Arguments.Option[]{
-                new Arguments.Option("working", "Change working directory (user.dir) to input file's directory"),
-                new Arguments.Option("overwrite", "Allow overwriting of output files"),
-//                        new Arguments.Option("options", "Display an options dialog"),
-//                        new Arguments.Option("window", "Provide a console window"),
-//                        new Arguments.Option("verbose", "Give verbose parsing messages"),
-
-                new Arguments.Option("help", "Print this information and stop"),
-        };
-
-        Arguments.Option[] allOptions = ArrayUtil.combineArrays(commonOptions, newOptions);
-        return new Arguments(allOptions);
+    protected void setName(String name, String fullName) {
+        this.names[0] = name;
+        this.names[1] = fullName;
     }
 
-    public void printTitle() {
-        System.out.println();
-        centreLine(getName() + " " + version.getVersionString() + ", " + version.getDateString(), 60);
-        centreLine("New Zealand Genomic Observatory Toolkit", 60);
-        for (String creditLine : version.getCredits()) {
-            centreLine(creditLine, 60);
-        }
-        System.out.println();
-    }
-
-    public void centreLine(String line, int pageWidth) {
-        int n = pageWidth - line.length();
-        int n1 = n / 2;
-        for (int i = 0; i < n1; i++) {
-            System.out.print(" ");
-        }
-        System.out.println(line);
-    }
-
-    public void printUsage(final Arguments arguments) {
-        arguments.printUsage(getName(), "[<input-file-name>]");
-        System.out.println();
-        System.out.println("  Example: " + getName() + " -help");
-        System.out.println();
-    }
-
-    /**
-     * common method to get input file
-     * @param args
-     * @param arguments
-     * @param inputFileNamePostfix
-     * @return
-     */
-    public Path getInputFile(String[] args, final Arguments arguments, String inputFileNamePostfix) {
-
+    public void init(Arguments arguments, String[] args) {
         try {
             arguments.parseArguments(args);
         } catch (Arguments.ArgumentException ae) {
@@ -100,8 +56,11 @@ public class Module {
         }
 
         printTitle();
+    }
 
-        String inputFileName = null;
+
+    public String getFirstArg(Arguments arguments) {
+        String firstArg = null;
 
         // check args[]
         final String[] args2 = arguments.getLeftoverArguments();
@@ -110,8 +69,68 @@ public class Module {
             printUsage(arguments);
             System.exit(0);
         } else if (args2.length > 0) {
-            inputFileName = args2[0];
+            firstArg = args2[0];
         }
+        return firstArg;
+    }
+
+    /**
+     * add new options to Arguments
+     * @param newOptions
+     * @return
+     */
+    public Arguments getArguments(Arguments.Option[] newOptions) {
+        Arguments.Option[] commonOptions = new Arguments.Option[]{
+                new Arguments.Option("working", "Change working directory (user.dir) to input file's directory"),
+                new Arguments.Option("overwrite", "Allow overwriting of output files"),
+//                        new Arguments.Option("options", "Display an options dialog"),
+//                        new Arguments.Option("window", "Provide a console window"),
+//                        new Arguments.Option("verbose", "Give verbose parsing messages"),
+
+                new Arguments.Option("help", "Print this information and stop"),
+        };
+
+        Arguments.Option[] allOptions = ArrayUtil.combineArrays(commonOptions, newOptions);
+        return new Arguments(allOptions);
+    }
+
+    protected void printTitle() {
+        System.out.println();
+        centreLine(getName() + " " + version.getVersionString() + ", " + version.getDateString(), 60);
+        centreLine(getFullName(), 60);
+        for (String creditLine : version.getCredits()) {
+            centreLine(creditLine, 60);
+        }
+        System.out.println();
+    }
+
+    protected void centreLine(String line, int pageWidth) {
+        int n = pageWidth - line.length();
+        int n1 = n / 2;
+        for (int i = 0; i < n1; i++) {
+            System.out.print(" ");
+        }
+        System.out.println(line);
+    }
+
+    protected void printUsage(final Arguments arguments) {
+        arguments.printUsage(getName(), "[<input-file-name>]");
+        System.out.println();
+        System.out.println("  Example: " + getName() + " -help");
+        System.out.println();
+    }
+
+
+    //++++++++++ Validate/Input/Output File ++++++++++
+
+    /**
+     * common method to get input file
+     *
+     * @param arguments
+     * @param inputFileNamePostfix
+     * @return
+     */
+    public Path getInputFile(final Arguments arguments, String inputFileName, String inputFileNamePostfix) {
 
         Path inputFile = validateInputFile(inputFileName, inputFileNamePostfix);
 
@@ -122,8 +141,6 @@ public class Module {
 
         return inputFile;
     }
-
-    //++++++++++ Validate File ++++++++++
 
     public void validateFile(String fileName, String fileNamePostfix, String ioMessage) {
         if (fileName == null) {
