@@ -10,7 +10,6 @@ import nzgo.toolkit.core.tree.TreeUtil;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -97,11 +96,7 @@ public class TreeRegex extends Module{
             outFileName = arguments.getStringOption("out");
         }
 
-        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_NEX);
-        if (!arguments.hasOption("overwrite") && Files.exists(outFile)) {
-            MyLogger.error("Output file exists, please use \"-overwrite\" to allow overwrite output");
-            System.exit(0);
-        }
+        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_NEX, arguments.hasOption("overwrite"));
 
         // program parameters
         String dirtyInput = null;

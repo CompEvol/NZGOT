@@ -176,14 +176,22 @@ public class Module {
     /**
      * validate output file
      * if fileNamePostfix is null, ignore checking postfix
+     * if overwrite is false, check if outFile exists
      * @param fileName
      * @param fileNamePostfix
+     * @param overwrite
      * @return
      */
-    public Path validateOutputFile(String fileName, String fileNamePostfix) {
+    public Path validateOutputFile(String fileName, String fileNamePostfix, boolean overwrite) {
         validateFile(fileName, fileNamePostfix, "output");
 
-        return FileSystems.getDefault().getPath(".", fileName);
+        Path outFile = FileSystems.getDefault().getPath(".", fileName);
+        if (!overwrite && Files.exists(outFile)) {
+            MyLogger.error("Output file exists, please use \"-overwrite\" to allow overwrite output");
+            System.exit(0);
+        }
+
+        return outFile;
     }
 
 }

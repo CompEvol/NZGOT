@@ -9,11 +9,11 @@ import nzgo.toolkit.core.naming.NameSpace;
  */
 public class SampleNameParser extends NameParser {
 
+    // mostly use for sequences annotation (*.fasta)
     // eg IDME8NK01ETVXF|DirectSoil|LB1-A
-    private static final int READ_INDEX_SAMPLE = 2;
-
     public SampleNameParser () {
         this("\\|", "-");
+        setSplitIndex(2);
     }
     public SampleNameParser(String separator, String secondarySeparator){
         super(separator, secondarySeparator);
@@ -27,11 +27,11 @@ public class SampleNameParser extends NameParser {
      */
     public String getSampleFromRead(String readName) {
         // 3 fields in read name
-        String[] fields = parse(readName);
-        if (fields.length < 3)
+        String sample = getTrait(readName);
+        if (sample == null)
             throw new IllegalArgumentException("Error: invalid read name : " + readName);
 
-        return fields[READ_INDEX_SAMPLE];
+        return sample;
     }
 
     /**

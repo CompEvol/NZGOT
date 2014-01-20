@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class Importer {
 
-    public static NameParser nameParser = new NameParser(); // default tab
+    public static NameParser nameParser = new NameParser(); // default tab and |
 
     public static BufferedReader getReader(File file, String msg) throws IOException {
 
