@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.community;
 
 import jebl.evolution.sequences.Sequence;
-import nzgo.toolkit.core.community.util.SampleNameParser;
+import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.util.Arrays;

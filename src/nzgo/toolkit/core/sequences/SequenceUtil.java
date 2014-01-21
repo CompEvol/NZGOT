@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.sequences;
 
 import jebl.evolution.sequences.Sequence;
-import nzgo.toolkit.core.community.io.OTUsImporter;
+import nzgo.toolkit.core.io.OTUsImporter;
 import nzgo.toolkit.core.logger.MyLogger;
 
 import java.io.*;

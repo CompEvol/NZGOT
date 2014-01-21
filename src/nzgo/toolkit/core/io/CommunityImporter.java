@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.community.io;
+package nzgo.toolkit.core.io;
 
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.logger.MyLogger;

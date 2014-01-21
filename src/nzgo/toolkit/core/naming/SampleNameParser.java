@@ -1,7 +1,4 @@
-package nzgo.toolkit.core.community.util;
-
-import nzgo.toolkit.core.naming.NameParser;
-import nzgo.toolkit.core.naming.NameSpace;
+package nzgo.toolkit.core.naming;
 
 /**
  * Sample Name Parser

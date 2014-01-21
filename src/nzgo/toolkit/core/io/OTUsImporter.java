@@ -1,9 +1,8 @@
-package nzgo.toolkit.core.community.io;
+package nzgo.toolkit.core.io;
 
 import nzgo.toolkit.core.community.*;
-import nzgo.toolkit.core.community.util.SampleNameParser;
-import nzgo.toolkit.core.io.Importer;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.uc.UCParser;
 
 import java.io.BufferedReader;
