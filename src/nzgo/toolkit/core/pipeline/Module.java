@@ -58,7 +58,7 @@ public class Module {
         printTitle();
     }
 
-
+    // args[0]
     public String getFirstArg(Arguments arguments) {
         String firstArg = null;
 
@@ -81,13 +81,13 @@ public class Module {
      */
     public Arguments getArguments(Arguments.Option[] newOptions) {
         Arguments.Option[] commonOptions = new Arguments.Option[]{
-                new Arguments.Option("working", "Change working directory (user.dir) to input file's directory"),
-                new Arguments.Option("overwrite", "Allow overwriting of output files"),
-//                        new Arguments.Option("options", "Display an options dialog"),
-//                        new Arguments.Option("window", "Provide a console window"),
-//                        new Arguments.Option("verbose", "Give verbose parsing messages"),
+                new Arguments.Option("working", "Change working directory (user.dir) to input file's directory."),
+                new Arguments.Option("overwrite", "Allow overwriting of output files."),
+//                        new Arguments.Option("options", "Display an options dialog."),
+//                        new Arguments.Option("window", "Provide a console window."),
+//                        new Arguments.Option("verbose", "Give verbose parsing messages."),
 
-                new Arguments.Option("help", "Print this information and stop"),
+                new Arguments.Option("help", "Print this information and stop."),
         };
 
         Arguments.Option[] allOptions = ArrayUtil.combineArrays(commonOptions, newOptions);
@@ -132,7 +132,7 @@ public class Module {
      */
     public Path getInputFile(final Arguments arguments, String inputFileName, String inputFileNamePostfix) {
 
-        Path inputFile = validateInputFile(inputFileName, inputFileNamePostfix);
+        Path inputFile = validateInputFile(inputFileName, inputFileNamePostfix, "input");
 
         // set working directory
         if (inputFile.toFile().getParent() != null && arguments.hasOption("working")) {
@@ -142,7 +142,7 @@ public class Module {
         return inputFile;
     }
 
-    public void validateFile(String fileName, String fileNamePostfix, String ioMessage) {
+    public void validateFileName(String fileName, String fileNamePostfix, String ioMessage) {
         if (fileName == null) {
             MyLogger.error("Invalid " + ioMessage + " file name : " + fileName);
             System.exit(0);
@@ -156,17 +156,18 @@ public class Module {
     /**
      * validate input file
      * if fileNamePostfix is null, ignore checking postfix
+     *
      * @param fileName
      * @param fileNamePostfix
      * @return
      */
-    public Path validateInputFile(String fileName, String fileNamePostfix) {
-        validateFile(fileName, fileNamePostfix, "input");
+    public Path validateInputFile(String fileName, String fileNamePostfix, String ioMessage) {
+        validateFileName(fileName, fileNamePostfix, ioMessage);
 
         // input
         Path file = Paths.get(fileName);
         if (file == null || Files.notExists(file)) {
-            MyLogger.error("Cannot find input file : " + fileName);
+            MyLogger.error("Cannot find " + ioMessage + " file : " + fileName);
             System.exit(0);
         }
 
@@ -177,13 +178,15 @@ public class Module {
      * validate output file
      * if fileNamePostfix is null, ignore checking postfix
      * if overwrite is false, check if outFile exists
+     *
      * @param fileName
      * @param fileNamePostfix
+     * @param ioMessage
      * @param overwrite
      * @return
      */
-    public Path validateOutputFile(String fileName, String fileNamePostfix, boolean overwrite) {
-        validateFile(fileName, fileNamePostfix, "output");
+    public Path validateOutputFile(String fileName, String fileNamePostfix, String ioMessage, boolean overwrite) {
+        validateFileName(fileName, fileNamePostfix, ioMessage);
 
         Path outFile = FileSystems.getDefault().getPath(".", fileName);
         if (!overwrite && Files.exists(outFile)) {

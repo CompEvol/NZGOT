@@ -1,6 +1,7 @@
 package nzgo.toolkit.core.tree;
 
 import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import nzgo.toolkit.core.community.util.SampleNameParser;
 import nzgo.toolkit.core.io.Importer;
@@ -26,7 +27,7 @@ import java.util.Map;
  */
 public class TreeUtil {
 
-    public static SampleNameParser sampleNameParser = new SampleNameParser(); //"\\|", "-"
+    public static SampleNameParser sampleNameParser = new SampleNameParser(); //TODO
 
     /**
      * change newick tree into nexus tree
@@ -46,12 +47,12 @@ public class TreeUtil {
         out.close();
     }
 
-    public static void writeNexusTree(String newickTree, File outFile) throws IOException {
+    public static void writeNexusTree(Tree newickTree, File outFile) throws IOException {
         MyLogger.info("\nCreating Nexus tree : " + outFile);
 
         BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
         out.write("#nexus\n" + "Begin trees;\n");
-        out.write("tree = " + newickTree + "\n");
+        out.write("tree = " + newickTree.getRoot().toNewick() + ";\n");
         out.write("End;\n");
         out.flush();
         out.close();
@@ -63,7 +64,7 @@ public class TreeUtil {
      * @param newickTree
      * @return
      */
-    public static BioSortedSet<Element> getTaxaFromTree(TreeParser newickTree) {
+    public static BioSortedSet<Element> getTaxaTraitsFromTree(Tree newickTree) {
         BioSortedSet<Element> traits = new BioSortedSet<>("taxa");
 
         Element notIdentified = new Element(TaxaBreak.OTHER);
@@ -103,19 +104,22 @@ public class TreeUtil {
      */
     protected static String getTaxon(String label) {
         char c = label.charAt(0);
-        String[] fields = sampleNameParser.parse(label);
+//        String[] fields = sampleNameParser.parse(label);
         if (Character.isDigit(c)) {
 //            if (fields.length < 10) return fields[8];
 //            if (fields[9] == null) return fields[8];
 //            if (fields[9].contentEquals("null")) return fields[8];
 //            return fields[9];
-            return fields[3];
+            sampleNameParser.getSeparator(0).setSplitIndex(3); //TODO
         } else {
-            return fields[1];
+            sampleNameParser.getSeparator(0).setSplitIndex(1);
         }
+
+        return sampleNameParser.getSeparator(0).getItem(label);
     }
 
-    public static List<Element> getTaxaTraits(TreeParser newickTree) {
+    public static List<Element> getTaxaTraits(Tree newickTree) {
+        // annotations to insert in nodes
         List<Element> taxaTraits = new ArrayList<>();
 
         Element notIdentified = new Element(TaxaBreak.OTHER);
@@ -124,7 +128,7 @@ public class TreeUtil {
             Node leafNode = newickTree.getNode(i);
 
             // only work for taxon at moment
-            String taxon = sampleNameParser.getTrait(leafNode.getID());
+            String taxon = getTaxon(leafNode.getID());
 
             if (taxon == null || "null".equalsIgnoreCase(taxon)) {
 //                MyLogger.warn("Find invalid taxon " + taxon + " from tip " + leafNode.getID());
@@ -173,7 +177,7 @@ public class TreeUtil {
     protected static String simplifyLabel(String label) {
         char c = label.charAt(0);
         if (Character.isDigit(c)) {
-            String[] fields = sampleNameParser.parse(label);
+            String[] fields = sampleNameParser.getSeparator(0).parse(label);
             String taxon = fields[8];
             if (fields.length > 9 && fields[9] != null && !fields[9].contentEquals("null"))
                 taxon = fields[9];
@@ -183,7 +187,7 @@ public class TreeUtil {
         }
     }
 
-    protected static void simplifyLabelsOfTree(TreeParser newickTree) {
+    protected static void simplifyLabelsOfTree(Tree newickTree) {
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
 
@@ -192,7 +196,7 @@ public class TreeUtil {
         }
     }
 
-    protected static String getMetaString(String label, List traits) {
+    protected static String getMetaStringFrom(String label, List traits) {
         for (Object tr : traits) {
             if (label.contains(tr.toString()))
                 return "trait=" + tr.toString();
@@ -200,7 +204,7 @@ public class TreeUtil {
         return "trait=" + TaxaBreak.OTHER;
     }
 
-    protected static <T, E> String getMetaString(String label, Map<T, E> traits) {
+    protected static <T, E> String getMetaStringFrom(String label, Map<T, E> traits) {
         for (Map.Entry<T, E> entry : traits.entrySet()) {
             if (label.contains(entry.getKey().toString())) {
                 return "trait=" + entry.getValue().toString();
@@ -246,7 +250,7 @@ public class TreeUtil {
         while (line != null) {
             if (line.startsWith(">")) {
                 line = line.substring(1);
-                String[] fields = sampleNameParser.parse(line);
+                String[] fields = sampleNameParser.getSeparator(0).parse(line);
 
                 if (fields.length < 2)
                     throw new IllegalArgumentException("Error: invalid sequence label in the line: " + line);
@@ -278,12 +282,12 @@ public class TreeUtil {
         return newickTree;
     }
 
-    public static void annotateTree(TreeParser newickTree, List traits) {
+    public static void annotateTree(Tree newickTree, List traits) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
 
-            String metaDataString = getMetaString(leafNode.getID(), traits);
+            String metaDataString = getMetaStringFrom(leafNode.getID(), traits);
             if (leafNode.metaDataString != null && leafNode.metaDataString.length() > 1)
                 metaDataString = ", " + metaDataString;
 
@@ -292,12 +296,12 @@ public class TreeUtil {
 
     }
 
-    public static void annotateTree(TreeParser newickTree, Map traits) {
+    public static void annotateTree(Tree newickTree, Map traits) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
 
-            String metaDataString = getMetaString(leafNode.getID(), traits);
+            String metaDataString = getMetaStringFrom(leafNode.getID(), traits);
             if (leafNode.metaDataString != null && leafNode.metaDataString.length() > 1)
                 metaDataString = leafNode.metaDataString + ", " + metaDataString;
 
@@ -306,7 +310,7 @@ public class TreeUtil {
 
     }
 
-    protected static void annotateTreeByOTUs(TreeParser newickTree, List<String> mixedOTUs) {
+    protected static void annotateTreeByOTUs(Tree newickTree, List<String> mixedOTUs) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
@@ -318,7 +322,7 @@ public class TreeUtil {
     }
 
     public static void createTaxaBreakAndAnnotateTree(String workPath, String stem, String cleanedNewickTree) throws Exception {
-        TreeParser newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
+        Tree newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
         simplifyLabelsOfTree(newickTree);
 
         // annotate tree by database
@@ -327,7 +331,7 @@ public class TreeUtil {
         writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
 
         // taxa break
-        BioSortedSet<Element> taxaFromTree = getTaxaFromTree(newickTree);
+        BioSortedSet<Element> taxaFromTree = getTaxaTraitsFromTree(newickTree);
         Taxa taxa = new Taxa(taxaFromTree);
         TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
         Taxon bioClassification = new Taxon("Insecta", "50557");
@@ -356,7 +360,6 @@ public class TreeUtil {
         DirtyTree.cleanDirtyTreeOutput(newickTree, DirtyTree.GENEIOUS.toString());
 
         createTaxaBreakAndAnnotateTree(workPath, stem, newickTree);
-
     }
 
 }

@@ -68,14 +68,14 @@ public class SequencesQualityControl extends Module{
         Module module = new SequencesQualityControl();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
-//                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct postfix"),
-                new Arguments.StringOption("out", "output-file-name", "Output file name (*.fasta) including a correct postfix"),
+//                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct postfix."),
+                new Arguments.StringOption("out", "output-file-name", "Output file name (*.fasta) including a correct postfix."),
                 new Arguments.StringOption("genetic_code", GeneticCodeUtil.getGeneticCodeNames(),
-                        false, "A set of standard genetic codes, default to universal standard code"),
-                new Arguments.Option("strip", "strip sequences to fit in Frame 1"),
-//                        new Arguments.Option("allow_reverse", "Allow reverse sequences into the program"), //TODO
+                        false, "A set of standard genetic codes, default to universal standard code."),
+                new Arguments.Option("strip", "strip sequences to fit in Frame 1."),
+//                        new Arguments.Option("allow_reverse", "Allow reverse sequences into the program."), //TODO
 
-                new Arguments.Option("print_genetic_code", "Print available genetic codes"),
+                new Arguments.Option("print_genetic_code", "Print available genetic codes."),
         };
         final Arguments arguments = module.getArguments(newOptions);
 
@@ -85,6 +85,7 @@ public class SequencesQualityControl extends Module{
         }
 
         module.init(arguments, args);
+        // input
         String inputFileName = module.getFirstArg(arguments);
         Path inputFile = module.getInputFile(arguments, inputFileName, NameSpace.POSTFIX_SEQUENCES);
 
@@ -93,8 +94,7 @@ public class SequencesQualityControl extends Module{
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-
-        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_SEQUENCES, arguments.hasOption("overwrite"));
+        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_SEQUENCES, "output", arguments.hasOption("overwrite"));
 
         // program parameters
         GeneticCode geneticCode = GeneticCode.UNIVERSAL;

@@ -72,7 +72,7 @@ public class OTUsImporter extends Importer {
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = nameParser.parse(line);
+            String[] fields = nameParser.getSeparator(0).parse(line);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -138,7 +138,7 @@ public class OTUsImporter extends Importer {
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = nameParser.parse(line);
+            String[] fields = nameParser.getSeparator(0).parse(line);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -169,7 +169,7 @@ public class OTUsImporter extends Importer {
         String line = reader.readLine();
         while (line != null) {
             // 3 columns: 1st -> identity %, 2nd -> otu name, 3rd -> reference sequence id
-            String[] fields = nameParser.parse(line);
+            String[] fields = nameParser.getSeparator(0).parse(line);
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 

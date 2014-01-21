@@ -13,7 +13,7 @@ public class SampleNameParser extends NameParser {
     // eg IDME8NK01ETVXF|DirectSoil|LB1-A
     public SampleNameParser () {
         this("\\|", "-");
-        setSplitIndex(2);
+        getSeparator(0).setSplitIndex(2); // TODO
     }
     public SampleNameParser(String separator, String secondarySeparator){
         super(separator, secondarySeparator);
@@ -27,7 +27,7 @@ public class SampleNameParser extends NameParser {
      */
     public String getSampleFromRead(String readName) {
         // 3 fields in read name
-        String sample = getTrait(readName);
+        String sample = getSeparator(0).getItem(readName);
         if (sample == null)
             throw new IllegalArgumentException("Error: invalid read name : " + readName);
 
@@ -41,7 +41,7 @@ public class SampleNameParser extends NameParser {
      */
     public String[] getPlotFromSample(String sample) {
         // plot_subplot, subplot
-        String[] plot_subplot = secondaryParse(sample);
+        String[] plot_subplot = getSeparator(1).parse(sample);
         if (plot_subplot.length != 2)
             throw new IllegalArgumentException("Error: invalid sample location in the read name : " + sample);
 
