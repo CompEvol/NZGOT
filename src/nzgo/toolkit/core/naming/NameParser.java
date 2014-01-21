@@ -17,12 +17,15 @@ import java.util.List;
  * and change <tt>splitIndex</tt> to <tt>use getSeparator(index).setSplitIndex(splitIndex)</tt>.
  * 2) <tt>index</tt> in <tt>NameParser</tt> is index for <tt>List<Separator> separators</tt>.
  * 3) <tt>splitIndex</tt> in <tt>Separator</tt> for String[] <tt>parse(label)</tt> splitting by <tt>regex</tt>.
+ * 4) if <tt>isRegexGroup</tt> true, then use to parse names into groups (regexGroup),
+ * if <tt>isRegexGroup</tt> false, then use to parse names in different naming level (levelSeparator).
  *
  * @author Walter Xie
  */
 public class NameParser {
 
     protected List<Separator> separators;
+    protected final boolean isRegexGroup;
 
     // mostly use for tab-separated values (*.tsv)
     // default to have 2 separators
@@ -36,15 +39,19 @@ public class NameParser {
         separators = new ArrayList<>();
         separators.add(new Separator(separator));
         separators.add(new Separator(secondarySeparator));
+        isRegexGroup = false;
     }
 
-    // mostly use to parse names into groups
-    public NameParser(Path separatorsTSV){
+    // load separators from file, separators.size >= 1
+    // if isRegexGroup true, then use to parse names into groups (regexGroup)
+    // if isRegexGroup false, then use to parse names in different naming level (levelSeparator)
+    public NameParser(Path separatorsTSV, final boolean isRegexGroup){
         try {
             separators = ConfigImporter.importSeparators(separatorsTSV);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.isRegexGroup = isRegexGroup;
     }
 
     public static String getPrefix(String label, String separator) {

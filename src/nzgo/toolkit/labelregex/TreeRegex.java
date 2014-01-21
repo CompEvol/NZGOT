@@ -4,10 +4,10 @@ import beast.app.util.Arguments;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import nzgo.toolkit.NZGOToolkit;
-import nzgo.toolkit.core.community.util.SampleNameParser;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameParser;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.tree.DirtyTree;
@@ -78,7 +78,7 @@ public class TreeRegex extends Module{
         System.out.println();
         System.out.println("  <test-string> is a test string only applied to -test option.");
         System.out.println("  Example: " + getName() + " -test IDME8NK01ETVXF|DirectSoil|LB1-A");
-        System.out.println("  Example: " + getName() + " -customSeparators -test IDME8NK01ETVXF|DirectSoil|LB1-A");
+        System.out.println("  Example: " + getName() + " -levelSeparator -test IDME8NK01ETVXF|DirectSoil|LB1-A");
         System.out.println();
     }
 
@@ -101,10 +101,15 @@ public class TreeRegex extends Module{
                         " for mapping traits to tree nodes, where the 1st column is leaf nodes labels, " +
                         "the 2nd is the mapped trait."),
 
-                new Arguments.Option("customSeparators", "use a customized " + SEPARATORS_FILE + " to load separators, " +
-                        "where the 1st column is a regular expression, the 2nd is the index at the string " +
+                new Arguments.Option("levelSeparator", "load customized separators from " + SEPARATORS_FILE +
+                        ", where the 1st column is a regular expression, the 2nd is the index at the string " +
                         "array parsed by the regular expression. Use default separators if no " + SEPARATORS_FILE +
-                        ". Use default index 0 if no 2nd column."),
+                        ". Level separators parse names in different naming level. Index = 0 if no 2nd column."),
+                new Arguments.Option("regexGroup", "load customized regular expression groups from " + SEPARATORS_FILE +
+                        ", where the 1st column is a regular expression, the 2nd is the group index, " +
+                        "the 3rd is a unique name for this group. Regex groups parse names into groups. " +
+                        "Index = 0 and name is the regular expression string without none word characters, " +
+                        "only if no both 2nd and 3rd columns."),
                 new Arguments.Option("printSeparators", "print defined separators in sequence, " +
                         "including the index at the array from splitting label"),
 
@@ -120,9 +125,12 @@ public class TreeRegex extends Module{
         module.init(arguments, args);
 
         // separators
-        if (arguments.hasOption("customSeparators")) {
+        if (arguments.hasOption("levelSeparator") || arguments.hasOption("regexGroup")) {
+            MyLogger.error("Cannot use -levelSeparator and -regexGroup at the same time !");
+            System.exit(0);
+        } else if (arguments.hasOption("levelSeparator") || arguments.hasOption("regexGroup")) {
             Path separatorsTSV = module.validateInputFile(SEPARATORS_FILE, NameSpace.POSTFIX_TSV, "customized separators");
-            nameParser = new NameParser(separatorsTSV);
+            nameParser = new NameParser(separatorsTSV, arguments.hasOption("regexGroup"));
         }
 
         if (arguments.hasOption("printSeparators")) {

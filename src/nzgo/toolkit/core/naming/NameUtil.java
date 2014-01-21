@@ -14,4 +14,7 @@ public class NameUtil {
         return true;
     }
 
+    public static String getWordCharacters(String name) {
+        return name.replaceAll("\\W", "");
+    }
 }

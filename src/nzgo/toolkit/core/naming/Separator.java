@@ -11,6 +11,7 @@ public class Separator{
 
     private Pattern regex;
     private int splitIndex;
+    private String name;
 
     public Separator(String regex) {
         setRegex(regex);
@@ -60,6 +61,14 @@ public class Separator{
         System.out.print(getItem(label) + "\n");
     }
 
+    public String getName() {
+        setName(NameUtil.getWordCharacters(getRegex().toString()));
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Pattern getRegex() {
         if (regex == null)
