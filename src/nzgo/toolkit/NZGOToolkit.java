@@ -41,8 +41,8 @@ public class NZGOToolkit extends Module{
         Module module = new NZGOToolkit();
         throw new UnsupportedOperationException("Not implemented yet !");
 //        Arguments.Option[] newOptions = new Arguments.Option[]{
-////                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct postfix"),
-//                new Arguments.StringOption("out", "output-file-name", "Output tree file name (*.nex) including a correct postfix"),
+////                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct suffix"),
+//                new Arguments.StringOption("out", "output-file-name", "Output tree file name (*.nex) including a correct suffix"),
 //                new Arguments.StringOption("dirty_input", new String[]{"FastTree", "Geneious"},
 //                        false, "The dirty newick tree input from other tools, which contains invalid characters. " +
 //                        "This option is not required for a standard newick format."),
@@ -52,7 +52,7 @@ public class NZGOToolkit extends Module{
 //
 //
 //
-//        Path inputFile = module.getInputFile(args, arguments, NameSpace.POSTFIX_NEWICK);
+//        Path inputFile = module.getInputFile(args, arguments, NameSpace.SUFFIX_NEWICK);
 //
 //        // output
 //        String outFileName = inputFile.getFileName().toString().replace(".fasta", "_translate.fasta");
@@ -60,7 +60,7 @@ public class NZGOToolkit extends Module{
 //            outFileName = arguments.getStringOption("out");
 //        }
 //
-//        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_NEX);
+//        Path outFile = module.validateOutputFile(outFileName, NameSpace.SUFFIX_NEX);
 //        if (!arguments.hasOption("overwrite") && Files.exists(outFile)) {
 //            MyLogger.error("Output file exists, please use \"-overwrite\" to allow overwrite output");
 //            System.exit(0);

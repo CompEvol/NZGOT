@@ -13,16 +13,16 @@ public class NameSpace {
     public static final String PREFIX_OTU_MAPPING = "otu_map_";
     public static final String PREFIX_OTU_REFERENCE = "reference_";
 
-    public static final String POSTFIX_SEQUENCES = ".fasta";
-    public static final String POSTFIX_OTUS = POSTFIX_SEQUENCES;
-    public static final String POSTFIX_MAPPING = ".m8";
+    public static final String SUFFIX_SEQUENCES = ".fasta";
+    public static final String SUFFIX_OTUS = SUFFIX_SEQUENCES;
+    public static final String SUFFIX_MAPPING = ".m8";
 
     public static final String BY_PLOT = "by plot";
     public static final String BY_SUBPLOT = "by subplot";
 
-    public static final String POSTFIX_NEWICK = ".newick";
-    public static final String POSTFIX_NEX = ".nex";
+    public static final String SUFFIX_NEWICK = ".newick";
+    public static final String SUFFIX_NEX = ".nex";
 
-    public static final String POSTFIX_CSV = ".csv";
-    public static final String POSTFIX_TSV = ".tsv";
+    public static final String SUFFIX_CSV = ".csv";
+    public static final String SUFFIX_TSV = ".tsv";
 }

@@ -7,7 +7,7 @@ package nzgo.toolkit.core.uc;
  */
 public class UCParser {
 
-    public static final String POSTFIX_UC = ".uc";
+    public static final String SUFFIX_UC = ".uc";
 
     public static final String HIT = "H";
     public static final String Centroid = "S";
@@ -24,7 +24,7 @@ public class UCParser {
     public static final String COLUMN_SEPARATOR = "\t";
 
     public static boolean isUCFile(String fileName) {
-        return fileName.endsWith(POSTFIX_UC);
+        return fileName.endsWith(SUFFIX_UC);
     }
 
     public static boolean isNA(String field) {

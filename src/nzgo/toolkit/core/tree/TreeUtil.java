@@ -328,7 +328,7 @@ public class TreeUtil {
         // annotate tree by database
         List<String> mixedOTUs = getMixedOTUs(workPath + "clusters.uc");
         annotateTreeByOTUs(newickTree, mixedOTUs);
-        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.POSTFIX_NEX);
+        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.SUFFIX_NEX);
 
         // taxa break
         BioSortedSet<Element> taxaFromTree = getTaxaTraitsFromTree(newickTree);
@@ -341,7 +341,7 @@ public class TreeUtil {
 
         // annotate tree by traits (taxa)
         annotateTree(newickTree, taxaBreak.taxaBreakMap);
-        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.POSTFIX_NEX);
+        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.SUFFIX_NEX);
     }
 
 
@@ -354,7 +354,7 @@ public class TreeUtil {
 
         final String stem = "tree-pairwise-ga-clustering";
 
-        File treeFile = new File(workPath + stem + NameSpace.POSTFIX_NEWICK);
+        File treeFile = new File(workPath + stem + NameSpace.SUFFIX_NEWICK);
         String newickTree = getNewickTreeFromFile(treeFile);
 
         DirtyTree.cleanDirtyTreeOutput(newickTree, DirtyTree.GENEIOUS.toString());

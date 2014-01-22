@@ -131,7 +131,7 @@ public class TaxaBreak {
     public void writeTaxaBreakTable(String workPath) throws IOException, XMLStreamException {
         MyLogger.info("\n" + taxa.size() + " Taxa extracted from tree tips labels : ");
 
-        String outputFilePath = workPath + "taxaBreakTable" + NameSpace.POSTFIX_TSV;
+        String outputFilePath = workPath + "taxaBreakTable" + NameSpace.SUFFIX_TSV;
         BufferedWriter out = new BufferedWriter(new FileWriter(outputFilePath));
         // column head
         out.write("# count\ttaxa\tguess\t" + rankToBreak + "\n");
@@ -162,7 +162,7 @@ public class TaxaBreak {
         out.close();
 
         // 2nd output file for summary
-        outputFilePath = workPath + "taxaBreakSummary" + NameSpace.POSTFIX_TSV;
+        outputFilePath = workPath + "taxaBreakSummary" + NameSpace.SUFFIX_TSV;
         out = new BufferedWriter(new FileWriter(outputFilePath));
 
         Taxa<String> taxaOnRank = getTaxaOnRank();

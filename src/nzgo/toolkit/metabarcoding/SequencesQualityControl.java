@@ -10,9 +10,7 @@ import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.sequences.AminoAcidUtil;
 import nzgo.toolkit.core.sequences.GeneticCodeUtil;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 /**
@@ -32,10 +30,10 @@ public class SequencesQualityControl extends Module{
      * @param geneticCode
      * @param stripSequencesInFrame1
      */
-    private SequencesQualityControl(File inputFile, File outFile, GeneticCode geneticCode, boolean stripSequencesInFrame1) {
+    private SequencesQualityControl(Path inputFile, Path outFile, GeneticCode geneticCode, boolean stripSequencesInFrame1) {
         super();
         // print msg
-        MyLogger.info("\nWorking path is " + FileSystems.getDefault());
+//        MyLogger.info("\nWorking path is " + FileSystems.getDefault());
         MyLogger.info("Input file is " + inputFile);
         MyLogger.info("Output file is " + outFile);
         MyLogger.info("Genetic code set to " + geneticCode.getName() + ", " + geneticCode.getDescription());
@@ -44,10 +42,8 @@ public class SequencesQualityControl extends Module{
 
         int[] result = new int[2];
         try {
-            result = AminoAcidUtil.writeTranslatableSequences(inputFile, outFile, geneticCode, stripSequencesInFrame1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ImportException e) {
+            result = AminoAcidUtil.writeTranslatableSequences(inputFile.toFile(), outFile.toFile(), geneticCode, stripSequencesInFrame1);
+        } catch (IOException | ImportException e) {
             e.printStackTrace();
         }
 
@@ -68,8 +64,8 @@ public class SequencesQualityControl extends Module{
         Module module = new SequencesQualityControl();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
-//                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct postfix."),
-                new Arguments.StringOption("out", "output-file-name", "Output file name (*.fasta) including a correct postfix."),
+//                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct suffix."),
+                new Arguments.StringOption("out", "output-file-name", "Output file name (*.fasta) including a correct suffix."),
                 new Arguments.StringOption("genetic_code", GeneticCodeUtil.getGeneticCodeNames(),
                         false, "A set of standard genetic codes, default to universal standard code."),
                 new Arguments.Option("strip", "strip sequences to fit in Frame 1."),
@@ -87,14 +83,14 @@ public class SequencesQualityControl extends Module{
         Path working = module.init(arguments, args);
         // input
         String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.POSTFIX_SEQUENCES);
+        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_SEQUENCES});
 
         // output
-        String outFileName = inputFile.getFileName().toString().replace(".fasta", "_translate.fasta");
+        String outFileName = inputFile.getFileName().toString().replace(NameSpace.SUFFIX_SEQUENCES, "_translate" + NameSpace.SUFFIX_SEQUENCES);
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_SEQUENCES, "output", arguments.hasOption("overwrite"));
+        Path outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_SEQUENCES}, "output", arguments.hasOption("overwrite"));
 
         // program parameters
         GeneticCode geneticCode = GeneticCode.UNIVERSAL;
@@ -104,6 +100,6 @@ public class SequencesQualityControl extends Module{
         }
         final boolean stripSequencesInFrame1 = arguments.hasOption("strip");
 
-        new SequencesQualityControl(inputFile.toFile(), outFile.toFile(), geneticCode, stripSequencesInFrame1);
+        new SequencesQualityControl(inputFile, outFile, geneticCode, stripSequencesInFrame1);
     }
 }

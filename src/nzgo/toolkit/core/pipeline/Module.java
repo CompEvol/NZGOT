@@ -5,6 +5,7 @@ import beast.app.util.Version;
 import nzgo.toolkit.NZGOTVersion;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.nio.file.FileSystems;
@@ -138,19 +139,22 @@ public class Module {
 
     /**
      * common method to get input file
-     *
-     * @param inputFileNamePostfix
+     * @param working
+     * @param inputFileName
+     * @param inputFileNameSuffixes
      * @return
      */
-    public Path getInputFile(Path working, String inputFileName, String inputFileNamePostfix) {
+    public Path getInputFile(Path working, String inputFileName, String[] inputFileNameSuffixes) {
 
-        Path inputFile = validateInputFile(working, inputFileName, inputFileNamePostfix, "input");
+        Path inputFile = validateInputFile(working, inputFileName, inputFileNameSuffixes, "input");
 
         if (working != null) {
             System.setProperty(NameSpace.HOME_DIR, working.toAbsolutePath().toString());
+            MyLogger.info("\nSet working path to " + working.toAbsolutePath());
         } else if (inputFile.getParent() != null) {
             // set working directory to the input directory as default
             System.setProperty(NameSpace.HOME_DIR, inputFile.getParent().toAbsolutePath().toString());
+            MyLogger.info("\nSet working path to " + inputFile.getParent().toAbsolutePath());
         } else {
             MyLogger.error("Cannot find working path : " + inputFile.getParent());
             System.exit(0);
@@ -159,28 +163,34 @@ public class Module {
         return inputFile;
     }
 
-    public void validateFileName(String fileName, String fileNamePostfix, String ioMessage) {
+    /**
+     * validate file name
+     * @param fileName
+     * @param fileNameSuffixes
+     * @param ioMessage
+     */
+    public void validateFileName(String fileName, String[] fileNameSuffixes, String ioMessage) {
         if (fileName == null) {
             MyLogger.error("Invalid " + ioMessage + " file name : " + fileName);
             System.exit(0);
-        } else if (fileNamePostfix != null && !fileName.endsWith(fileNamePostfix)) {
+        } else if (fileNameSuffixes != null && !NameUtil.endsWith(fileName, fileNameSuffixes)) {
             MyLogger.error("Invalid " + ioMessage + " file format : " + fileName +
-                    ", where " + fileNamePostfix + " is required");
+                    ", where " + fileNameSuffixes + " is required");
             System.exit(0);
         }
     }
 
     /**
      * validate input file
-     * if fileNamePostfix is null, ignore checking postfix
+     * if fileNameSuffix is null, ignore checking suffix
      * @param working
      * @param fileName
-     * @param fileNamePostfix
+     * @param fileNameSuffixes
      * @param ioMessage
      * @return
      */
-    public Path validateInputFile(Path working, String fileName, String fileNamePostfix, String ioMessage) {
-        validateFileName(fileName, fileNamePostfix, ioMessage);
+    public Path validateInputFile(Path working, String fileName, String[] fileNameSuffixes, String ioMessage) {
+        validateFileName(fileName, fileNameSuffixes, ioMessage);
 
         if (working == null)
             working = Paths.get(".");
@@ -196,17 +206,17 @@ public class Module {
 
     /**
      * validate output file
-     * if fileNamePostfix is null, ignore checking postfix
+     * if fileNameSuffix is null, ignore checking suffix
      * if overwrite is false, check if outFile exists
      *
      * @param fileName
-     * @param fileNamePostfix
+     * @param fileNameSuffixes
      * @param ioMessage
      * @param overwrite
      * @return
      */
-    public Path validateOutputFile(String fileName, String fileNamePostfix, String ioMessage, boolean overwrite) {
-        validateFileName(fileName, fileNamePostfix, ioMessage);
+    public Path validateOutputFile(String fileName, String[] fileNameSuffixes, String ioMessage, boolean overwrite) {
+        validateFileName(fileName, fileNameSuffixes, ioMessage);
 
         Path outFile = FileSystems.getDefault().getPath(".", fileName);
         if (!overwrite && Files.exists(outFile)) {

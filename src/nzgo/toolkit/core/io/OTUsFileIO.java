@@ -192,7 +192,7 @@ public class OTUsFileIO extends FileIO {
     }
 
     public static boolean isOTUsFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTUS_RELABELED) && fileName.endsWith(NameSpace.POSTFIX_OTUS);
+        return fileName.startsWith(NameSpace.PREFIX_OTUS_RELABELED) && fileName.endsWith(NameSpace.SUFFIX_OTUS);
     }
 
     public static boolean isOTUMappingFile(String fileName) {

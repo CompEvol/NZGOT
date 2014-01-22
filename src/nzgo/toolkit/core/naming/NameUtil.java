@@ -24,4 +24,12 @@ public class NameUtil {
     public static String getWordCharacters(String name) {
         return name.replaceAll("\\W", "");
     }
+
+    public static boolean endsWith(String name, String[] suffixes) {
+        for (String suffix : suffixes) {
+            if (name.endsWith(suffix))
+                return true;
+        }
+        return false;
+    }
 }

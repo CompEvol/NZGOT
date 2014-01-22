@@ -64,7 +64,7 @@ public class TreeRegex extends Module{
     }
 
     public void printUsage(final Arguments arguments) {
-        arguments.printUsage(getName(), "[<newick-tree> or <test-string>]");
+        arguments.printUsage(getName(), "[<*.newick> or <test-string>]");
         System.out.println("  <newick-tree> is a string or a file (*.newick).");
         System.out.println();
         System.out.println("  Example: " + getName() + " tree.newick");
@@ -82,8 +82,8 @@ public class TreeRegex extends Module{
         Module module = new TreeRegex();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
-//                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct postfix."),
-                new Arguments.StringOption("out", "output-file-name", "Output tree file name (*.nex) including a correct postfix."),
+//                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct suffix."),
+                new Arguments.StringOption("out", "output-file-name", "Output tree file name (*.nex) including a correct suffix."),
                 new Arguments.StringOption("dirty_input", DirtyTree.valuesToString(), false,
                         "The dirty newick tree input from other tools, which contains invalid characters. " +
                         "This option is not required for a standard newick format."),
@@ -119,7 +119,7 @@ public class TreeRegex extends Module{
 
         };
         final Arguments arguments = module.getArguments(newOptions);
-        String outFileName = "tree" + NameSpace.POSTFIX_NEX;
+        String outFileName = "tree" + NameSpace.SUFFIX_NEX;
         String newickTree = null;
 
         Path working = module.init(arguments, args);
@@ -129,7 +129,7 @@ public class TreeRegex extends Module{
             MyLogger.error("Cannot use -levelSeparator and -regexGroup at the same time !");
             System.exit(0);
         } else if (arguments.hasOption("levelSeparator") || arguments.hasOption("regexGroup")) {
-            Path separatorsTSV = module.validateInputFile(working, SEPARATORS_FILE, NameSpace.POSTFIX_TSV, "customized separators");
+            Path separatorsTSV = module.validateInputFile(working, SEPARATORS_FILE, new String[]{NameSpace.SUFFIX_TSV}, "customized separators");
             nameParser = new NameParser(separatorsTSV, arguments.hasOption("regexGroup"));
         }
 
@@ -156,15 +156,15 @@ public class TreeRegex extends Module{
 
         // input
         String firstArg = module.getFirstArg(arguments);
-        if (firstArg.endsWith(NameSpace.POSTFIX_NEWICK)) {
-            Path inputFile = module.getInputFile(working, firstArg, NameSpace.POSTFIX_NEWICK);
+        if (firstArg.endsWith(NameSpace.SUFFIX_NEWICK)) {
+            Path inputFile = module.getInputFile(working, firstArg, new String[]{NameSpace.SUFFIX_NEWICK});
             try {
                 newickTree = TreeFileIO.importNewickTree(inputFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            outFileName = "tree" + NameSpace.POSTFIX_NEX;
+            outFileName = "tree" + NameSpace.SUFFIX_NEX;
         } else if (firstArg.endsWith(";")) {
             newickTree = firstArg;
         }
@@ -173,7 +173,7 @@ public class TreeRegex extends Module{
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-        Path outFile = module.validateOutputFile(outFileName, NameSpace.POSTFIX_NEX, "output", arguments.hasOption("overwrite"));
+        Path outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_NEX}, "output", arguments.hasOption("overwrite"));
 
         // program parameters
         String dirtyInput = null;
@@ -190,10 +190,10 @@ public class TreeRegex extends Module{
         Path traitsMapTSV = null;
         int traitsIO = 0; // input = 1, output = 2, both = 3
         if (arguments.hasOption("outputTraitsMap")) {
-            traitsMapTSV = module.validateOutputFile(TRAITS_MAPPING_FILE, NameSpace.POSTFIX_TSV, "traits mapping", true);
+            traitsMapTSV = module.validateOutputFile(TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping", true);
             traitsIO += 2;
         } else if (arguments.hasOption("inputTraitsMap")) {
-            traitsMapTSV = module.validateInputFile(working, TRAITS_MAPPING_FILE, NameSpace.POSTFIX_TSV, "traits mapping");
+            traitsMapTSV = module.validateInputFile(working, TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping");
             traitsIO += 1;
         }
 
