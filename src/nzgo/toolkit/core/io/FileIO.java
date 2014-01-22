@@ -3,21 +3,22 @@ package nzgo.toolkit.core.io;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameParser;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * file Importer
+ * file FileIO
  * @author Walter Xie
  */
-public class Importer {
+public class FileIO {
 
     public static NameParser nameParser = new NameParser(); // default tab and |
+
+    public static boolean hasContent(String line) {
+        return !line.startsWith("#") && !line.trim().isEmpty();
+    }
 
     // java 1.6
     public static BufferedReader getReader(File file, String msg) throws IOException {
@@ -39,5 +40,16 @@ public class Importer {
             MyLogger.info("\nImport " + msg + " file: " + path);
 
         return reader;
+    }
+
+    // java 1.7
+    public static BufferedWriter getWriter(Path path, String msg) throws IOException {
+
+        BufferedWriter writer = Files.newBufferedWriter(path, Charset.defaultCharset());
+
+        if (msg != null)
+            MyLogger.info("\nOutput " + msg + " file: " + path);
+
+        return writer;
     }
 }

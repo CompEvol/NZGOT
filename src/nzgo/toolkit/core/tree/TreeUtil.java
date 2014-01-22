@@ -3,7 +3,7 @@ package nzgo.toolkit.core.tree;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
-import nzgo.toolkit.core.io.Importer;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.SampleNameParser;
@@ -244,7 +244,7 @@ public class TreeUtil {
 
         File sequences = new File(workPath + "all.fasta");
 
-        BufferedReader reader = Importer.getReader(sequences, null);
+        BufferedReader reader = FileIO.getReader(sequences, null);
 
         String line = reader.readLine();
         while (line != null) {
@@ -275,7 +275,7 @@ public class TreeUtil {
     }
 
     public static String getNewickTreeFromFile(File treeFile) throws IOException {
-        BufferedReader reader = Importer.getReader(treeFile, "tree");
+        BufferedReader reader = FileIO.getReader(treeFile, "tree");
         String newickTree = reader.readLine();
         reader.close();
 

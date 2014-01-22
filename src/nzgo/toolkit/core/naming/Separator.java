@@ -1,5 +1,6 @@
 package nzgo.toolkit.core.naming;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -25,6 +26,15 @@ public class Separator{
 
     public String getPrefix(String label) {
         return parse(label)[0];
+    }
+
+    public boolean isMatched(String label) {
+        return isMatched(label, false);
+    }
+
+    public boolean isMatched(String label, boolean entireRegionMatched) {
+        Matcher matcher = getRegex().matcher(label);
+        return entireRegionMatched ? matcher.matches() : matcher.lookingAt();
     }
 
     /**
@@ -57,8 +67,16 @@ public class Separator{
 
     public void printItem(String label, boolean printRegex) {
         if (printRegex)
-            System.out.print("  Use regex : " + getRegex() + ", to get item :");
+            System.out.print("  Use regex : " + getRegex() + " to get item :");
         System.out.print(getItem(label) + "\n");
+    }
+
+    public void printName(String label, boolean printRegex) {
+        if (isMatched(label)){
+            if (printRegex)
+                System.out.print("  Regex : " + getRegex() + " is matched and get name :");
+            System.out.print(getName() + "\n");
+        }
     }
 
     public String getName() {

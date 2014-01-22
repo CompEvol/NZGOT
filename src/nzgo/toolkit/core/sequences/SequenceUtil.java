@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.sequences;
 
 import jebl.evolution.sequences.Sequence;
-import nzgo.toolkit.core.io.OTUsImporter;
+import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 
 import java.io.*;
@@ -42,7 +42,7 @@ public class SequenceUtil {
         File outFastaFile2 = new File(workPath + fileNameStem + "-2.fasta");
         PrintStream out2 = new PrintStream(new FileOutputStream(outFastaFile2));
 
-        BufferedReader reader = OTUsImporter.getReader(inFastaFile, "the original");
+        BufferedReader reader = OTUsFileIO.getReader(inFastaFile, "the original");
 
         String line = reader.readLine();
         PrintStream out = out1;

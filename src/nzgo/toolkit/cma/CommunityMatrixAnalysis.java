@@ -1,8 +1,8 @@
 package nzgo.toolkit.cma;
 
 import nzgo.toolkit.core.community.Community;
-import nzgo.toolkit.core.io.CommunityExporter;
-import nzgo.toolkit.core.io.OTUsImporter;
+import nzgo.toolkit.core.io.CommunityFileIO;
+import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 
 import java.io.File;
@@ -32,17 +32,17 @@ public class CommunityMatrixAnalysis {
             File file = listOfFiles[i];
             if (file.isFile()) {
                 String fileName = file.getName();
-                if (OTUsImporter.isOTUsFile(fileName)) {
+                if (OTUsFileIO.isOTUsFile(fileName)) {
                     MyLogger.info("\nFind OTUs file: " + file);
 
                     otusFile = file;
 
-                } else if (OTUsImporter.isOTUMappingFile(fileName)) {
+                } else if (OTUsFileIO.isOTUMappingFile(fileName)) {
                     MyLogger.info("\nFind OTU mapping file: " + file);
 
                     otuMappingFile = file;
 
-                } else if (OTUsImporter.isReferenceMappingFile(fileName)) {
+                } else if (OTUsFileIO.isReferenceMappingFile(fileName)) {
                     MyLogger.info("\nFind reference sequence mapping file: " + file);
 
                     referenceMappingFile = file;
@@ -68,14 +68,14 @@ public class CommunityMatrixAnalysis {
 
         if (referenceMappingFile != null) {
             outFileAndPath = workPath + File.separator + "report_ref_reads.txt";
-            CommunityExporter.writeRefReads(outFileAndPath, community);
+            CommunityFileIO.writeRefReads(outFileAndPath, community);
 
         } else {
             MyLogger.info("\nWarning: create community analysis without providing reference sequence. ");
         }
 
         outFileAndPath = workPath + File.separator + "community_matrix.csv";
-        CommunityExporter.writeCommunityMatrix(outFileAndPath, community);
+        CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
     }
 
 }

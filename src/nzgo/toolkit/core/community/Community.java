@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.community;
 
-import nzgo.toolkit.core.io.CommunityImporter;
-import nzgo.toolkit.core.io.OTUsImporter;
+import nzgo.toolkit.core.io.CommunityFileIO;
+import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.naming.NameSpace;
 
 import java.io.File;
@@ -44,12 +44,12 @@ public class Community<E> extends OTUs<E> {
 
         try {
             if (otusFile != null)
-                OTUsImporter.importOTUs(otusFile, this);
+                OTUsFileIO.importOTUs(otusFile, this);
 
-            CommunityImporter.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null);
+            CommunityFileIO.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null);
 
             if (refSeqMappingFile != null)
-                OTUsImporter.importRefSeqMappingFromUCFile(refSeqMappingFile, this);
+                OTUsFileIO.importRefSeqMappingFromUCFile(refSeqMappingFile, this);
         } catch (IOException e) {
             e.printStackTrace();
         }

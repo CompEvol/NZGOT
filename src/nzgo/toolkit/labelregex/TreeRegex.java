@@ -4,6 +4,7 @@ import beast.app.util.Arguments;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import nzgo.toolkit.NZGOToolkit;
+import nzgo.toolkit.core.io.TreeFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameParser;
 import nzgo.toolkit.core.naming.NameSpace;
@@ -11,13 +12,10 @@ import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.tree.DirtyTree;
-import nzgo.toolkit.core.tree.TreeUtil;
+import nzgo.toolkit.core.tree.TreeAnnotation;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Tree Annotation
@@ -34,14 +32,9 @@ public class TreeRegex extends Module{
         super("TreeRegex", NZGOToolkit.TOOLKIT[1]);
     }
 
-    /**
-     */
-    private TreeRegex(String newickTree, String dirtyInput, Path outFile) {
-        super();
 
-        String workPath = FileSystems.getDefault().toString();
-        // print msg
-        MyLogger.info("\nWorking path is " + workPath);
+    private TreeRegex(String newickTree, String dirtyInput, Path outFile, Path traitsMapTSV, int traitsIO) {
+        super();
 
         // if dirtyInput is null, do nothing
         DirtyTree.cleanDirtyTreeOutput(newickTree, dirtyInput);
@@ -52,20 +45,22 @@ public class TreeRegex extends Module{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Map<String, String> traits = new TreeMap<>();
-        TreeUtil.annotateTree(tree, traits);
+
+        TreeAnnotation treeAnnotation = new TreeAnnotation(tree, nameParser);
 
         try {
-            TreeUtil.writeNexusTree(tree, outFile.toFile());
+            if (traitsIO == 1 || traitsIO == 3)
+                treeAnnotation.importPreTaxaTraits(traitsMapTSV);
+
+            if (traitsIO >= 2)
+                treeAnnotation.writeTaxaTraits(traitsMapTSV);
+
+            // fire setTaxaTraits() same time
+            treeAnnotation.writeNexusTree(outFile);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//        try {
-//            TreeUtil.createTaxaBreakAndAnnotateTree(workPath, treeFileStem, newickTree);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void printUsage(final Arguments arguments) {
@@ -76,9 +71,9 @@ public class TreeRegex extends Module{
         System.out.println("  Example: " + getName() + " -out tree.nex (((A:1.5,B:0.5):1.1,C:3.0);");
         System.out.println("  Example: " + getName() + " -help");
         System.out.println();
-        System.out.println("  <test-string> is a test string only applied to -test option.");
-        System.out.println("  Example: " + getName() + " -test IDME8NK01ETVXF|DirectSoil|LB1-A");
-        System.out.println("  Example: " + getName() + " -levelSeparator -test IDME8NK01ETVXF|DirectSoil|LB1-A");
+        System.out.println("  <test-string> is a test string only applied to -test* option.");
+        System.out.println("  Example: " + getName() + " -testSeparator IDME8NK01ETVXF|DirectSoil|LB1-A");
+        System.out.println("  Example: " + getName() + " -levelSeparator -testSeparator IDME8NK01ETVXF|DirectSoil|LB1-A");
         System.out.println();
     }
 
@@ -113,57 +108,58 @@ public class TreeRegex extends Module{
                 new Arguments.Option("printSeparators", "print defined separators in sequence, " +
                         "including the index at the array from splitting label"),
 
-                // -test args[0]
-                new Arguments.Option("test", "print the trait parsed from given string, using defined primary (1st) separator."),
-                new Arguments.Option("testByAll", "print the list of traits in sequence, " +
-                        "which parsed from given string by each separator. Return original string if cannot parse."),
+                // -test* args[0]
+                new Arguments.Option("testSeparator", "print the trait parsed from given string, using defined primary (1st) separator."),
+                new Arguments.Option("testLevelSeparators", "print the list of parsed items in different naming level in sequence. " +
+                        "Return the original string/substring if it cannot be parsed."),
+                new Arguments.Option("testRegexGroup", "print the name(s) of the matches of the related regular expression(s). " +
+                        "Return \"" + NameParser.OTHER + "\" for the regular expression not matched. " +
+                        "This have to use with -regexGroup together. Note: the valid regular expression groups " +
+                        "can have only one match, correct 1st column in " + SEPARATORS_FILE + " if more than one names are printed."),
+
         };
         final Arguments arguments = module.getArguments(newOptions);
         String outFileName = "tree" + NameSpace.POSTFIX_NEX;
         String newickTree = null;
 
-        module.init(arguments, args);
+        Path working = module.init(arguments, args);
 
         // separators
-        if (arguments.hasOption("levelSeparator") || arguments.hasOption("regexGroup")) {
+        if (arguments.hasOption("levelSeparator") && arguments.hasOption("regexGroup")) {
             MyLogger.error("Cannot use -levelSeparator and -regexGroup at the same time !");
             System.exit(0);
         } else if (arguments.hasOption("levelSeparator") || arguments.hasOption("regexGroup")) {
-            Path separatorsTSV = module.validateInputFile(SEPARATORS_FILE, NameSpace.POSTFIX_TSV, "customized separators");
+            Path separatorsTSV = module.validateInputFile(working, SEPARATORS_FILE, NameSpace.POSTFIX_TSV, "customized separators");
             nameParser = new NameParser(separatorsTSV, arguments.hasOption("regexGroup"));
         }
 
         if (arguments.hasOption("printSeparators")) {
             nameParser.printSeparators();
             System.exit(0);
-        } else if (arguments.hasOption("test")) {
+        } else if (arguments.hasOption("testSeparator")) {
             String firstArg = module.getFirstArg(arguments);
             nameParser.getSeparator(0).printItem(firstArg, true);
             System.exit(0);
-        } else if (arguments.hasOption("testByAll")) {
+        } else if (arguments.hasOption("testLevelSeparators")) {
             String firstArg = module.getFirstArg(arguments);
             for (Separator separator : nameParser.getSeparators()) {
                 separator.printItem(firstArg, true);
             }
             System.exit(0);
+        } else if (arguments.hasOption("testRegexGroup")) {
+            String firstArg = module.getFirstArg(arguments);
+            for (Separator separator : nameParser.getSeparators()) {
+                separator.printName(firstArg, true);
+            }
+            System.exit(0);
         }
-
-        // traits Map
-        if (arguments.hasOption("outputTraitsMap")) {
-            Path traitsMapTSV = module.validateOutputFile(TRAITS_MAPPING_FILE, NameSpace.POSTFIX_TSV, "traits mapping", true);
-            // write(separatorsTSV);
-        } else if (arguments.hasOption("inputTraitsMap")) {
-            Path traitsMapTSV = module.validateInputFile(TRAITS_MAPPING_FILE, NameSpace.POSTFIX_TSV, "traits mapping");
-
-        }
-
 
         // input
         String firstArg = module.getFirstArg(arguments);
         if (firstArg.endsWith(NameSpace.POSTFIX_NEWICK)) {
-            Path inputFile = module.getInputFile(arguments, firstArg, NameSpace.POSTFIX_NEWICK);
+            Path inputFile = module.getInputFile(working, firstArg, NameSpace.POSTFIX_NEWICK);
             try {
-                newickTree = TreeUtil.getNewickTreeFromFile(inputFile.toFile());
+                newickTree = TreeFileIO.importNewickTree(inputFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -190,9 +186,17 @@ public class TreeRegex extends Module{
             System.exit(0);
         }
 
+        // traits Map
+        Path traitsMapTSV = null;
+        int traitsIO = 0; // input = 1, output = 2, both = 3
+        if (arguments.hasOption("outputTraitsMap")) {
+            traitsMapTSV = module.validateOutputFile(TRAITS_MAPPING_FILE, NameSpace.POSTFIX_TSV, "traits mapping", true);
+            traitsIO += 2;
+        } else if (arguments.hasOption("inputTraitsMap")) {
+            traitsMapTSV = module.validateInputFile(working, TRAITS_MAPPING_FILE, NameSpace.POSTFIX_TSV, "traits mapping");
+            traitsIO += 1;
+        }
 
-
-
-        new TreeRegex(newickTree, dirtyInput, outFile);
+        new TreeRegex(newickTree, dirtyInput, outFile, traitsMapTSV, traitsIO);
     }
 }

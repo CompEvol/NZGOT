@@ -11,7 +11,7 @@ import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
-import nzgo.toolkit.core.io.OTUsImporter;
+import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.sequences.SequenceUtil;
 
@@ -88,10 +88,10 @@ public class AutomaticEC {
 
         File file = new File(mapSeqOtu);
         OTUs otus = new OTUs(file.getName());
-        OTUsImporter.importOTUsAndMappingFromUCFile(file, otus);
+        OTUsFileIO.importOTUsAndMappingFromUCFile(file, otus);
 
         file = new File(mapOtuRef);
-        OTUsImporter.importRefSeqMappingFromUCFile(file, otus);
+        OTUsFileIO.importRefSeqMappingFromUCFile(file, otus);
 
         double count = 0;
         double size = sequences.size();

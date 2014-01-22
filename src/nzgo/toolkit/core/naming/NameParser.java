@@ -1,6 +1,6 @@
 package nzgo.toolkit.core.naming;
 
-import nzgo.toolkit.core.io.ConfigImporter;
+import nzgo.toolkit.core.io.ConfigFileIO;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -23,6 +23,8 @@ import java.util.List;
  * @author Walter Xie
  */
 public class NameParser {
+
+    public static final String OTHER = "Other";
 
     protected List<Separator> separators;
     protected final boolean isRegexGroup;
@@ -47,19 +49,41 @@ public class NameParser {
     // if isRegexGroup false, then use to parse names in different naming level (levelSeparator)
     public NameParser(Path separatorsTSV, final boolean isRegexGroup){
         try {
-            separators = ConfigImporter.importSeparators(separatorsTSV);
+            separators = ConfigFileIO.importSeparators(separatorsTSV);
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.isRegexGroup = isRegexGroup;
     }
 
-    public static String getPrefix(String label, String separator) {
-        int index = label.indexOf(separator);
-        if (index > 0)
-            return label.substring(0, index);
-        return label;
+    public String getFinalItem(String label) {
+        String finalItem = null;
+
+        if (isRegexGroup) {
+            for (Separator separator : separators) {
+                if (separator.isMatched(label)) {
+                    if (finalItem != null)
+                        throw new IllegalArgumentException("Multi-matches [" + finalItem + ", " +
+                                separator.getName() +  "] are invalid : " + label);
+                    finalItem = separator.getName();
+                }
+            }
+
+        } else {
+            String item = label;
+            for (Separator separator : separators) {
+                finalItem = separator.getItem(item);
+                item = finalItem;
+            }
+        }
+
+        if (finalItem == null || finalItem.equals(label))
+            return OTHER;
+        return finalItem;
     }
+
+
+
 
     public List<Separator> getSeparators() {
         return separators;

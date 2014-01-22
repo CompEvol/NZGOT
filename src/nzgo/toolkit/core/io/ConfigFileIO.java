@@ -1,19 +1,21 @@
 package nzgo.toolkit.core.io;
 
-import beast.evolution.tree.Tree;
 import nzgo.toolkit.core.naming.Separator;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
- * Config Importer
+ * Config FileIO
  * @author Walter Xie
  */
-public class ConfigImporter extends Importer {
+public class ConfigFileIO extends FileIO {
 
     public static List<Separator> importSeparators (Path separatorsTSV) throws IOException {
         List<Separator> separators = new ArrayList<>();
@@ -22,7 +24,7 @@ public class ConfigImporter extends Importer {
         Separator lineSeparator = new Separator("\t");
         String line = reader.readLine();
         while (line != null) {
-            if (line.startsWith("#")) { // comments
+            if (hasContent(line)) { // not comments or empty
                 String[] items = lineSeparator.parse(line);
 
                 Separator separator = new Separator(items[0]);
@@ -48,27 +50,46 @@ public class ConfigImporter extends Importer {
         return separators;
     }
 
-    public static void insertTraitsToTree (Path traitsMapTSV, Tree newickTree) throws IOException {
 
-        BufferedReader reader = getReader(traitsMapTSV, "traits mapping");
+    public static Map<String, String> importPreTaxaTraits (Path traitsMapTSV) throws IOException {
+        Map<String, String> preTaxaTraits = new TreeMap<>();
+        BufferedReader reader = getReader(traitsMapTSV, "pre-defined taxa traits mapping");
 
         Separator lineSeparator = new Separator("\t");
         String line = reader.readLine();
         while (line != null) {
-            String[] items = lineSeparator.parse(line);
+            if (hasContent(line)) { // not comments or empty
+                String[] items = lineSeparator.parse(line);
+                if (items.length < 2)
+                    throw new IllegalArgumentException("Invalid file format for taxa traits mapping, line : " + line);
+                if (preTaxaTraits.containsKey(items[0]))
+                    throw new IllegalArgumentException("Find duplicate name for leaf node : " + items[0]);
 
-            if (line.startsWith("#")) { // comments
-
+                preTaxaTraits.put(items[0], items[1]);
             }
 
             line = reader.readLine();
         }
-
         reader.close();
 
+        if (preTaxaTraits.size() < 1)
+            throw new IllegalArgumentException("It needs at least one separator !");
 
+        return preTaxaTraits;
+    }
 
+    public static void writeTaxaTraits (Path traitsMapTSV, String[][] taxaTraits) throws IOException {
+        BufferedWriter writer = getWriter(traitsMapTSV, "taxa traits map");
+
+//        writer.write("# \n");
+        for (int i = 0; i < taxaTraits.length; i++) {
+            writer.write(taxaTraits[i][0] + "\t" + taxaTraits[i][1] + "\n");
+        }
+
+        writer.flush();
+        writer.close();
 
     }
+
 
 }

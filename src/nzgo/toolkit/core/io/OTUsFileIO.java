@@ -11,12 +11,12 @@ import java.io.IOException;
 import java.util.TreeSet;
 
 /**
- * OTUs Importer
+ * OTUs FileIO
  * attempt to store reads as Sequence
  * both OTU and reference mapping file are uc format.
  * @author Walter Xie
  */
-public class OTUsImporter extends Importer {
+public class OTUsFileIO extends FileIO {
 
     public static void importOTUs (File otusFile, OTUs otus) throws IOException, IllegalArgumentException {
 

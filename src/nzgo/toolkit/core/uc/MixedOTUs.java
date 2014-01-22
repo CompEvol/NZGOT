@@ -1,6 +1,6 @@
 package nzgo.toolkit.core.uc;
 
-import nzgo.toolkit.core.io.Importer;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 
 import java.io.BufferedReader;
@@ -39,11 +39,11 @@ public class MixedOTUs extends UCParser{
      */
     public void findMixedOTUs(File ucFile) throws IOException {
 
-        BufferedReader reader = Importer.getReader(ucFile, "uc");
+        BufferedReader reader = FileIO.getReader(ucFile, "uc");
 
         String line = reader.readLine();
         while (line != null) {
-            String[] fields = Importer.nameParser.getSeparator(0).parse(line); // use same separator in Importer.getReader
+            String[] fields = FileIO.nameParser.getSeparator(0).parse(line); // use same separator in FileIO.getReader
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid uc file in the line: " + line);
 

@@ -1,8 +1,8 @@
 package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.NameParser;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.util.Element;
 
@@ -71,7 +71,7 @@ public class TaxaBreak {
             // try prefix, such as Cotesia_ruficrus
             if (taxonList.size() < 1) {
                 if (checkPrefix) {
-                    String prefix = NameParser.getPrefix(name.toString(), "_");
+                    String prefix = NameUtil.getPrefix(name.toString(), "_");
                     if (!prefix.contentEquals(name.toString())) {
                         taxonList = EFetchStAXParser.getTaxonByName(prefix);
                         guessTaxaMap.put(name.toString(), prefix);

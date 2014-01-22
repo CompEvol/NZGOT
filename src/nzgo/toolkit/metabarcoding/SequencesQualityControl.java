@@ -84,10 +84,10 @@ public class SequencesQualityControl extends Module{
             System.exit(0);
         }
 
-        module.init(arguments, args);
+        Path working = module.init(arguments, args);
         // input
         String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(arguments, inputFileName, NameSpace.POSTFIX_SEQUENCES);
+        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.POSTFIX_SEQUENCES);
 
         // output
         String outFileName = inputFile.getFileName().toString().replace(".fasta", "_translate.fasta");

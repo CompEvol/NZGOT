@@ -7,6 +7,8 @@ package nzgo.toolkit.core.naming;
 // TODO use XML to customize?
 public class NameSpace {
 
+    public static final String HOME_DIR = "user.dir";
+
     public static final String PREFIX_OTUS_RELABELED = "otus_relabeled_";
     public static final String PREFIX_OTU_MAPPING = "otu_map_";
     public static final String PREFIX_OTU_REFERENCE = "reference_";

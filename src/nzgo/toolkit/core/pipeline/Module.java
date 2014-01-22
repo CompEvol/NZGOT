@@ -4,6 +4,7 @@ import beast.app.util.Arguments;
 import beast.app.util.Version;
 import nzgo.toolkit.NZGOTVersion;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.nio.file.FileSystems;
@@ -39,7 +40,7 @@ public class Module {
         this.names[1] = fullName;
     }
 
-    public void init(Arguments arguments, String[] args) {
+    public Path init(Arguments arguments, String[] args) {
         try {
             arguments.parseArguments(args);
         } catch (Arguments.ArgumentException ae) {
@@ -56,6 +57,17 @@ public class Module {
         }
 
         printTitle();
+
+        // set working directory
+        Path working = null;
+        if (arguments.hasOption("working")) {
+            working = Paths.get(arguments.getStringOption("working"));
+            if (Files.notExists(working)) {
+                MyLogger.error("Cannot find working path : " + working);
+                System.exit(0);
+            }
+        }
+        return working;
     }
 
     // args[0]
@@ -81,7 +93,8 @@ public class Module {
      */
     public Arguments getArguments(Arguments.Option[] newOptions) {
         Arguments.Option[] commonOptions = new Arguments.Option[]{
-                new Arguments.Option("working", "Change working directory (user.dir) to input file's directory."),
+                new Arguments.StringOption("working", "working-path", "Change working directory (" + NameSpace.HOME_DIR +
+                        ") to given path, otherwise change to input file's directory by default if this option is not used."),
                 new Arguments.Option("overwrite", "Allow overwriting of output files."),
 //                        new Arguments.Option("options", "Display an options dialog."),
 //                        new Arguments.Option("window", "Provide a console window."),
@@ -126,17 +139,21 @@ public class Module {
     /**
      * common method to get input file
      *
-     * @param arguments
      * @param inputFileNamePostfix
      * @return
      */
-    public Path getInputFile(final Arguments arguments, String inputFileName, String inputFileNamePostfix) {
+    public Path getInputFile(Path working, String inputFileName, String inputFileNamePostfix) {
 
-        Path inputFile = validateInputFile(inputFileName, inputFileNamePostfix, "input");
+        Path inputFile = validateInputFile(working, inputFileName, inputFileNamePostfix, "input");
 
-        // set working directory
-        if (inputFile.toFile().getParent() != null && arguments.hasOption("working")) {
-            System.setProperty("user.dir", inputFile.toFile().getParentFile().getAbsolutePath());
+        if (working != null) {
+            System.setProperty(NameSpace.HOME_DIR, working.toAbsolutePath().toString());
+        } else if (inputFile.getParent() != null) {
+            // set working directory to the input directory as default
+            System.setProperty(NameSpace.HOME_DIR, inputFile.getParent().toAbsolutePath().toString());
+        } else {
+            MyLogger.error("Cannot find working path : " + inputFile.getParent());
+            System.exit(0);
         }
 
         return inputFile;
@@ -156,16 +173,19 @@ public class Module {
     /**
      * validate input file
      * if fileNamePostfix is null, ignore checking postfix
-     *
+     * @param working
      * @param fileName
      * @param fileNamePostfix
+     * @param ioMessage
      * @return
      */
-    public Path validateInputFile(String fileName, String fileNamePostfix, String ioMessage) {
+    public Path validateInputFile(Path working, String fileName, String fileNamePostfix, String ioMessage) {
         validateFileName(fileName, fileNamePostfix, ioMessage);
 
+        if (working == null)
+            working = Paths.get(".");
         // input
-        Path file = Paths.get(fileName);
+        Path file = Paths.get(working.toString(), fileName);
         if (file == null || Files.notExists(file)) {
             MyLogger.error("Cannot find " + ioMessage + " file : " + fileName);
             System.exit(0);
