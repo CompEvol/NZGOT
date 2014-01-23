@@ -6,10 +6,7 @@ import beast.util.TreeParser;
 import nzgo.toolkit.NZGOToolkit;
 import nzgo.toolkit.core.io.TreeFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.NameParser;
-import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.naming.SampleNameParser;
-import nzgo.toolkit.core.naming.Separator;
+import nzgo.toolkit.core.naming.*;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.tree.DirtyTree;
 import nzgo.toolkit.core.tree.TreeAnnotation;
@@ -24,7 +21,8 @@ import java.nio.file.Path;
 public class TreeRegex extends Module{
 
     public static final String SEPARATORS_FILE = "separators.tsv";
-    public static final String TRAITS_MAPPING_FILE = "traitsMap.tsv";
+    public static final String MATCHERS_FILE = "matchers.tsv";
+    public static final String TRAITS_MAPPING_FILE = "traits_map.tsv";
 
     public static NameParser nameParser = new SampleNameParser(); //"\\|", "-"
 
@@ -96,15 +94,14 @@ public class TreeRegex extends Module{
                         " for mapping traits to tree nodes, where the 1st column is leaf nodes labels, " +
                         "the 2nd is the mapped trait."),
 
-                new Arguments.Option("levelSeparator", "load customized separators from " + SEPARATORS_FILE +
-                        ", where the 1st column is a regular expression, the 2nd is the index at the string " +
-                        "array parsed by the regular expression. Use default separators if no " + SEPARATORS_FILE +
-                        ". Level separators parse names in different naming level. Index = 0 if no 2nd column."),
-                new Arguments.Option("regexGroup", "load customized regular expression groups from " + SEPARATORS_FILE +
-                        ", where the 1st column is a regular expression, the 2nd is the group index, " +
-                        "the 3rd is a unique name for this group. Regex groups parse names into groups. " +
-                        "Index = 0 and name is the regular expression string without none word characters, " +
-                        "only if no both 2nd and 3rd columns."),
+                new Arguments.StringOption("regex_type", RegexType.getRegexTypes(), false, "Two types are available: " +
+                        "separator and matcher.\nLevel separators parse names in different naming level. " +
+                        "Separators are uploaded from " + SEPARATORS_FILE + ", where the 1st column is a regular expression, " +
+                        "the 2nd is the index at the string array parsed by the regular expression. " +
+                        "Use default separators if no " + SEPARATORS_FILE + " index = 0 if no 2nd column.\n" +
+                        "Regex groups match names into groups. Matchers are uploaded from " + MATCHERS_FILE +
+                        ", where the 1st column is a regular expression, the 2nd is a unique name for this group. " +
+                        "If no 2nd column, name is the regular expression string without none word characters."),
                 new Arguments.Option("printSeparators", "print defined separators in sequence, " +
                         "including the index at the array from splitting label"),
 
@@ -112,9 +109,9 @@ public class TreeRegex extends Module{
                 new Arguments.Option("testSeparator", "print the trait parsed from given string, using defined primary (1st) separator."),
                 new Arguments.Option("testLevelSeparators", "print the list of parsed items in different naming level in sequence. " +
                         "Return the original string/substring if it cannot be parsed."),
-                new Arguments.Option("testRegexGroup", "print the name(s) of the matches of the related regular expression(s). " +
+                new Arguments.Option("testGroupMatcher", "print the name(s) of the matches of the related regular expression(s). " +
                         "Return \"" + NameParser.OTHER + "\" for the regular expression not matched. " +
-                        "This have to use with -regexGroup together. Note: the valid regular expression groups " +
+                        "This have to use with -groupMatcher together. Note: the valid regular expression groups " +
                         "can have only one match, correct 1st column in " + SEPARATORS_FILE + " if more than one names are printed."),
 
         };
@@ -125,12 +122,11 @@ public class TreeRegex extends Module{
         Path working = module.init(arguments, args);
 
         // separators
-        if (arguments.hasOption("levelSeparator") && arguments.hasOption("regexGroup")) {
-            MyLogger.error("Cannot use -levelSeparator and -regexGroup at the same time !");
-            System.exit(0);
-        } else if (arguments.hasOption("levelSeparator") || arguments.hasOption("regexGroup")) {
+        RegexType regexType = null;
+        if (arguments.hasOption("regex_type")) {
+            regexType = RegexType.valueOf(arguments.getStringOption("regex_type"));
             Path separatorsTSV = module.validateInputFile(working, SEPARATORS_FILE, new String[]{NameSpace.SUFFIX_TSV}, "customized separators");
-            nameParser = new NameParser(separatorsTSV, arguments.hasOption("regexGroup"));
+            nameParser = new NameParser(separatorsTSV, regexType);
         }
 
         if (arguments.hasOption("printSeparators")) {
@@ -138,18 +134,18 @@ public class TreeRegex extends Module{
             System.exit(0);
         } else if (arguments.hasOption("testSeparator")) {
             String firstArg = module.getFirstArg(arguments);
-            nameParser.getSeparator(0).printItem(firstArg, true);
+            nameParser.getSeparator(0).print(firstArg, true);
             System.exit(0);
         } else if (arguments.hasOption("testLevelSeparators")) {
             String firstArg = module.getFirstArg(arguments);
-            for (Separator separator : nameParser.getSeparators()) {
-                separator.printItem(firstArg, true);
+            for (Regex regex : nameParser.getRegexList()) {
+                ((Separator) regex).print(firstArg, true);
             }
             System.exit(0);
-        } else if (arguments.hasOption("testRegexGroup")) {
+        } else if (arguments.hasOption("testGroupMatcher")) {
             String firstArg = module.getFirstArg(arguments);
-            for (Separator separator : nameParser.getSeparators()) {
-                separator.printName(firstArg, true);
+            for (Regex regex : nameParser.getRegexList()) {
+                ((Matcher) regex).print(firstArg, true);
             }
             System.exit(0);
         }

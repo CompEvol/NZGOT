@@ -11,14 +11,14 @@ import java.nio.file.Path;
  * Name Magic
  * @author Walter Xie
  */
-public class NameMagic extends Module{
+public class NameAssembler extends Module{
 
-    public NameMagic() {
-        super("NameMagic", NZGOToolkit.TOOLKIT[1]);
+    public NameAssembler() {
+        super("NameAssembler", NZGOToolkit.TOOLKIT[1]);
     }
 
 
-    private NameMagic(Path inputFile, Path outFile) {
+    private NameAssembler(Path inputFile, Path outFile) {
         super();
 
 
@@ -35,12 +35,13 @@ public class NameMagic extends Module{
 
     // main
     public static void main(String[] args) {
-        Module module = new NameMagic();
+        Module module = new NameAssembler();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
                 new Arguments.StringOption("out", "output-file-name", "Output file name and its suffix is same as input file."),
 
-
+                new Arguments.StringOption("separator", "regular-expression", "The regular expression to separate a name into items to be assembled."),
+                new Arguments.StringOption("regex", "regular-expression", "The regular expression to find matched names to be proceeded."),
         };
         final Arguments arguments = module.getArguments(newOptions);
 
@@ -58,6 +59,6 @@ public class NameMagic extends Module{
 
         // program parameters
 
-        new NameMagic(inputFile, outFile);
+        new NameAssembler(inputFile, outFile);
     }
 }

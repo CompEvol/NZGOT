@@ -12,6 +12,7 @@ public class SampleNameParser extends NameParser {
         this("\\|", "-");
         getSeparator(0).setSplitIndex(2); // TODO
     }
+
     public SampleNameParser(String separator, String secondarySeparator){
         super(separator, secondarySeparator);
     }
