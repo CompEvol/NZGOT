@@ -34,4 +34,31 @@ public class ArrayUtil {
         }
         return combinedArray;
     }
+
+    public static Number parseNumber(String string, Class<? extends Number> numType) {
+        if (numType.isAssignableFrom(Integer.class)) {
+            return Integer.valueOf(string);
+        } else if (numType.isAssignableFrom(Double.class)) {
+            return Double.valueOf(string);
+        } else if (numType.isAssignableFrom(Long.class)) {
+            return Long.valueOf(string);
+        } else if (numType.isAssignableFrom(Byte.class)) {
+            return Byte.valueOf(string);
+        } else if (numType.isAssignableFrom(Float.class)) {
+            return Float.valueOf(string);
+        } else if (numType.isAssignableFrom(Short.class)) {
+            return Short.valueOf(string);
+        }
+        throw new NumberFormatException("Cannot parse " + string + " to number type " + numType);
+    }
+
+    public static <T extends Number> T[] parseNumbers(String[] strings) {
+        T[] numbers = (T[]) new Object[strings.length];
+
+        for (int i=0; i < strings.length; i++) {
+            numbers[i] = (T) parseNumber(strings[i], numbers[i].getClass());
+        }
+
+        return numbers;
+    }
 }

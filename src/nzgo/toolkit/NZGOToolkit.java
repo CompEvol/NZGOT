@@ -1,6 +1,6 @@
 package nzgo.toolkit;
 
-import beast.app.util.Arguments;
+import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.pipeline.Module;
 

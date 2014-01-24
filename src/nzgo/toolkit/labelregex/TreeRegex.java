@@ -1,9 +1,9 @@
 package nzgo.toolkit.labelregex;
 
-import beast.app.util.Arguments;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import nzgo.toolkit.NZGOToolkit;
+import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.io.TreeFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.*;
@@ -172,10 +172,7 @@ public class TreeRegex extends Module{
         Path outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_NEX}, "output", arguments.hasOption("overwrite"));
 
         // program parameters
-        String dirtyInput = null;
-        if (arguments.hasOption("dirty_input")) {
-            dirtyInput = arguments.getStringOption("dirty_input");
-        }
+        String dirtyInput = arguments.getStringOption("dirty_input");
 
         if (newickTree == null) {
             MyLogger.error("Invalid newick tree string/file : " + firstArg);

@@ -1,9 +1,9 @@
 package nzgo.toolkit.metabarcoding;
 
-import beast.app.util.Arguments;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.GeneticCode;
 import nzgo.toolkit.NZGOToolkit;
+import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;

@@ -1,8 +1,13 @@
 package nzgo.toolkit.core.sequences;
 
+import jebl.evolution.sequences.BasicSequence;
 import jebl.evolution.sequences.Sequence;
+import jebl.evolution.sequences.SequenceType;
+import jebl.evolution.taxa.Taxon;
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.Assembler;
+import nzgo.toolkit.core.naming.NameUtil;
 
 import java.io.*;
 import java.util.List;
@@ -13,6 +18,18 @@ import java.util.List;
  * @author Walter Xie
  */
 public class SequenceUtil {
+
+    public static void assembleSequenceLabels(List<Sequence> sequences, Assembler assembler) {
+        for (int i = 0; i < sequences.size(); i++) {
+            Sequence sequence = sequences.get(i);
+            String taxon = assembler.getAssembledLabel(sequence.getTaxon().getName());
+
+            if (!NameUtil.isEmptyNull(taxon)) {
+                Sequence newSeq = new BasicSequence(SequenceType.NUCLEOTIDE, Taxon.getTaxon(taxon), sequence.getStates());
+                sequences.set(i, newSeq);
+            }
+        }
+    }
 
     /**
      * get sequence string from a list of sequences given the sequence label

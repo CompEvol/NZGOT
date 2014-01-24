@@ -4,8 +4,11 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import nzgo.toolkit.core.io.FileIO;
+import nzgo.toolkit.core.io.TreeFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.Assembler;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxa;
@@ -15,7 +18,9 @@ import nzgo.toolkit.core.uc.MixedOTUs;
 import nzgo.toolkit.core.util.BioSortedSet;
 import nzgo.toolkit.core.util.Element;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,34 +34,19 @@ public class TreeUtil {
 
     public static SampleNameParser sampleNameParser = new SampleNameParser(); //TODO
 
-    /**
-     * change newick tree into nexus tree
-     *
-     * @param newickTree
-     * @param nexusFilePath
-     * @throws IOException
-     */
-    public static void writeNexusTree(String newickTree, String nexusFilePath) throws IOException {
-        MyLogger.info("\nCreating Nexus tree ...");
 
-        BufferedWriter out = new BufferedWriter(new FileWriter(nexusFilePath));
-        out.write("#nexus\n" + "Begin trees;\n");
-        out.write("tree = " + newickTree + "\n");
-        out.write("End;\n");
-        out.flush();
-        out.close();
+    public static void assembleTreeTaxa(Tree newickTree, Assembler assembler) {
+        for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
+            Node leafNode = newickTree.getNode(i);
+
+            String taxon = assembler.getAssembledLabel(leafNode.getID());
+
+            if (!NameUtil.isEmptyNull(taxon))
+                leafNode.setID(taxon);
+        }
     }
 
-    public static void writeNexusTree(Tree newickTree, File outFile) throws IOException {
-        MyLogger.info("\nCreating Nexus tree : " + outFile);
 
-        BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
-        out.write("#nexus\n" + "Begin trees;\n");
-        out.write("tree = " + newickTree.getRoot().toNewick() + ";\n");
-        out.write("End;\n");
-        out.flush();
-        out.close();
-    }
 
     /**
      * get traits from the tree leave nodes' labels
@@ -328,7 +318,7 @@ public class TreeUtil {
         // annotate tree by database
         List<String> mixedOTUs = getMixedOTUs(workPath + "clusters.uc");
         annotateTreeByOTUs(newickTree, mixedOTUs);
-        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.SUFFIX_NEX);
+        TreeFileIO.writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.SUFFIX_NEX);
 
         // taxa break
         BioSortedSet<Element> taxaFromTree = getTaxaTraitsFromTree(newickTree);
@@ -341,7 +331,7 @@ public class TreeUtil {
 
         // annotate tree by traits (taxa)
         annotateTree(newickTree, taxaBreak.taxaBreakMap);
-        writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.SUFFIX_NEX);
+        TreeFileIO.writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.SUFFIX_NEX);
     }
 
 

@@ -1,8 +1,8 @@
 package nzgo.toolkit.core.pipeline;
 
-import beast.app.util.Arguments;
 import beast.app.util.Version;
 import nzgo.toolkit.NZGOTVersion;
+import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;

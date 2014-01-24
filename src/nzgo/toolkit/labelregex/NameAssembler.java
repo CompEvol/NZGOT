@@ -1,14 +1,25 @@
 package nzgo.toolkit.labelregex;
 
-import beast.app.util.Arguments;
+import beast.evolution.tree.Tree;
+import jebl.evolution.io.ImportException;
+import jebl.evolution.sequences.Sequence;
 import nzgo.toolkit.NZGOToolkit;
+import nzgo.toolkit.core.io.Arguments;
+import nzgo.toolkit.core.io.SequenceFileIO;
+import nzgo.toolkit.core.io.TreeFileIO;
+import nzgo.toolkit.core.naming.Assembler;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.sequences.SequenceUtil;
+import nzgo.toolkit.core.tree.DirtyTree;
+import nzgo.toolkit.core.tree.TreeUtil;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
- * Name Magic
+ * Name Assembler
  * @author Walter Xie
  */
 public class NameAssembler extends Module{
@@ -18,9 +29,48 @@ public class NameAssembler extends Module{
     }
 
 
-    private NameAssembler(Path inputFile, Path outFile) {
+    private NameAssembler(Path inputFile, Path outFile, Assembler assembler, String dirtyInput) {
         super();
 
+        if (inputFile.endsWith(NameSpace.SUFFIX_NEWICK)) {
+
+            Tree tree = null;
+            try {
+                tree = TreeFileIO.importNewickTree(inputFile, dirtyInput);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            TreeUtil.assembleTreeTaxa(tree, assembler);
+
+            try {
+                TreeFileIO.writeNewickTree(outFile, tree);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else if (inputFile.endsWith(NameSpace.SUFFIX_SEQUENCES)) {
+
+            List<Sequence> sequences = null;
+            try {
+                sequences = SequenceFileIO.importNucleotideSequences(inputFile);
+            } catch (IOException | ImportException e) {
+                e.printStackTrace();
+            }
+
+            SequenceUtil.assembleSequenceLabels(sequences, assembler);
+
+            try {
+                SequenceFileIO.writeFasta(outFile, sequences);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+
+            throw new UnsupportedOperationException("Do not support input not *.fasta or *.newick yet !");
+
+        }
 
     }
 
@@ -39,9 +89,16 @@ public class NameAssembler extends Module{
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
                 new Arguments.StringOption("out", "output-file-name", "Output file name and its suffix is same as input file."),
+                new Arguments.StringOption("dirty_input", DirtyTree.valuesToString(), false,
+                        "The dirty newick tree input from other tools, which contains invalid characters. " +
+                                "This option is not required for a standard newick format."),
 
                 new Arguments.StringOption("separator", "regular-expression", "The regular expression to separate a name into items to be assembled."),
-                new Arguments.StringOption("regex", "regular-expression", "The regular expression to find matched names to be proceeded."),
+                new Arguments.StringOption("matcher", "regular-expression", "The regular expression to select matched names to be proceeded. " +
+                        "If no, then proceed all names."),
+                new Arguments.StringOption("commands", "config-file-name", "The file to define commands to assemble items parsed by separator. " +
+                        "Multi-commands can be separated by |, e.g. " + Assembler.CommandType.getExample() +
+                        "Note: the item's index may change after each command, so that every commands use the input items indexes."),
         };
         final Arguments arguments = module.getArguments(newOptions);
 
@@ -58,7 +115,13 @@ public class NameAssembler extends Module{
         Path outFile = module.validateOutputFile(outFileName, null, "output", arguments.hasOption("overwrite"));
 
         // program parameters
+        String dirtyInput = arguments.getStringOption("dirty_input");
+        String separatorArg = arguments.getStringOption("separator");
+        String matcherArg = arguments.getStringOption("matcher");
+        String commandsArg = arguments.getStringOption("commands");
 
-        new NameAssembler(inputFile, outFile);
+        Assembler assembler = new Assembler(separatorArg, matcherArg, commandsArg);
+
+        new NameAssembler(inputFile, outFile, assembler, dirtyInput);
     }
 }

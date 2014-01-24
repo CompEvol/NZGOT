@@ -21,6 +21,10 @@ public class NameUtil {
         return true;
     }
 
+    public static boolean isEmptyNull(String item) {
+        return item == null || "null".equalsIgnoreCase(item) || item.trim().isEmpty();
+    }
+
     public static String getWordCharacters(String name) {
         return name.replaceAll("\\W", "");
     }
