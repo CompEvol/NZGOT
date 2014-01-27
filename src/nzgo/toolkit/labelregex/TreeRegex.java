@@ -20,10 +20,6 @@ import java.nio.file.Path;
  */
 public class TreeRegex extends Module{
 
-    public static final String SEPARATORS_FILE = "separators.tsv";
-    public static final String MATCHERS_FILE = "matchers.tsv";
-    public static final String TRAITS_MAPPING_FILE = "traits_map.tsv";
-
     public static NameParser nameParser = new SampleNameParser(); //"\\|", "-"
 
     public TreeRegex() {
@@ -86,20 +82,20 @@ public class TreeRegex extends Module{
                         "The dirty newick tree input from other tools, which contains invalid characters. " +
                         "This option is not required for a standard newick format."),
 
-                new Arguments.Option("inputTraitsMap", "use a customized " + TRAITS_MAPPING_FILE + " to load traits, " +
+                new Arguments.Option("traitsMapIn", "use a customized " + NameSpace.TRAITS_MAPPING_FILE + " to load traits, " +
                         "where the 1st column is leaf nodes labels, the 2nd is the mapped trait. " +
-                        "If the option \"-outputTraitsMap\" is used together, then create/overwrite " +
-                        TRAITS_MAPPING_FILE + " first and load traits from this file."),
-                new Arguments.Option("outputTraitsMap", "create/overwrite " + TRAITS_MAPPING_FILE +
+                        "If the option \"-traitsMapOut\" is used together, then create/overwrite " +
+                        NameSpace.TRAITS_MAPPING_FILE + " first and load traits from this file."),
+                new Arguments.Option("traitsMapOut", "create/overwrite " + NameSpace.TRAITS_MAPPING_FILE +
                         " for mapping traits to tree nodes, where the 1st column is leaf nodes labels, " +
                         "the 2nd is the mapped trait."),
 
                 new Arguments.StringOption("regex_type", RegexType.getRegexTypes(), false, "Two types are available: " +
                         "separator and matcher.\nLevel separators parse names in different naming level. " +
-                        "Separators are uploaded from " + SEPARATORS_FILE + ", where the 1st column is a regular expression, " +
+                        "Separators are uploaded from " + NameSpace.SEPARATORS_FILE + ", where the 1st column is a regular expression, " +
                         "the 2nd is the index at the string array parsed by the regular expression. " +
-                        "Use default separators if no " + SEPARATORS_FILE + " index = 0 if no 2nd column.\n" +
-                        "Regex groups match names into groups. Matchers are uploaded from " + MATCHERS_FILE +
+                        "Use default separators if no " + NameSpace.SEPARATORS_FILE + " index = 0 if no 2nd column.\n" +
+                        "Regex groups match names into groups. Matchers are uploaded from " + NameSpace.MATCHERS_FILE +
                         ", where the 1st column is a regular expression, the 2nd is a unique name for this group. " +
                         "If no 2nd column, name is the regular expression string without none word characters."),
                 new Arguments.Option("printSeparators", "print defined separators in sequence, " +
@@ -112,7 +108,7 @@ public class TreeRegex extends Module{
                 new Arguments.Option("testGroupMatcher", "print the name(s) of the matches of the related regular expression(s). " +
                         "Return \"" + NameParser.OTHER + "\" for the regular expression not matched. " +
                         "This have to use with -groupMatcher together. Note: the valid regular expression groups " +
-                        "can have only one match, correct 1st column in " + SEPARATORS_FILE + " if more than one names are printed."),
+                        "can have only one match, correct 1st column in " + NameSpace.SEPARATORS_FILE + " if more than one names are printed."),
 
         };
         final Arguments arguments = module.getArguments(newOptions);
@@ -125,7 +121,7 @@ public class TreeRegex extends Module{
         RegexType regexType = null;
         if (arguments.hasOption("regex_type")) {
             regexType = RegexType.valueOf(arguments.getStringOption("regex_type"));
-            Path separatorsTSV = module.validateInputFile(working, SEPARATORS_FILE, new String[]{NameSpace.SUFFIX_TSV}, "customized separators");
+            Path separatorsTSV = module.validateInputFile(working, NameSpace.SEPARATORS_FILE, new String[]{NameSpace.SUFFIX_TSV}, "customized separators");
             nameParser = new NameParser(separatorsTSV, regexType);
         }
 
@@ -182,11 +178,11 @@ public class TreeRegex extends Module{
         // traits Map
         Path traitsMapTSV = null;
         int traitsIO = 0; // input = 1, output = 2, both = 3
-        if (arguments.hasOption("outputTraitsMap")) {
-            traitsMapTSV = module.validateOutputFile(TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping", true);
+        if (arguments.hasOption("traitsMapOut")) {
+            traitsMapTSV = module.validateOutputFile(NameSpace.TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping", true);
             traitsIO += 2;
-        } else if (arguments.hasOption("inputTraitsMap")) {
-            traitsMapTSV = module.validateInputFile(working, TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping");
+        } else if (arguments.hasOption("traitsMapIn")) {
+            traitsMapTSV = module.validateInputFile(working, NameSpace.TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping");
             traitsIO += 1;
         }
 

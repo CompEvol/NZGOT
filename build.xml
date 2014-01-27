@@ -49,7 +49,7 @@
                classpathref="classpath"
                fork="true"
                memoryinitialsize="256m"
-               memorymaximumsize="1024m">
+               memorymaximumsize="2048m">
             <include name="nzgo/toolkit/**"/>
             <!-- complie JUnit test classes -->
             <!--<include name="test/**"/>-->

@@ -29,8 +29,6 @@ public class NameParser {
     protected List<Regex> regexList;
     public final RegexType regexType;
 
-    protected Class<?> cls;
-
     // mostly use for tab-separated values (*.tsv)
     // default to have 2 regex
     public NameParser(){

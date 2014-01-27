@@ -99,6 +99,9 @@ public class NameAssembler extends Module{
                 new Arguments.StringOption("commands", "config-file-name", "The file to define commands to assemble items parsed by separator. " +
                         "Multi-commands can be separated by |, e.g. " + Assembler.CommandType.getExample() +
                         "Note: the item's index may change after each command, so that every commands use the input items indexes."),
+                new Arguments.StringOption("traitsMap", "traits-map-file-name", "load traits from file, when the command " +
+                        Assembler.CommandType.ADD + " is used, where the 1st column is the item separated from the name, " +
+                        "the 2nd is the mapped trait. If no this option, then look for file " + NameSpace.TRAITS_MAPPING_FILE + "."),
         };
         final Arguments arguments = module.getArguments(newOptions);
 
@@ -119,8 +122,9 @@ public class NameAssembler extends Module{
         String separatorArg = arguments.getStringOption("separator");
         String matcherArg = arguments.getStringOption("matcher");
         String commandsArg = arguments.getStringOption("commands");
+        String traitsMap = arguments.getStringOption("traitsMap");
 
-        Assembler assembler = new Assembler(separatorArg, matcherArg, commandsArg);
+        Assembler assembler = new Assembler(separatorArg, matcherArg, commandsArg, traitsMap);
 
         new NameAssembler(inputFile, outFile, assembler, dirtyInput);
     }

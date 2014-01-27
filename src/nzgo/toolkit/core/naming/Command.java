@@ -1,9 +1,11 @@
 package nzgo.toolkit.core.naming;
 
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Assembler
@@ -13,12 +15,18 @@ public class Command {
 
     protected final Assembler.CommandType commandType;
     protected final Integer[] indexesInCommand;
+    protected final Map<String,String> traitMap;
 
     private final Separator indexesSeparator = new Separator(","); // for indexes between ()
 
     public Command(String command) {
+        this(command, null);
+    }
+
+    public Command(String command, Map<String,String> traitMap) {
         this.commandType = getCommandType(command);
         this.indexesInCommand = getIndexesInCommand(command);
+        this.traitMap = traitMap;
     }
 
     public void proceed(List<String> items) {
@@ -31,6 +39,9 @@ public class Command {
                 break;
             case COMBINE:
                 combine(items, indexesInCommand[0], Arrays.copyOfRange(indexesInCommand, 1, indexesInCommand.length));
+                break;
+            case ADD:
+                add(items, indexesInCommand[0]);
                 break;
             default:
                 throw new IllegalArgumentException("Try to proceed an illegal command : " + commandType);
@@ -73,7 +84,7 @@ public class Command {
         }
     }
 
-    public void delete(List<String> items, Integer[] indexes) {
+    public void delete(List<String> items, Integer... indexes) {
         validate(items.size(), indexes);
         for (int i = 0; i < indexes.length; i++) {
             items.remove(indexes[i]-i);
@@ -100,6 +111,23 @@ public class Command {
                 delete(items, indexes);
                 return;
             }
+        }
+    }
+
+    /**
+     * add the mapped trait of items.get(from) into last items
+     * @param items
+     * @param from
+     */
+    public void add(List<String> items, int from) {
+        validate(items.size(), from);
+        String item = items.get(from);
+        String trait = traitMap.get(item);
+        if (!NameUtil.isEmptyNull(trait)) {
+            items.add(trait);
+        } else {
+            items.add(NameParser.OTHER);
+            MyLogger.warn("Find no mapping for item : " + item);
         }
     }
 

@@ -25,7 +25,7 @@ public class Assembler {
         setCommands(commandsArg);
     }
 
-    public Assembler(String regex1, String regex2, String commandsArg) {
+    public Assembler(String regex1, String regex2, String commandsArg, String traitsMap) {
         this(regex2, commandsArg);
         if (regex1 != null) {
             Separator separator = new Separator(regex1);
@@ -107,7 +107,8 @@ public class Assembler {
     public static enum CommandType {
         MOVE    ("move"),
         DELETE  ("delete"),
-        COMBINE ("combine");
+        COMBINE ("combine"),
+        ADD     ("add_map_of");
 
         private String type;
 
@@ -125,7 +126,7 @@ public class Assembler {
         }
 
         public static String getExample() {
-            return MOVE + "(1,5)|" + DELETE + "(2,3,4)|" + COMBINE + "(5,6,7)";
+            return MOVE + "(1,5)|" + DELETE + "(2,3,4)|" + COMBINE + "(5,6,7)|" + ADD + "(2)";
         }
 
     }
