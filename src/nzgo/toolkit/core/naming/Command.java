@@ -23,10 +23,19 @@ public class Command {
         this(command, null);
     }
 
+    /**
+     * traitMap is null if not add
+     * @param command
+     * @param traitMap
+     */
     public Command(String command, Map<String,String> traitMap) {
         this.commandType = getCommandType(command);
         this.indexesInCommand = getIndexesInCommand(command);
         this.traitMap = traitMap;
+
+        if (commandType == Assembler.CommandType.ADD && traitMap == null)
+            throw new IllegalArgumentException("Need trait map to use \"" + Assembler.CommandType.ADD + "\" command !");
+
     }
 
     public void proceed(List<String> items) {

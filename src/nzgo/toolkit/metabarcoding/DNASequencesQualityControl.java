@@ -14,13 +14,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * Sequences Quality Control
+ * DNA Sequences Quality Control
  * @author Walter Xie
  */
-public class SequencesQualityControl extends Module{
+public class DNASequencesQualityControl extends Module{
 
-    public SequencesQualityControl() {
-        super("SequencesQualityControl", NZGOToolkit.TOOLKIT[1]);
+    public DNASequencesQualityControl() {
+        super("DNASequencesQualityControl", NZGOToolkit.TOOLKIT[1]);
     }
 
     /**
@@ -30,7 +30,7 @@ public class SequencesQualityControl extends Module{
      * @param geneticCode
      * @param stripSequencesInFrame1
      */
-    private SequencesQualityControl(Path inputFile, Path outFile, GeneticCode geneticCode, boolean stripSequencesInFrame1) {
+    private DNASequencesQualityControl(Path inputFile, Path outFile, GeneticCode geneticCode, boolean stripSequencesInFrame1) {
         super();
         // print msg
 //        MyLogger.info("\nWorking path is " + FileSystems.getDefault());
@@ -61,7 +61,7 @@ public class SequencesQualityControl extends Module{
 
     // main
     public static void main(String[] args) {
-        Module module = new SequencesQualityControl();
+        Module module = new DNASequencesQualityControl();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
 //                        new Arguments.StringOption("in", "input-file-name", "Input file name (*.fasta) including a correct suffix."),
@@ -100,6 +100,6 @@ public class SequencesQualityControl extends Module{
         }
         final boolean stripSequencesInFrame1 = arguments.hasOption("strip");
 
-        new SequencesQualityControl(inputFile, outFile, geneticCode, stripSequencesInFrame1);
+        new DNASequencesQualityControl(inputFile, outFile, geneticCode, stripSequencesInFrame1);
     }
 }

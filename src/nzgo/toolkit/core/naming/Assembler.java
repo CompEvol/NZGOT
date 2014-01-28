@@ -3,6 +3,7 @@ package nzgo.toolkit.core.naming;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Assembler
@@ -14,24 +15,33 @@ public class Assembler {
     private Separator separator;
     private Matcher matcher; // match every labels if null
     private Command[] commands;
+    private Map<String, String> traitsMap;
 
     public Assembler(String regex, String commandsArg) {
-        // set to same as separator of commands arg string
-        setSeparator(commandsSeparator);
-        if (regex != null) {
-            Matcher matcher = new Matcher(regex);
+        this(null, regex, commandsArg, null);
+    }
+
+    /**
+     *
+     * @param regex1         use commandsSeparator if null
+     * @param regex2         match all if null
+     * @param commandsArg
+     * @param traitsMap      if no add, it is null
+     */
+    public Assembler(String regex1, String regex2, String commandsArg, Map<String, String> traitsMap) {
+        if (regex1 != null) {
+            Separator separator = new Separator(regex1);
+            setSeparator(separator);
+        } else {
+            // set to same as separator of commands arg string
+            setSeparator(commandsSeparator);
+        }
+        if (regex2 != null) {
+            Matcher matcher = new Matcher(regex2);
             setMatcher(matcher);
         }
         setCommands(commandsArg);
-    }
-
-    public Assembler(String regex1, String regex2, String commandsArg, String traitsMap) {
-        this(regex2, commandsArg);
-        if (regex1 != null) {
-            Separator separator = new Separator(regex1);
-            // overwrite separator
-            setSeparator(separator);
-        }
+        setTraitsMap(traitsMap);
     }
 
     /**
@@ -46,7 +56,7 @@ public class Assembler {
 
         commands = new Command[coms.length];
         for (int i = 0; i < coms.length; i++) {
-            Command command = new Command(coms[i]);
+            Command command = new Command(coms[i], traitsMap);
             commands[i] = command;
         }
     }
@@ -64,11 +74,7 @@ public class Assembler {
                 command.proceed(items);
             }
 
-            String assembledLabel = items.get(0);
-            for (int i = 1; i < items.size(); i++) {
-                assembledLabel += getSeparator() + items.get(i);
-            }
-            return assembledLabel;
+            return getSeparator().getLabel(items);
         }
         return label;
     }
@@ -102,6 +108,14 @@ public class Assembler {
 
     public void setCommands(Command[] commands) {
         this.commands = commands;
+    }
+
+    public Map<String, String> getTraitsMap() {
+        return traitsMap;
+    }
+
+    public void setTraitsMap(Map<String, String> traitsMap) {
+        this.traitsMap = traitsMap;
     }
 
     public static enum CommandType {

@@ -46,10 +46,7 @@
 
         <!-- Compile the java code from ${src} into ${build} /bin -->
         <javac source="${JDK_VERSION}" target="${JDK_VERSION}" srcdir="${src}" destdir="${build}"
-               classpathref="classpath"
-               fork="true"
-               memoryinitialsize="256m"
-               memorymaximumsize="2048m">
+               classpathref="classpath" fork="true" memoryinitialsize="256m" memorymaximumsize="2048m">
             <include name="nzgo/toolkit/**"/>
             <!-- complie JUnit test classes -->
             <!--<include name="test/**"/>-->
@@ -79,7 +76,7 @@
                 <!--<include name="nzgo/toolkit/**/*.properties"/>-->
             <!--</fileset>-->
             <zipgroupfileset dir="${lib}" includes="jebl2-r22.jar"/>
-            <zipgroupfileset dir="${lib}" includes="beast.jar"/>
+            <zipgroupfileset dir="${lib}" includes="beast*.jar"/>
         </jar>
 
     </target>

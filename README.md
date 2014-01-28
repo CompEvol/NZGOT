@@ -36,15 +36,23 @@ others. Core package is always on the top of dependency, it cannot contain any c
 other packages.
 The available packages at the current version are:
 
-1) Community matrix analysis.
+1) Useful tools to rename labels for sequences or tree by regular expressions
+Main package: nzgo.labelregex
+Owners: Walter Xie
+
+2) Useful tools for meta-barcoding, such as DNA sequences quality check.
+Main package: nzgo.metabarcoding
+Owners: Walter Xie
+
+3) Community matrix analysis.
 Main package: nzgo.cma
 Owners: Walter Xie, Alexei Drummond
 
-2) Error correction tool for the next-generation sequencing data.
+4) Error correction tool for the next-generation sequencing data.
 Main package: nzgo.ec
 Owners: Thomas Hummel, Alexei Drummond, Walter Xie
 
-3) Useful tools for BEAST 2 project.
+5) Useful tools for BEAST 2 project.
 Main package: nzgo.beast
 Owners: Walter Xie
 

@@ -29,4 +29,5 @@ public class NameSpace {
     public static final String MATCHERS_FILE = "matchers" + SUFFIX_TSV;
     public static final String SEPARATORS_FILE = "separators" + SUFFIX_TSV;
     public static final String TRAITS_MAPPING_FILE = "traits_map" + SUFFIX_TSV;
+    public static final String ERROR_MAPPING_FILE = "error" + SUFFIX_TSV;
 }

@@ -12,7 +12,7 @@ import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxa;
-import nzgo.toolkit.core.taxonomy.TaxaBreak;
+import nzgo.toolkit.core.taxonomy.TaxaSort;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.uc.MixedOTUs;
 import nzgo.toolkit.core.util.BioSortedSet;
@@ -57,7 +57,7 @@ public class TreeUtil {
     public static BioSortedSet<Element> getTaxaTraitsFromTree(Tree newickTree) {
         BioSortedSet<Element> traits = new BioSortedSet<>("taxa");
 
-        Element notIdentified = new Element(TaxaBreak.OTHER);
+        Element notIdentified = new Element(TaxaSort.Error.UNIDENTIFIED.toString());
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
@@ -112,7 +112,7 @@ public class TreeUtil {
         // annotations to insert in nodes
         List<Element> taxaTraits = new ArrayList<>();
 
-        Element notIdentified = new Element(TaxaBreak.OTHER);
+        Element notIdentified = new Element(TaxaSort.Error.UNIDENTIFIED.toString());
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
@@ -191,7 +191,7 @@ public class TreeUtil {
             if (label.contains(tr.toString()))
                 return "trait=" + tr.toString();
         }
-        return "trait=" + TaxaBreak.OTHER;
+        return "trait=" + TaxaSort.Error.UNIDENTIFIED.toString();
     }
 
     protected static <T, E> String getMetaStringFrom(String label, Map<T, E> traits) {
@@ -200,7 +200,7 @@ public class TreeUtil {
                 return "trait=" + entry.getValue().toString();
             }
         }
-        return "trait=" + TaxaBreak.OTHER;
+        return "trait=" + TaxaSort.Error.UNIDENTIFIED.toString();
     }
 
     protected static List<String> getMixedOTUs(String ucFilePath) {
@@ -321,16 +321,14 @@ public class TreeUtil {
         TreeFileIO.writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "new-" + stem + NameSpace.SUFFIX_NEX);
 
         // taxa break
+        Taxon bioClassification = new Taxon("Insecta", "50557");
         BioSortedSet<Element> taxaFromTree = getTaxaTraitsFromTree(newickTree);
         Taxa taxa = new Taxa(taxaFromTree);
-        TaxaBreak taxaBreak = new TaxaBreak(taxa, Rank.ORDER);
-        Taxon bioClassification = new Taxon("Insecta", "50557");
-        taxaBreak.setBioClassification(bioClassification);
-        taxaBreak.getTaxaBreakMap(); // default to check prefix
-        taxaBreak.writeTaxaBreakTable(workPath);
+        TaxaSort taxaSort = new TaxaSort(taxa, Rank.ORDER, bioClassification); // default to check prefix
+        taxaSort.writeTaxaSortTable(workPath);
 
         // annotate tree by traits (taxa)
-        annotateTree(newickTree, taxaBreak.taxaBreakMap);
+        annotateTree(newickTree, taxaSort.taxaSortMap);
         TreeFileIO.writeNexusTree(newickTree.getRoot().toNewick() + ";", workPath + "taxa-" + stem + NameSpace.SUFFIX_NEX);
     }
 

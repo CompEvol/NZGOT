@@ -1,5 +1,7 @@
 package nzgo.toolkit.core.naming;
 
+import java.util.List;
+
 /**
  * Separator using <a href="../util/regex/Pattern.html#sum">regular expression</a>
  * parse names in different naming level
@@ -31,6 +33,19 @@ public class Separator extends Regex{
             return null;
 
         return items[getSplitIndex()];
+    }
+
+    /**
+     * get the string of items separated by regex
+     * @param items
+     * @return
+     */
+    public String getLabel(List<String> items) {
+        String label = items.get(0);
+        for (int i = 1; i < items.size(); i++) {
+            label += getRegex() + items.get(i);
+        }
+        return label;
     }
 
     public void print(String label, boolean printRegex) {

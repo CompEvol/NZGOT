@@ -4,6 +4,7 @@ import nzgo.toolkit.core.naming.Regex;
 import nzgo.toolkit.core.naming.RegexFactory;
 import nzgo.toolkit.core.naming.RegexType;
 import nzgo.toolkit.core.naming.Separator;
+import nzgo.toolkit.core.taxonomy.Taxa;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -107,6 +108,31 @@ public class ConfigFileIO extends FileIO {
 //        return matchers;
 //    }
 
+    public static Taxa importTaxa (Path taxaTSV) throws IOException {
+        Taxa taxa = new Taxa();
+        BufferedReader reader = getReader(taxaTSV, "taxa");
+
+        Separator lineSeparator = new Separator("\t");
+        String line = reader.readLine();
+        while (line != null) {
+            if (hasContent(line)) { // not comments or empty
+                String[] items = lineSeparator.parse(line);
+//                if (items.length < 2)
+//                    throw new IllegalArgumentException("Invalid file format for taxa traits mapping, line : " + line);
+
+                taxa.addUniqueElement(items[0]);
+            }
+
+            line = reader.readLine();
+        }
+        reader.close();
+
+        if (taxa.size() < 1)
+            throw new IllegalArgumentException("It needs at least one taxon !");
+
+        return taxa;
+    }
+
     public static Map<String, String> importPreTaxaTraits (Path traitsMapTSV) throws IOException {
         Map<String, String> preTaxaTraits = new TreeMap<>();
         BufferedReader reader = getReader(traitsMapTSV, "pre-defined taxa traits mapping");
@@ -144,8 +170,23 @@ public class ConfigFileIO extends FileIO {
 
         writer.flush();
         writer.close();
-
     }
 
+    public static void writeConfigMap (Path configMapTSV, Map<String, String> map, String msg) throws IOException {
+        BufferedWriter writer = getWriter(configMapTSV, msg);
+
+//        writer.write("# \n");
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            writer.write(entry.getKey() + "\t" + entry.getValue() + "\n");
+        }
+
+        writer.flush();
+        writer.close();
+    }
+
+
+    public static void writeTaxaMap (Path traitsMapTSV, Map<String, String> taxaTraits) throws IOException {
+        writeConfigMap(traitsMapTSV, taxaTraits, "taxa traits map");
+    }
 
 }

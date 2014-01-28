@@ -61,4 +61,8 @@ public enum Rank {
         return rank;
     }
 
+    public static String[] mainRanksToString() {
+        return new String[]{SPECIES.toString(), GENUS.toString(), FAMILY.toString(),
+                ORDER.toString(), CLASS.toString(), PHYLUM.toString()};
+    }
 }
