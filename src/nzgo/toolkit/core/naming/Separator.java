@@ -48,6 +48,14 @@ public class Separator extends Regex{
         return label;
     }
 
+    public String getLabel(String... items) {
+        String label = items[0];
+        for (int i = 1; i < items.length; i++) {
+            label += getRegex() + items[i];
+        }
+        return label;
+    }
+
     public void print(String label, boolean printRegex) {
         if (printRegex)
             System.out.print("  Use regex : " + getRegex() + " to get item :");

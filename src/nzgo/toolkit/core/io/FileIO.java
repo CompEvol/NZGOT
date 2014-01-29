@@ -14,7 +14,7 @@ import java.nio.file.Path;
  */
 public class FileIO {
 
-    public static NameParser nameParser = new NameParser(); // default tab and |
+    public static NameParser lineParser = new NameParser(); // default tab and |
 
     public static boolean hasContent(String line) {
         return !line.startsWith("#") && !line.trim().isEmpty();

@@ -118,26 +118,32 @@ public class TaxaSort {
             }
 
         } else { // == 1
-            // filter out taxon not belong to bioClass, but always true if bioClass == null
             if (taxon == null) {
                 String errMsg = appendPrefixMsg(Error.UNIDENTIFIED.toString(), prefix);
                 errors.put(queryTaxon, errMsg);
                 taxaSortMap.put(queryTaxon, Error.UNIDENTIFIED.toString());
-                return;
+
             } else if (!taxon.belongsTo(bioClass)) {
+                // filter out taxon not belong to bioClass, but always true if bioClass == null
                 String errMsg = appendPrefixMsg(Error.NOT_IN_BIO_CLASS.toString(), prefix);
                 errors.put(queryTaxon, errMsg);
                 taxaSortMap.put(queryTaxon, Error.UNIDENTIFIED.toString());
-                return;
-            }
 
-            Taxon t = taxon.getParentTaxonOn(rankToBreak);
-            if (t == null) {
-                String errMsg = appendPrefixMsg(Error.NO_TAXON_ON_RANK.toString(), prefix);
+            } else if (taxon.getRank().compareTo(rankToBreak) > 0) {
+                // taxon rank is higher than rankToBreak
+                String errMsg = appendPrefixMsg(Error.HIGHER_RANK.toString(), prefix);
                 errors.put(queryTaxon, errMsg);
-                taxaSortMap.put(queryTaxon, Error.UNIDENTIFIED.toString());
+                taxaSortMap.put(queryTaxon, taxon.getScientificName());
             } else {
-                taxaSortMap.put(queryTaxon, t.getScientificName());
+                // normal cases
+                Taxon t = taxon.getParentTaxonOn(rankToBreak);
+                if (t == null) {
+                    String errMsg = appendPrefixMsg(Error.NO_RANK.toString(), prefix);
+                    errors.put(queryTaxon, errMsg);
+                    taxaSortMap.put(queryTaxon, Error.UNIDENTIFIED.toString());
+                } else {
+                    taxaSortMap.put(queryTaxon, t.getScientificName());
+                }
             }
         }
     }
@@ -271,18 +277,25 @@ public class TaxaSort {
     }
 
     public static enum Error {
-        UNIDENTIFIED ("Unidentified"),
-        MULTI_RESULT ("Multi result"),
-        PREFIX       ("Prefix"),
-        NO_TAXON_ON_RANK ("No taxon on rank"),
-        NOT_IN_BIO_CLASS ("Not in bio class"),
-        ERROR        ("Error"),
-        OTHER        ("Other");
+        UNIDENTIFIED ("unidentified", "unidentified taxon"),
+        MULTI_RESULT ("multi-result", "multi-result for a given taxon name"),
+        PREFIX       ("prefix", "use the prefix of taxon name"),
+        NO_RANK      (Rank.NO_RANK.toString(), "no taxonomy at the given rank"),
+        HIGHER_RANK      ("higher rank", "taxon rank is higher than the given rank"),
+        NOT_IN_BIO_CLASS ("not in", "taxon does not belong to the given biological classification"),
+        ERROR        ("error", "error"),
+        OTHER        ("other", "other");
 
         private String type;
+        private String msg;
 
-        private Error(String type) {
+        private Error(String type, String msg) {
             this.type = type;
+            this.msg = msg;
+        }
+
+        public String getMsg() {
+            return msg;
         }
 
         @Override

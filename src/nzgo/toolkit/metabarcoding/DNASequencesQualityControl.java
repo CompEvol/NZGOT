@@ -47,7 +47,7 @@ public class DNASequencesQualityControl extends Module{
             e.printStackTrace();
         }
 
-        MyLogger.info("\nTotal " + result[0] + " sequences, " + result[1] + " are translatable.");
+        MyLogger.info("\nInput has " + result[0] + " sequences in total, where " + result[1] + " are translatable.");
     }
 
     public void printUsage(final Arguments arguments) {

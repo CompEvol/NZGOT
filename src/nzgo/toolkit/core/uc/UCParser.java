@@ -1,13 +1,14 @@
 package nzgo.toolkit.core.uc;
 
+import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.Separator;
+
 /**
  * USEARCH cluster format (UC) is a tab-separated text file
  * http://www.drive5.com/usearch/manual/ucout.html
  * @author Walter Xie
  */
 public class UCParser {
-
-    public static final String SUFFIX_UC = ".uc";
 
     public static final String HIT = "H";
     public static final String Centroid = "S";
@@ -21,10 +22,10 @@ public class UCParser {
     public static final int Query_Sequence_COLUMN_ID = 8;
     public static final int Target_Sequence_COLUMN_ID = 9;
 
-    public static final String COLUMN_SEPARATOR = "\t";
+    protected final Separator lineSeparator = new Separator("\t");
 
     public static boolean isUCFile(String fileName) {
-        return fileName.endsWith(SUFFIX_UC);
+        return fileName.endsWith(NameSpace.SUFFIX_UC);
     }
 
     public static boolean isNA(String field) {

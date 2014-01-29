@@ -2,54 +2,63 @@ package nzgo.toolkit.core.uc;
 
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.Matcher;
+import nzgo.toolkit.core.naming.NameSpace;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mixed Sequence is from different database
- * with the head sequence of its assigned OTU
+ * Mixed OTUs
+ * contain any sequence belongs to a different type to the head sequence
+ * such as different databases (BOLD, GOD)
  * @author Walter Xie
  */
 public class MixedOTUs extends UCParser{
+    // TODO: use a list of matchers for more than 2 types
+    private final Matcher matcher;
+
+    public static final String MIXED_OTUS_FILE = "mixed_otus" + NameSpace.SUFFIX_TSV;
 
     // rows from uc file containing mixed sequences from diff database
-    public List<String[]> rowsOfMixedSequences = new ArrayList<>();
+    public List<String[]> sequencesInMixedOTUs = new ArrayList<>();
 
-    public MixedOTUs(File ucFile) {
+    public MixedOTUs(Path ucFile, String regex) {
+        matcher = new Matcher(regex);
+
         try {
-            findMixedOTUs(ucFile);
+            setMixedOTUs(ucFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        reportMixedSequences();
     }
 
     /**
-     * find rows of uc file having mixed sequences, which contains sequences
+     * find rows of uc file where sequences belong to mixed OTUs,
      * from the different database of the head sequence.
      * (or the different category)
      * 2 categories are allowed at moment (e.g. BOLD, GOD)
      * @param ucFile
-     * @throws java.io.IOException
+     * @throws IOException
      */
-    public void findMixedOTUs(File ucFile) throws IOException {
-
+    public void setMixedOTUs(Path ucFile) throws IOException {
         BufferedReader reader = FileIO.getReader(ucFile, "uc");
 
         String line = reader.readLine();
         while (line != null) {
-            String[] fields = FileIO.nameParser.getSeparator(0).parse(line); // use same separator in FileIO.getReader
+            String[] fields = FileIO.lineParser.getSeparator(0).parse(line); // use same separator in FileIO.getReader
 
             if (fields.length < 3) throw new IllegalArgumentException("Error: invalid uc file in the line: " + line);
 
             if (fields[Record_Type_COLUMN_ID].contentEquals(HIT)) {
-                if (!isInSameDatabase(fields[Query_Sequence_COLUMN_ID], fields[Target_Sequence_COLUMN_ID]))
-                    rowsOfMixedSequences.add(fields);
+                if (!isSameType(fields[Query_Sequence_COLUMN_ID], fields[Target_Sequence_COLUMN_ID]))
+                    sequencesInMixedOTUs.add(fields);
             }
 
             line = reader.readLine();
@@ -58,41 +67,49 @@ public class MixedOTUs extends UCParser{
         reader.close();
     }
 
+    public void writeMixedOTUs(Path outFile) throws IOException {
+        BufferedWriter writer = FileIO.getWriter(outFile, "mixed OTUs");
+
+//        writer.write("# \n");
+        for (String mixedOTU : getMixedOTUs()) {
+            writer.write(mixedOTU + "\tmixed\n");
+        }
+
+        writer.flush();
+        writer.close();
+    }
+
     /**
-     * get only OTUs
+     * get OTUs (head sequences) only
      * @return
      */
     public List<String> getMixedOTUs() {
         List<String> mixedOTUs = new ArrayList<>();
-        for (String[] fields : this.rowsOfMixedSequences) {
+        for (String[] fields : this.sequencesInMixedOTUs) {
             if (!mixedOTUs.contains(fields[Target_Sequence_COLUMN_ID]))
                 mixedOTUs.add(fields[Target_Sequence_COLUMN_ID]);
         }
         return mixedOTUs;
     }
 
-    public void reportMixedSequences() {
-        MyLogger.info("\nFind " + rowsOfMixedSequences.size() + " mixed sequences in " + getMixedOTUs().size() + " OTUs : ");
-        for (String[] fields : rowsOfMixedSequences) {
-            MyLogger.info(fields[Cluster_Number_COLUMN_ID] + COLUMN_SEPARATOR + fields[Target_Sequence_COLUMN_ID] +
-                    COLUMN_SEPARATOR + fields[Query_Sequence_COLUMN_ID] );
+    public void reportMixedOTUs() {
+        MyLogger.info("\nFind " + sequencesInMixedOTUs.size() + " mixed sequences in " + getMixedOTUs().size() + " OTUs : ");
+        for (String[] fields : sequencesInMixedOTUs) {
+            MyLogger.info( lineSeparator.getLabel(fields[Cluster_Number_COLUMN_ID],
+                    fields[Target_Sequence_COLUMN_ID], fields[Query_Sequence_COLUMN_ID]) );
         }
     }
 
     /**
-     * hard code to identify whether 2 sequences are from the same database (BOLD, GOD)
-     * check if 1st char of sequence label is integer or string
-     * BOLD sequence label starts string
-     * GOD sequence label starts integer
+     * identify whether 2 sequences are in the same type,
+     * given the regular expression to match one of two types
+     * such as from same database (BOLD, GOD)
      * @param label1
      * @param label2
      * @return
      */
-    public static boolean isInSameDatabase(String label1, String label2) {
-        char c1 = label1.charAt(0);
-        char c2 = label2.charAt(0);
-
-        return Character.isDigit(c1) == Character.isDigit(c2);
+    public boolean isSameType(String label1, String label2) {
+        return matcher.isMatched(label1) == matcher.isMatched(label2);
     }
 
     //Main method
@@ -110,7 +127,8 @@ public class MixedOTUs extends UCParser{
             if (file.isFile()) {
                 String fileName = file.getName();
                 if (isUCFile(fileName)) {
-                    MixedOTUs mixedOTUs = new MixedOTUs(file);
+                    MixedOTUs mixedOTUs = new MixedOTUs(file.toPath(), ".*NZAC.*");
+                    mixedOTUs.reportMixedOTUs();
                 } else {
                     MyLogger.info("\nIgnore file: " + file);
                 }

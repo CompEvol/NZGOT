@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  * Tree Annotation
- * tips: create another TreeAnnotation by loading annotated newickTree and new nameParser
+ * tips: create another TreeAnnotation by loading annotated newickTree and new lineParser
  * for multi-annotation
  * @author Walter Xie
  */

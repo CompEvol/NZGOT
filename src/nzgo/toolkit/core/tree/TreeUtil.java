@@ -46,8 +46,6 @@ public class TreeUtil {
         }
     }
 
-
-
     /**
      * get traits from the tree leave nodes' labels
      * TODO generalize to select any type of trait
@@ -205,7 +203,8 @@ public class TreeUtil {
 
     protected static List<String> getMixedOTUs(String ucFilePath) {
         File ucFile = new File(ucFilePath);
-        MixedOTUs mixedOTUs = new MixedOTUs(ucFile);
+        MixedOTUs mixedOTUs = new MixedOTUs(ucFile.toPath(), ".*NZAC.*");
+        mixedOTUs.reportMixedOTUs();
 
         List<String> mixedOTUsList = mixedOTUs.getMixedOTUs();
         for (int i = 0; i < mixedOTUsList.size(); i++) {

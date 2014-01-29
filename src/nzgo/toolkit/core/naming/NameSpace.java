@@ -16,6 +16,7 @@ public class NameSpace {
     public static final String SUFFIX_SEQUENCES = ".fasta";
     public static final String SUFFIX_OTUS = SUFFIX_SEQUENCES;
     public static final String SUFFIX_MAPPING = ".m8";
+    public static final String SUFFIX_UC = ".uc";
 
     public static final String BY_PLOT = "by plot";
     public static final String BY_SUBPLOT = "by subplot";
@@ -30,4 +31,5 @@ public class NameSpace {
     public static final String SEPARATORS_FILE = "separators" + SUFFIX_TSV;
     public static final String TRAITS_MAPPING_FILE = "traits_map" + SUFFIX_TSV;
     public static final String ERROR_MAPPING_FILE = "error" + SUFFIX_TSV;
+
 }
