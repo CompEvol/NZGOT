@@ -84,13 +84,14 @@ public class TreeRegex extends Module{
 
                 new Arguments.Option("traitsMapIn", "use a customized " + NameSpace.TRAITS_MAPPING_FILE + " to load traits, " +
                         "where the 1st column is leaf nodes labels, the 2nd is the mapped trait. " +
+                        "The mapped trait is used first, and then regex groups are applied to get traits. " +
                         "If the option \"-traitsMapOut\" is used together, then create/overwrite " +
                         NameSpace.TRAITS_MAPPING_FILE + " first and load traits from this file."),
                 new Arguments.Option("traitsMapOut", "create/overwrite " + NameSpace.TRAITS_MAPPING_FILE +
                         " for mapping traits to tree nodes, where the 1st column is leaf nodes labels, " +
                         "the 2nd is the mapped trait."),
 
-                new Arguments.StringOption("regex_type", RegexType.getRegexTypes(), false, "Two types are available: " +
+                new Arguments.StringOption("regex_type", RegexFactory.RegexType.getRegexTypes(), false, "Two types are available: " +
                         "separator and matcher.\nLevel separators parse names in different naming level. " +
                         "Separators are uploaded from " + NameSpace.SEPARATORS_FILE + ", where the 1st column is a regular expression, " +
                         "the 2nd is the index at the string array parsed by the regular expression. " +
@@ -118,9 +119,9 @@ public class TreeRegex extends Module{
         Path working = module.init(arguments, args);
 
         // separators
-        RegexType regexType = null;
+        RegexFactory.RegexType regexType = null;
         if (arguments.hasOption("regex_type")) {
-            regexType = RegexType.valueOf(arguments.getStringOption("regex_type"));
+            regexType = RegexFactory.RegexType.valueOf(arguments.getStringOption("regex_type"));
             Path separatorsTSV = module.validateInputFile(working, NameSpace.SEPARATORS_FILE, new String[]{NameSpace.SUFFIX_TSV}, "customized separators");
             nameParser = new NameParser(separatorsTSV, regexType);
         }

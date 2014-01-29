@@ -38,4 +38,29 @@ public class RegexFactory {
 
         }
     }
+
+    /**
+     * @author Walter Xie
+     */
+    public static enum RegexType {
+
+        SEPARATOR("separator"),
+        MATCHER  ("matcher"),
+        REGEX    ("regular expression");
+
+        private String type;
+
+        private RegexType(String type) {
+            this.type = type;
+        }
+
+        public static String[] getRegexTypes() {
+            return new String[]{SEPARATOR.toString(), MATCHER.toString()};
+        }
+
+        @Override
+        public String toString() {
+            return type;
+        }
+    }
 }

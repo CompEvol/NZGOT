@@ -12,8 +12,9 @@ import java.util.Map;
 
 /**
  * Tree Annotation
- * tips: create another TreeAnnotation by loading annotated newickTree and new lineParser
- * for multi-annotation
+ * tips:
+ * create another TreeAnnotation by loading annotated newickTree and new lineParser for multi-annotation
+ * The mapped trait preTaxaTraits is used first, and then nameParser is applied to get traits.
  * @author Walter Xie
  */
 public class TreeAnnotation {

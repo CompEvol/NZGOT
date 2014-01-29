@@ -2,7 +2,6 @@ package nzgo.toolkit.core.io;
 
 import nzgo.toolkit.core.naming.Regex;
 import nzgo.toolkit.core.naming.RegexFactory;
-import nzgo.toolkit.core.naming.RegexType;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.taxonomy.Taxa;
 
@@ -21,7 +20,7 @@ import java.util.TreeMap;
  */
 public class ConfigFileIO extends FileIO {
 
-    public static List<Regex> importRegex (Path regexTSV, RegexType regexType) throws IOException {
+    public static List<Regex> importRegex (Path regexTSV, RegexFactory.RegexType regexType) throws IOException {
         List<Regex> regexList = new ArrayList<>();
         RegexFactory regexFactory = new RegexFactory(regexType);
 

@@ -27,7 +27,7 @@ public class NameParser {
     public static final String OTHER = "Other";
 
     protected List<Regex> regexList;
-    public final RegexType regexType;
+    public final RegexFactory.RegexType regexType;
 
     // mostly use for tab-separated values (*.tsv)
     // default to have 2 regex
@@ -39,7 +39,7 @@ public class NameParser {
 
     public NameParser(String regex1, String regex2){
         regexList = new ArrayList<>();
-        regexType = RegexType.SEPARATOR;
+        regexType = RegexFactory.RegexType.SEPARATOR;
         regexList.add(new Separator(regex1));
         regexList.add(new Separator(regex2));
     }
@@ -47,7 +47,7 @@ public class NameParser {
     // load regexList from file, regexList.size >= 1
     // if isGroupMatcher true, then use to match names into groups (groupMatcher)
     // if isGroupMatcher false, then use to parse names in different naming level (levelSeparator)
-    public NameParser(Path regexTSV, final RegexType regexType){
+    public NameParser(Path regexTSV, final RegexFactory.RegexType regexType){
         this.regexType = regexType;
         try {
             regexList = ConfigFileIO.importRegex(regexTSV, regexType);
@@ -61,14 +61,14 @@ public class NameParser {
     public String getFinalItem(String label) {
         String finalItem = null;
 
-        if (regexType == RegexType.SEPARATOR) {
+        if (regexType == RegexFactory.RegexType.SEPARATOR) {
             String item = label;
             for (Regex regex : regexList) {
                 finalItem = ((Separator) regex).getItem(item);
                 item = finalItem;
             }
 
-        } else if (regexType == RegexType.MATCHER) {
+        } else if (regexType == RegexFactory.RegexType.MATCHER) {
             for (Regex regex : regexList) {
                 if (regex.isMatched(label)) {
                     if (finalItem != null)
@@ -96,15 +96,15 @@ public class NameParser {
     }
 
     public Separator getSeparator(int index) {
-        if (regexType != RegexType.SEPARATOR)
-            throw new IllegalArgumentException("Wrong regex type : " + regexType + ", it should be " + RegexType.SEPARATOR);
+        if (regexType != RegexFactory.RegexType.SEPARATOR)
+            throw new IllegalArgumentException("Wrong regex type : " + regexType + ", it should be " + RegexFactory.RegexType.SEPARATOR);
 
         return (Separator) getRegex(index);
     }
 
     public Matcher getMatcher(int index) {
-        if (regexType != RegexType.MATCHER)
-            throw new IllegalArgumentException("Wrong regex type : " + regexType + ", it should be " + RegexType.MATCHER);
+        if (regexType != RegexFactory.RegexType.MATCHER)
+            throw new IllegalArgumentException("Wrong regex type : " + regexType + ", it should be " + RegexFactory.RegexType.MATCHER);
 
         return (Matcher) getRegex(index);
     }
