@@ -3,7 +3,6 @@ package nzgo.toolkit.core.uc;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Matcher;
-import nzgo.toolkit.core.naming.NameSpace;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,12 +20,10 @@ import java.util.List;
  */
 public class MixedOTUs extends UCParser{
     // TODO: use a list of matchers for more than 2 types
-    private final Matcher matcher;
-
-    public static final String MIXED_OTUS_FILE = "mixed_otus" + NameSpace.SUFFIX_TSV;
+    protected final Matcher matcher;
 
     // rows from uc file containing mixed sequences from diff database
-    public List<String[]> sequencesInMixedOTUs = new ArrayList<>();
+    protected List<String[]> sequencesInMixedOTUs = new ArrayList<>();
 
     public MixedOTUs(Path ucFile, String regex) {
         matcher = new Matcher(regex);
@@ -67,18 +64,6 @@ public class MixedOTUs extends UCParser{
         reader.close();
     }
 
-    public void writeMixedOTUs(Path outFile) throws IOException {
-        BufferedWriter writer = FileIO.getWriter(outFile, "mixed OTUs");
-
-//        writer.write("# \n");
-        for (String mixedOTU : getMixedOTUs()) {
-            writer.write(mixedOTU + "\tmixed\n");
-        }
-
-        writer.flush();
-        writer.close();
-    }
-
     /**
      * get OTUs (head sequences) only
      * @return
@@ -90,6 +75,18 @@ public class MixedOTUs extends UCParser{
                 mixedOTUs.add(fields[Target_Sequence_COLUMN_ID]);
         }
         return mixedOTUs;
+    }
+
+    public void writeMixedOTUs(Path outFile) throws IOException {
+        BufferedWriter writer = FileIO.getWriter(outFile, "mixed OTUs");
+
+//        writer.write("# \n");
+        for (String mixedOTU : getMixedOTUs()) {
+            writer.write(mixedOTU + "\tmixed\n");
+        }
+
+        writer.flush();
+        writer.close();
     }
 
     public void reportMixedOTUs() {
@@ -111,6 +108,7 @@ public class MixedOTUs extends UCParser{
     public boolean isSameType(String label1, String label2) {
         return matcher.isMatched(label1) == matcher.isMatched(label2);
     }
+
 
     //Main method
     public static void main(final String[] args) throws IOException {

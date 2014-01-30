@@ -83,6 +83,9 @@ public class Module {
             System.exit(0);
         } else if (args2.length > 0) {
             firstArg = args2[0];
+
+            if (NameUtil.isEmptyNull(firstArg))
+                throw new IllegalArgumentException("Argument cannot be null or empty");
         }
         return firstArg;
     }

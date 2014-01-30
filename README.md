@@ -8,7 +8,7 @@
                     walter@cs.auckland.ac.nz
                     alexei@cs.auckland.ac.nz
 
-Last updated: walter@cs.auckland.ac.nz - 9th January 2014
+Last updated: walter@cs.auckland.ac.nz - 30th January 2014
 
 
 =====
@@ -19,7 +19,7 @@ to create an open-source framework useful and reusable for data analysis and mod
 in bioinformatics and ecology.
 
 The minimum version of Java 1.7 is required. The whole software has the dependencies
-on JEBL (http://jebl.sourceforge.net) and BEAST 2 (http://code.google.com/p/beast2/).
+on JEBL (http://jebl.sourceforge.net) and BEAST 2 (https://github.com/CompEvol/beast2.git).
 The 3rd party libraries are included in the /lib folder.
 
 Core package in this project is to provide a framework for an easy development of other
