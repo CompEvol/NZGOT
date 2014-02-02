@@ -110,7 +110,7 @@ class LogFormatter extends Formatter {
             header = "[WARNING] ";
         } else if (Level.SEVERE == record.getLevel()) {
             header = "\n" + df.format(new Date(record.getMillis())) + " ";
-            header += "[" + record.getSourceClassName() + ".";
+            header += "[" + record.getSourceClassName() + "";
             header += record.getSourceMethodName() + "]\n";
             header += "[ERROR] ";
         } else {

@@ -52,7 +52,7 @@ public class SequenceUtil {
 
     public static void splitFastaBy(File inFastaFile, String regex) throws IOException {
         String workPath = inFastaFile.getParent() + File.separator;
-        String fileNameStem = inFastaFile.getName().substring(0, inFastaFile.getName().indexOf("."));
+        String fileNameStem = inFastaFile.getName().substring(0, inFastaFile.getName().indexOf(""));
 
         File outFastaFile1 = new File(workPath + fileNameStem + "-1.fasta");
         PrintStream out1 = new PrintStream(new FileOutputStream(outFastaFile1));

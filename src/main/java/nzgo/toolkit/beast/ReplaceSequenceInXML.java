@@ -105,7 +105,7 @@ public class ReplaceSequenceInXML {
             String fileName = file.getName();
             if (file.isFile() && fileName.endsWith("nex") && fileName.startsWith(stem)) {
                 try {
-                    String index = fileName.substring(fileName.lastIndexOf("_")+1, fileName.lastIndexOf("."));
+                    String index = fileName.substring(fileName.lastIndexOf("_")+1, fileName.lastIndexOf(""));
                     System.out.println("\nReading nex " + file + ", index = " + index);
 
                     if (parserMap.containsKey(index)) throw new IllegalArgumentException("parser map already had index = " + index);

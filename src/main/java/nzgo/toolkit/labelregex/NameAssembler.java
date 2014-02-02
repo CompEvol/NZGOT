@@ -103,7 +103,7 @@ public class NameAssembler extends Module{
                         "Note: the item's index may change after each command, so that every commands use the input items indexes."),
                 new Arguments.Option("traitsMap", "load traits from file, when the command " + Assembler.CommandType.ADD +
                         " is used, where the 1st column is the item separated from the name, the 2nd is the mapped trait. " +
-                        "If no this option, then look for the file " + NameSpace.TRAITS_MAPPING_FILE + "."),
+                        "If no this option, then look for the file " + NameSpace.TRAITS_MAPPING_FILE + ""),
         };
         final Arguments arguments = module.getArguments(newOptions);
 

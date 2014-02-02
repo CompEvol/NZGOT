@@ -196,7 +196,7 @@ public class Module {
         validateFileName(fileName, fileNameSuffixes, ioMessage);
 
         if (working == null)
-            working = Paths.get(".");
+            working = Paths.get("");
         // input
         Path file = Paths.get(working.toString(), fileName);
         if (file == null || Files.notExists(file)) {
@@ -221,7 +221,7 @@ public class Module {
     public Path validateOutputFile(String fileName, String[] fileNameSuffixes, String ioMessage, boolean overwrite) {
         validateFileName(fileName, fileNameSuffixes, ioMessage);
 
-        Path outFile = FileSystems.getDefault().getPath(".", fileName);
+        Path outFile = FileSystems.getDefault().getPath("", fileName);
         if (!overwrite && Files.exists(outFile)) {
             MyLogger.error("Output file exists, please use \"-overwrite\" to allow overwrite output");
             System.exit(0);

@@ -50,9 +50,9 @@ public class OTUAnalyzer extends Module{
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
                 new Arguments.StringOption("in", "input-file-name", "Input uc file name (*.uc), " +
-                        "if this option is not selected, then look for the file " + UC_FILE + "."),
+                        "if this option is not selected, then look for the file " + UC_FILE + ""),
                 new Arguments.StringOption("out", "output-file-name", "Output file name (*.tsv), " +
-                        "if this option is not selected, then use " + MIXED_OTUS_FILE + "."),
+                        "if this option is not selected, then use " + MIXED_OTUS_FILE + ""),
         };
         final Arguments arguments = module.getArguments(newOptions);
 
