@@ -57,8 +57,8 @@ Main package: nzgo.beast
 Owners: Walter Xie
 
 
-
-
+Developer guide:
+How to share IntelliJ IDEA project http://devnet.jetbrains.com/docs/DOC-1186
 
 
 
