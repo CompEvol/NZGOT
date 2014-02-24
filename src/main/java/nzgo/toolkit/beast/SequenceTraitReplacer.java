@@ -11,11 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Given nex file(s) to replace sequence in the xml, but tip names have to be same.
+ * use all models and parameters in a source xml,
+ * but replace its alignment given nex file(s),
+ * and *BEAST trait mapping given in replaceSpecTaxonMapping(PrintStream out)
+ *
  * use java 1.7 File.copy
  * @author Walter Xie
  */
-public class ReplaceSequenceInXML {
+public class SequenceTraitReplacer {
 
     private static int[] treeSet = new int[]{2,4,8,16,32,64,128}; // 2,4,8,16,32,64,128,256
 
@@ -79,7 +82,7 @@ public class ReplaceSequenceInXML {
                         } else if (line.contains("<taxonset id=\"taxonsuperset\"")) {
                             // trigger to print new species - individuals mapping
                             out.println(line);
-                            writeSpIndMapping(out);
+                            replaceSpecTaxonMapping(out);
                         } else {
                             String newLine = line.replaceAll(stem_old, stem);
                             out.println(newLine);
@@ -150,7 +153,7 @@ public class ReplaceSequenceInXML {
         return parserMap;
     }
 
-    private static void writeSpIndMapping(PrintStream out) {
+    private static void replaceSpecTaxonMapping(PrintStream out) {
         StringBuilder xml = new StringBuilder(
                 "                <taxon id=\"s07\" spec=\"TaxonSet\">\n" +
                         "                    <taxon id=\"s07_tip0\" spec=\"Taxon\"/>\n" +
