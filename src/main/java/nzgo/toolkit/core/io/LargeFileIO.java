@@ -30,25 +30,22 @@ public class LargeFileIO extends FileIO {
         long rafLength = gi_taxid_raf.length();
         filePointer = rafLength / 2;
         long prePointer = 1;
-        int preGi = 0;
 
         for (String gi : giTaxidMap.keySet()) {
             int sourceGi = Integer.parseInt(gi);
 
-            String taxid = mapGIToTaxid(sourceGi, preGi, prePointer);
+            String taxid = mapGIToTaxid(sourceGi, prePointer);
             if (taxid != null)
                 giTaxidMap.put(gi, taxid);
-
-            preGi = sourceGi;
         }
     }
 
 
-    public static String mapGIToTaxid(int sourceGi, int preGi, long prePointer) throws IOException {
+    public static String mapGIToTaxid(int sourceGi, long prePointer) throws IOException {
         String taxid = null;
         int count = 0;
 
-        if (preGi == 0) preGi = sourceGi;
+        int preGi = sourceGi;
 
         do {
             gi_taxid_raf.seek(filePointer);
@@ -76,12 +73,22 @@ public class LargeFileIO extends FileIO {
             if (curGi == preGi) {
                 MyLogger.error("\ncurGi == preGi !"); //TODO
             } else {
-                long step = Math.abs( (filePointer - prePointer) / (curGi - preGi) );
+                double weight = 0.9;
+                long step = Math.abs( (filePointer - prePointer) / (long)((curGi - preGi) * weight));
 
+                // smart jump, but may exit bound
+                long pointer = filePointer + (sourceGi - curGi) * step;
+
+                if (pointer < 1 || pointer >= gi_taxid_raf.length()) {
+                    if (sourceGi > curGi) {
+                        pointer = filePointer + Math.abs(filePointer - prePointer) / 2;
+                    } else {
+                        pointer = filePointer - Math.abs(filePointer - prePointer) / 2;
+                    }
+                }
                 preGi = curGi;
                 prePointer = filePointer;
-
-                filePointer += (sourceGi - curGi) * step;
+                filePointer = pointer;
             }
 
             count++;
@@ -93,8 +100,6 @@ public class LargeFileIO extends FileIO {
         } else {
             MyLogger.info("\nFind gi " + sourceGi + " taxid = " + taxid + " by " + count + " searches.");
         }
-
-        gi_taxid_raf.close();
 
         return taxid;
     }
@@ -123,14 +128,14 @@ public class LargeFileIO extends FileIO {
         int sourceGi = Integer.parseInt(gi);
         int preGi = sourceGi;
 
-        String taxid = mapGIToTaxid(sourceGi, preGi, prePointer);
+        String taxid = mapGIToTaxid(sourceGi, prePointer);
 
         return taxid;
     }
 
     //Main test method
     public static void main(final String[] args) throws Exception {
-        File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_raf_nucl.dmp");
+        File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
         LargeFileIO largeFileIO = new LargeFileIO(gi_taxid_raf_nucl);
 
         long start = System.currentTimeMillis();
