@@ -28,6 +28,8 @@ public class TaxaAssignment {
     protected Taxon bioClass;
     private final Separator regexPrefixSeparator;
 
+    // key is query Taxon, value is either Error.? or Taxon assigned on certain condition
+    // such as given a rank, or given a biology classification
     public Map<String, String> taxaAssignementMap = new TreeMap<>();
     public Map<String, String> errors = new TreeMap<>();
 

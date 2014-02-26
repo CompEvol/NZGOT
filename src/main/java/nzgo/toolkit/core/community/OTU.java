@@ -1,5 +1,6 @@
 package nzgo.toolkit.core.community;
 
+import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.util.BioSortedSet;
 
 /**
@@ -13,6 +14,7 @@ public class OTU<E> extends BioSortedSet<E> {
 
     protected Reference reference;
     protected AlphaDiversity alphaDiversity; //
+    protected Taxon taxonAgreed;
 
     public OTU(String name) {
         super(name);
@@ -32,5 +34,17 @@ public class OTU<E> extends BioSortedSet<E> {
 
     public void setAlphaDiversity(AlphaDiversity alphaDiversity) {
         this.alphaDiversity = alphaDiversity;
+    }
+
+    public boolean hasTaxon() {
+        return taxonAgreed != null;
+    }
+
+    public Taxon getTaxonAgreed() {
+        return taxonAgreed;
+    }
+
+    public void setTaxonAgreed(Taxon taxonAgreed) {
+        this.taxonAgreed = taxonAgreed;
     }
 }

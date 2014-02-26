@@ -1,8 +1,6 @@
 package nzgo.toolkit.core.blast.parser;
 
-import nzgo.toolkit.core.blast.Hit;
-import nzgo.toolkit.core.blast.Iteration;
-import nzgo.toolkit.core.blast.IterationHits;
+import nzgo.toolkit.core.blast.*;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.util.XMLUtil;
 
@@ -59,6 +57,34 @@ public class BlastStAXParser {
         return iterationList;
     }
 
+
+    public static void printBLASTOutput(File xmlBLASTOutputFile) throws JAXBException, IOException, XMLStreamException {
+        MyLogger.info("\nParsing BLAST xml output file : " + xmlBLASTOutputFile);
+
+        List<Iteration> iterationList = BlastStAXParser.parse(xmlBLASTOutputFile);
+
+        for(Iteration iteration : iterationList) {
+            MyLogger.info("iteration:" + iteration.getIterationQueryDef());
+
+            IterationHits hits = iteration.getIterationHits();
+            for(Hit hit : hits.getHit()) {
+                MyLogger.info("hit id:" + hit.getHitId());
+                MyLogger.info("hit length:" + hit.getHitLen());
+
+                HitHsps hitHsps = hit.getHitHsps();
+                for(Hsp hsp : hitHsps.getHsp()) {
+                    MyLogger.info("hsp num:" + hsp.getHspNum());
+                    MyLogger.info("hsp bit score:" + hsp.getHspBitScore());
+                    MyLogger.info("hsp e-value:" + hsp.getHspEvalue());
+                    MyLogger.info("identity / len:" + hsp.getHspIdentity() + " / " + hsp.getHspAlignLen() + " = " +
+                            Double.parseDouble(hsp.getHspIdentity()) / Double.parseDouble(hsp.getHspAlignLen()));
+                }
+
+                MyLogger.info("\n");
+            }
+        }
+    }
+
     public static void main(String[] args) {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
@@ -66,19 +92,8 @@ public class BlastStAXParser {
         MyLogger.info("\nWorking path = " + workPath);
 
         try {
-            File xmlFile = new File(workPath + "IndirectSoil_otus1.xml");
-            List<Iteration> iterationList = parse(xmlFile);
-
-            for(Iteration iteration: iterationList) {
-                MyLogger.info("iteration:" + iteration.getIterationQueryDef());
-
-                IterationHits hits = iteration.getIterationHits();
-                for(Hit hit:hits.getHit()) {
-                    MyLogger.info("def:" + hit.getHitDef());
-                    MyLogger.info("len:" + hit.getHitLen());
-                    MyLogger.info("\n");
-                }
-            }
+            File xmlFile = new File(workPath + "otus1.xml");
+            printBLASTOutput(xmlFile);
         }
         catch (Exception e) {
             e.printStackTrace();

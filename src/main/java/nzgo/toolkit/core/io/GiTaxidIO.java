@@ -11,13 +11,13 @@ import java.util.SortedMap;
  * Large File IO
  * @author Walter Xie
  */
-public class LargeFileIO extends FileIO {
+public class GiTaxidIO extends FileIO {
 
-    public static int COUNT_LIMIT = 100;
+    public static int COUNT_LIMIT = 50;
     public static RandomAccessFile gi_taxid_raf;
     public static long filePointer;
 
-    public LargeFileIO(File file) throws IOException {
+    public GiTaxidIO(File file) throws IOException {
         gi_taxid_raf = new RandomAccessFile(file, "r");
 
         MyLogger.info("\nLoad gi taxid mapping file " + file);
@@ -71,7 +71,12 @@ public class LargeFileIO extends FileIO {
             }
 
             if (curGi == preGi) {
-                MyLogger.error("\ncurGi == preGi !"); //TODO
+                //TODO
+                MyLogger.error("\ncurGi == preGi !");
+            } else if (curGi < sourceGi && sourceGi-curGi <= 6) {
+                //TODO
+                taxid = readLines(6, gi_taxid_raf, sourceGi);
+                break;
             } else {
                 double weight = 0.9;
                 long step = Math.abs( (filePointer - prePointer) / (long)((curGi - preGi) * weight));
@@ -104,15 +109,24 @@ public class LargeFileIO extends FileIO {
         return taxid;
     }
 
-    protected String readLines(int numOfLines, RandomAccessFile gi_taxid_raf) throws IOException {
-        String line = null;
+    protected static String readLines(int numOfLines, RandomAccessFile gi_taxid_raf, int sourceGi) throws IOException {
         for (int i=0; i<numOfLines; i++) {
-            line = gi_taxid_raf.readLine();
-            long filePointer = gi_taxid_raf.getFilePointer();
+            String line = gi_taxid_raf.readLine();
+            filePointer = gi_taxid_raf.getFilePointer();
 
             MyLogger.debug("\nline = " + line + ", filePointer =" + filePointer);
+
+            String[] map = lineParser.getSeparator(0).parse(line);
+
+//            MyLogger.debug("\nFound: gi = " + map[0] + ", taxid = " + map[1]);
+
+            int curGi = Integer.parseInt(map[0]);
+
+            if (sourceGi == curGi) {
+                return map[1];
+            }
         }
-        return line;
+        return null; // error
     }
 
     /**
@@ -121,7 +135,7 @@ public class LargeFileIO extends FileIO {
      * @return
      * @throws IOException
      */
-    public static String mapGIToTaxid(String gi) throws IOException {
+    public String mapGIToTaxid(String gi) throws IOException {
         long rafLength = gi_taxid_raf.length();
         filePointer = rafLength / 2;
         long prePointer = 1;
@@ -136,11 +150,11 @@ public class LargeFileIO extends FileIO {
     //Main test method
     public static void main(final String[] args) throws Exception {
         File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
-        LargeFileIO largeFileIO = new LargeFileIO(gi_taxid_raf_nucl);
+        GiTaxidIO giTaxidIO = new GiTaxidIO(gi_taxid_raf_nucl);
 
         long start = System.currentTimeMillis();
 
-        String taxid = mapGIToTaxid("261498544");
+        String taxid = giTaxidIO.mapGIToTaxid("261498544");
 
         long elapsedTimeMillis = System.currentTimeMillis()-start;
 

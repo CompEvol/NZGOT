@@ -1,5 +1,6 @@
 package nzgo.toolkit.core.community;
 
+import nzgo.toolkit.core.taxonomy.Taxa;
 import nzgo.toolkit.core.util.BioSortedSet;
 
 import java.util.HashMap;
@@ -61,6 +62,24 @@ public class OTUs<E> extends BioSortedSet<E> {
         }
 
         return readsCountMap;
+    }
+
+    /**
+     * get Taxa from all Taxon of OTU in OTUs
+     * @return
+     */
+    public Taxa getTaxa() {
+        Taxa taxa = new Taxa();
+
+        for(E e : this){
+            OTU otu = (OTU) e;
+            if (otu.hasTaxon()) {
+                taxa.addUniqueElement(otu.getTaxonAgreed());
+            }
+        }
+
+        if (taxa.size() < 1) return null;
+        return taxa;
     }
 
     /**

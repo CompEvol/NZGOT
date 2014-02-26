@@ -41,6 +41,13 @@ public class EFetchStAXParser {
         return taxonList;
     }
 
+    /**
+     * return Taxon given NCBI taxId
+     * @param taxId
+     * @return
+     * @throws XMLStreamException
+     * @throws IOException
+     */
     public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
         URL url = NCBIeUtils.eFetch(taxId);
         XMLStreamReader xmlStreamReader = XMLUtil.parse(url);

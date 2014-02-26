@@ -25,9 +25,6 @@
         <module name="nzgot" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="nzgot" target="1.7" />
-    </bytecodeTargetLevel>
   </component>
 </project>
 
