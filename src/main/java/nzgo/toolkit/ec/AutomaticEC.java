@@ -109,7 +109,7 @@ public class AutomaticEC {
 			referenceLabel = null;
 			referenceSeq = null;
 			
-            OTU otu = (OTU) otus.getOTUOfSeq(seq.getTaxon().toString());
+            OTU otu = (OTU) otus.getOTUByName(seq.getTaxon().toString());
             if (otu != null && otu.getReference() != null)
                 referenceLabel = otu.getReference().toString();
 

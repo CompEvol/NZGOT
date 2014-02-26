@@ -57,7 +57,7 @@ public class GiTaxidIO extends FileIO {
             }
 
             String line = gi_taxid_raf.readLine();
-            MyLogger.debug("\nline = " + line + ", filePointer =" + filePointer);
+            MyLogger.debug("line = " + line + ", filePointer = " + filePointer);
 
             String[] map = lineParser.getSeparator(0).parse(line);
 
@@ -103,7 +103,7 @@ public class GiTaxidIO extends FileIO {
         if (taxid == null) {
             MyLogger.warn("\nCannot find gi " + sourceGi + " after " + count + " searches.");
         } else {
-            MyLogger.info("\nFind gi " + sourceGi + " taxid = " + taxid + " by " + count + " searches.");
+            MyLogger.info("\nFind gi " + sourceGi + " taxid = " + taxid + " by " + count + " searches.\n");
         }
 
         return taxid;
@@ -114,7 +114,7 @@ public class GiTaxidIO extends FileIO {
             String line = gi_taxid_raf.readLine();
             filePointer = gi_taxid_raf.getFilePointer();
 
-            MyLogger.debug("\nline = " + line + ", filePointer =" + filePointer);
+            MyLogger.debug("line = " + line + ", filePointer = " + filePointer);
 
             String[] map = lineParser.getSeparator(0).parse(line);
 

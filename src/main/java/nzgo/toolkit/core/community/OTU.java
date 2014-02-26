@@ -16,8 +16,19 @@ public class OTU<E> extends BioSortedSet<E> {
     protected AlphaDiversity alphaDiversity; //
     protected Taxon taxonAgreed;
 
+    protected String alias; // special case to have 2 names
+
     public OTU(String name) {
         super(name);
+    }
+
+    public String getAlias() {
+        if (alias == null) return getName();
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public Reference getReference() {

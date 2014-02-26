@@ -38,7 +38,7 @@ public class TaxaUtil {
         for(Iteration iteration : iterationList) {
             String otuName = iteration.getIterationQueryDef();
 
-            MyLogger.debug("iteration:" + otuName);
+            MyLogger.debug("iteration: " + otuName);
 
             IterationHits hits = iteration.getIterationHits();
             for(Hit hit : hits.getHit()) {
@@ -48,25 +48,25 @@ public class TaxaUtil {
 
                 String taxid = giTaxidIO.mapGIToTaxid(gi);
 
-                taxidSet.addUniqueElement(taxid);
+                taxidSet.addElement(taxid);
 
-                MyLogger.debug("hit id:" + hitId + ", get gi = " + gi);
+                MyLogger.debug("hit id: " + hitId + ", get gi = " + gi);
 
-                MyLogger.debug("hit length:" + hit.getHitLen());
+                MyLogger.debug("hit length: " + hit.getHitLen());
 
                 HitHsps hitHsps = hit.getHitHsps();
                 for(Hsp hsp : hitHsps.getHsp()) {
-                    MyLogger.debug("hsp num:" + hsp.getHspNum());
-                    MyLogger.debug("hsp bit score:" + hsp.getHspBitScore());
-                    MyLogger.debug("hsp e-value:" + hsp.getHspEvalue());
-                    MyLogger.debug("identity / len:" + hsp.getHspIdentity() + " / " + hsp.getHspAlignLen() + " = " +
+                    MyLogger.debug("hsp num: " + hsp.getHspNum());
+                    MyLogger.debug("hsp bit score: " + hsp.getHspBitScore());
+                    MyLogger.debug("hsp e-value: " + hsp.getHspEvalue());
+                    MyLogger.debug("identity/len: " + hsp.getHspIdentity() + " / " + hsp.getHspAlignLen() + " = " +
                             Double.parseDouble(hsp.getHspIdentity()) / Double.parseDouble(hsp.getHspAlignLen()));
                 }
 
                 MyLogger.debug("\n");
             }
 
-            OTU otu = (OTU) otus.getOTUOfSeq(otuName);
+            OTU otu = (OTU) otus.getOTUByName(otuName);
 
             if (otu == null) {
                 MyLogger.error("Error: cannot find otu " + otuName + " from OTUs " + otu.getName());
@@ -90,6 +90,7 @@ public class TaxaUtil {
 
         try {
             File otusFile = new File(workPath + "otus1.fasta");
+            // TODO: change to Community and setAlias to OTU, so that can use writeCommunityMatrix
             OTUs otus = new OTUs(otusFile.getName());
 
             OTUsFileIO.importOTUs(otusFile, otus);

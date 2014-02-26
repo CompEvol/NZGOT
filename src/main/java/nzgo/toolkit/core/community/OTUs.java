@@ -18,19 +18,21 @@ public class OTUs<E> extends BioSortedSet<E> {
     }
 
     /**
-     * give a sequence to get the OTU it belongs to
+     * give a sequence name to get the OTU it belongs to
+     * or give name to get the OTU
+     * or give alias to get the OTU, if OTU has alias
      * TODO: only suit for hard clustering currently
-     * @param sequenceName
+     * @param name
      * @return
      */
-    public E getOTUOfSeq(String sequenceName) {
+    public E getOTUByName(String name) {
         Object sequence;
         for(E e : this){
             OTU otu = (OTU) e;
-            if (sequenceName.contentEquals(otu.getName())) {
+            if (name.contentEquals(otu.getName()) || name.contentEquals(otu.getAlias())) {
                 return e;
             } else {
-                sequence = otu.getUniqueElement(sequenceName);
+                sequence = otu.getUniqueElement(name);
                 if (sequence != null)
                     return e;
             }
@@ -74,7 +76,8 @@ public class OTUs<E> extends BioSortedSet<E> {
         for(E e : this){
             OTU otu = (OTU) e;
             if (otu.hasTaxon()) {
-                taxa.addUniqueElement(otu.getTaxonAgreed());
+                // may have multi-otus assigned to same taxon
+                taxa.addElement(otu.getTaxonAgreed());
             }
         }
 
