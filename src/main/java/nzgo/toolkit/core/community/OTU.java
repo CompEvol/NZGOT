@@ -12,29 +12,34 @@ import nzgo.toolkit.core.util.BioSortedSet;
  */
 public class OTU<E> extends BioSortedSet<E> {
 
-    protected Reference reference;
     protected AlphaDiversity alphaDiversity; //
     protected Taxon taxonAgreed;
 
+    @Deprecated
+    protected Reference reference;
+
+    @Deprecated
     protected String alias; // special case to have 2 names
 
     public OTU(String name) {
         super(name);
     }
 
+    @Deprecated
     public String getAlias() {
         if (alias == null) return getName();
         return alias;
     }
-
+    @Deprecated
     public void setAlias(String alias) {
         this.alias = alias;
     }
 
+    @Deprecated
     public Reference getReference() {
         return reference;
     }
-
+    @Deprecated
     public void setReference(Reference reference) {
         this.reference = reference;
     }

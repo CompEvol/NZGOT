@@ -2,10 +2,11 @@ package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.blast.*;
 import nzgo.toolkit.core.blast.parser.BlastStAXParser;
+import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
-import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SampleNameParser;
 
@@ -89,18 +90,18 @@ public class TaxaUtil {
         MyLogger.info("\nWorking path = " + workPath);
 
         try {
-            File otusFile = new File(workPath + "otus1.fasta");
+//            File otusFile = new File(workPath + "otus1.fasta");
+            File otuMappingFile = new File(workPath + "map.uc");
             // TODO: change to Community and setAlias to OTU, so that can use writeCommunityMatrix
-            OTUs otus = new OTUs(otusFile.getName());
+            Community community = new Community(otuMappingFile);
 
-            OTUsFileIO.importOTUs(otusFile, otus);
-
-            File xmlBLASTOutputFile = new File(workPath + "blast/otus1.xml");
+            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
             File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
 
-            setTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl, otus);
+            setTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl, community);
 
-
+            String outFileAndPath = workPath + File.separator + "community_matrix.csv";
+            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
 
         }
         catch (Exception e) {

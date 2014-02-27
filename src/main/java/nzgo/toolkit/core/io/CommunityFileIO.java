@@ -6,6 +6,7 @@ import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.taxonomy.Taxon;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -71,14 +72,22 @@ public class CommunityFileIO extends OTUsFileIO {
             OTU otu = (OTU) o;
             out.print(otu.getName());
 
+            // print AlphaDiversity column
             AlphaDiversity alphaDiversity = otu.getAlphaDiversity();
+            if (alphaDiversity != null) {
+//                throw new IllegalArgumentException("Error: cannot AlphaDiversity report for OTU : " + otu);
 
-            if (alphaDiversity == null)
-                throw new IllegalArgumentException("Error: cannot AlphaDiversity report for OTU : " + otu);
-
-            for (int a : alphaDiversity.getAlphaDiversity()) {
-                out.print("," + a);
+                for (int a : alphaDiversity.getAlphaDiversity()) {
+                    out.print("," + a);
+                }
             }
+
+            // print AlphaDiversity column
+            if (otu.hasTaxon()) {
+                Taxon taxonAgreed = otu.getTaxonAgreed();
+                out.print("," + taxonAgreed);
+            }
+
             out.print("\n");
         }
 

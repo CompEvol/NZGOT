@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 /**
  * Alpha Diversity for samples given a OTU
+ * TODO need review
  * @author Walter Xie
  */
 public class AlphaDiversity {

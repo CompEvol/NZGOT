@@ -50,10 +50,10 @@ public class UCParser {
      * @return
      */
     public static int getSize(String name) {
-        String regex = ".*;?size=(\\d*).*";
+        String regex = ".*size=(\\d*).*";
         String size = name.replaceFirst(regex, "$1");
 
-        if (size != null && size.length() > 0)
+        if (size != null && size.length() != name.length())
             return Integer.parseInt(size);
         else
             return 0;
