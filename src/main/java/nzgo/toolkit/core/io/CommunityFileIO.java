@@ -38,7 +38,7 @@ public class CommunityFileIO extends OTUsFileIO {
         TreeSet<String> samples = new TreeSet<>();
 
         // 1st, set sampleType, default to BY_PLOT
-        community.setSampleType(NameSpace.BY_PLOT);
+        community.setSampleType(NameSpace.BY_SUBPLOT);
         MyLogger.info("\nSet sample type: " + community.getSampleType());
 
         // 2nd, parse label to get sample

@@ -28,7 +28,11 @@ public class TaxonAgreed {
         }
 
         if (taxonAgreed == null) {
-            MyLogger.error("Error: cannot find agreed taxon " + taxonAgreed + " from taxid set: "+ taxidSet);
+            MyLogger.error("Error: cannot find agreed taxon " + taxonAgreed +
+                    " from taxid set: "+ taxidSet.elementsToString());
+        } else {
+            MyLogger.debug("find agreed taxon " + taxonAgreed + ", rank " + taxonAgreed.getRank() +
+                    ", from taxid set: "+ taxidSet.elementsToString());
         }
 
         return taxonAgreed;

@@ -35,7 +35,11 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
      * @param e
      */
     public void addElement(E e) {
-        if (!add(e))
+        add(e);
+    }
+
+    public void addElement(E e, boolean warnDuplicate) {
+        if (!add(e) && warnDuplicate)
             MyLogger.warn("find duplicate " + e.toString() + " in " + getName() + " !");
     }
 
@@ -83,6 +87,20 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
 
     public String toString() {
         return getName();
+    }
+
+    public String elementsToString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        int i = 0;
+        for (E e : this) {
+            if (i == 0)
+                stringBuilder.append(",");
+            stringBuilder.append(e);
+            i++;
+        }
+        stringBuilder.append("]");
+        return stringBuilder.toString();
     }
 
     public List<E> toList() {
