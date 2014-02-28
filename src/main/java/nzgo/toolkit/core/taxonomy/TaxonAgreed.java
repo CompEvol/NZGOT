@@ -11,7 +11,7 @@ import java.io.IOException;
  * @author Walter Xie
  */
 public class TaxonAgreed {
-
+    //TODO not working?
     public static Taxon getTaxonAgreed(Taxa taxidSet) throws IOException, XMLStreamException {
         Taxon taxonAgreed = null;
 

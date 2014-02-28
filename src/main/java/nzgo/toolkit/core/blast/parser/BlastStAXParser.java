@@ -48,7 +48,7 @@ public class BlastStAXParser {
                 String elementName = xmlStreamReader.getLocalName();
                 if(iterationTag.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
-                    iteration.reduceToFirstTopHit();
+                    iteration.reduceToTopHits(); // limit 50
                     iterationList.add(iteration);
                 }
             }
@@ -59,7 +59,7 @@ public class BlastStAXParser {
 
 
     public static void printBLASTOutput(File xmlBLASTOutputFile) throws JAXBException, IOException, XMLStreamException {
-        MyLogger.info("\nParsing BLAST xml output file : " + xmlBLASTOutputFile);
+        MyLogger.info("\nParsing BLAST xml output file : " + xmlBLASTOutputFile + "\n");
 
         List<Iteration> iterationList = BlastStAXParser.parse(xmlBLASTOutputFile);
 

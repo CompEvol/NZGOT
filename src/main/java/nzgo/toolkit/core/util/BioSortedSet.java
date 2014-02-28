@@ -94,7 +94,7 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
         stringBuilder.append("[");
         int i = 0;
         for (E e : this) {
-            if (i == 0)
+            if (i > 0)
                 stringBuilder.append(",");
             stringBuilder.append(e);
             i++;

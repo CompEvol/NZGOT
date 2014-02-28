@@ -27,13 +27,13 @@ public class IterationHits {
     /**
      * only return the first top hit for each iteration
      */
-    public void reduceToFirstTopHit() {
+    public void reduceToTopHits(int topHitsLimit) {
         if (hit == null) {
             hit = new ArrayList<Hit>();
-        } else if (hit.size() > 1) {
-            Hit first = hit.get(0);
+        } else if (hit.size() > topHitsLimit) {
+            List<Hit> topHits = hit.subList(0, topHitsLimit);
             hit = new ArrayList<>();
-            hit.add(first);
+            hit.addAll(topHits);
         }
     }
 

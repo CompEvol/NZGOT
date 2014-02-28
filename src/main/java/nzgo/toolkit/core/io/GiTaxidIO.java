@@ -35,7 +35,9 @@ public class GiTaxidIO extends FileIO {
 
         //        writer.write("# \n");
         for (Map.Entry<String, Taxon> entry : otuTaxaMap.entrySet()) {
-            writer.write(entry.getKey() + "\t" + entry.getValue() + "\t" + entry.getValue().getTaxId() + "\t" + entry.getValue().getRank() + "\n");
+            Taxon taxon = entry.getValue();
+            writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon) + "\t" + (taxon==null?"":taxon.getTaxId()) +
+                    "\t" + (taxon==null?"":taxon.getRank()) + "\n");
         }
 
         writer.flush();
