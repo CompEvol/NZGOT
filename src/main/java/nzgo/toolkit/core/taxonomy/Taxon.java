@@ -17,7 +17,7 @@ public class Taxon extends Element {
     protected String parentTaxId;
 
     protected int gi;
-
+    // start from "cellular organisms"
     public List<Taxon> lineage = new ArrayList<>();
 
     public Taxon() {
@@ -50,8 +50,8 @@ public class Taxon extends Element {
             return true;
         if (getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
             return true;
-        for (Taxon parentTaxon : lineage) {
-            if (parentTaxon.getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
+        for(int i = lineage.size() - 1; i >= 0; i--){
+            if (lineage.get(i).getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
                 return true;
         }
         return false;
@@ -64,9 +64,9 @@ public class Taxon extends Element {
      * @return
      */
     public Taxon getParentTaxonOn(Rank rank) {
-        for (Taxon parentTaxon : lineage) {
-            if (rank.equals(parentTaxon.getRank()))
-                return parentTaxon;
+        for(int i = lineage.size() - 1; i >= 0; i--){
+            if (rank.equals(lineage.get(i).getRank()))
+                return lineage.get(i);
         }
         if (this.rank.compareTo(rank) >= 0) return this;
         return null;
@@ -82,9 +82,9 @@ public class Taxon extends Element {
         if (taxon2 == null || taxon2.belongsTo(this))
             return this;
 
-        for (Taxon parentTaxon1 : lineage) {
-            if (taxon2.belongsTo(parentTaxon1))
-                return parentTaxon1;
+        for(int i = lineage.size() - 1; i >= 0; i--){
+            if (taxon2.belongsTo(lineage.get(i)))
+                return lineage.get(i);
         }
 
         return null; // exception
