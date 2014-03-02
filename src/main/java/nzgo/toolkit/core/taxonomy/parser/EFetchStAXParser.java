@@ -70,7 +70,7 @@ public class EFetchStAXParser {
         return null;
     }
 
-    protected static Taxon parseTaxon(XMLStreamReader xmlStreamReader) throws XMLStreamException {
+    public static Taxon parseTaxon(XMLStreamReader xmlStreamReader) throws XMLStreamException {
         Taxon taxon = new Taxon();
         while(xmlStreamReader.hasNext()){
             xmlStreamReader.next();

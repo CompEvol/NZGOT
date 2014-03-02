@@ -1,7 +1,6 @@
 package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -16,14 +15,15 @@ public class TaxonAgreed {
         Taxon taxonAgreed = null;
 
         for (Object taxid : taxidSet) {
-            Taxon taxon1 = EFetchStAXParser.getTaxonById(taxid.toString());
+//            Taxon taxon2 = EFetchStAXParser.getTaxonById(taxid.toString());
+            Taxon taxon2 = TaxaUtil.getTaxonById(taxid.toString());
 
-            if (taxon1 == null) {
+            if (taxon2 == null) {
                 MyLogger.error("Error: cannot find taxid " + taxid + " from EFetch !");
             } else if (taxonAgreed == null) {
-                taxonAgreed = taxon1;
+                taxonAgreed = taxon2;
             } else {
-                taxonAgreed = taxonAgreed.getTaxonAgreed(taxon1);
+                taxonAgreed = taxonAgreed.getTaxonAgreed(taxon2);
             }
         }
 

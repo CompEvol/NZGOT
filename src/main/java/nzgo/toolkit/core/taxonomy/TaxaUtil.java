@@ -8,6 +8,7 @@ import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SampleNameParser;
+import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.bind.JAXBContext;
@@ -49,14 +50,12 @@ public class TaxaUtil {
         JAXBContext jc = JAXBContext.newInstance(Iteration.class);
         Unmarshaller unmarshaller = jc.createUnmarshaller();
 
-        String iterationTag = "Iteration";
-
         while(xmlStreamReader.hasNext()){
             xmlStreamReader.next();
 
             if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                 String elementName = xmlStreamReader.getLocalName();
-                if(iterationTag.equals(elementName)){
+                if(Iteration.TAG.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
                     iteration.reduceToTopHits(); // limit 50
 
@@ -126,6 +125,26 @@ public class TaxaUtil {
 
     }
 
+    public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
+        XMLStreamReader xmlStreamReader = TaxonomyLocalDatabase.getAndAddTaxId(taxId);
+
+        try {
+            while(xmlStreamReader.hasNext()){
+                xmlStreamReader.next();
+
+                if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
+                    String elementName = xmlStreamReader.getLocalName();
+                    if (NCBIeUtils.isTaxon(elementName)) {
+                        return EFetchStAXParser.parseTaxon(xmlStreamReader);
+                    }
+                }
+            }
+        } finally {
+            xmlStreamReader.close();
+        }
+
+        return null;
+    }
 
     //Main method
     public static void main(final String[] args) {

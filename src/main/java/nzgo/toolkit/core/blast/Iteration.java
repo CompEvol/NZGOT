@@ -26,7 +26,9 @@ import javax.xml.bind.annotation.*;
 })
 @XmlRootElement(name = "Iteration")
 public class Iteration {
-    public static final int TOP_HITS_LIMITS = 50;
+    public static final int TOP_HITS_LIMITS = 10;
+    public static final String TAG = "Iteration";
+
 
     /**
      * only return the first top hit for each iteration

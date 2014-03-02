@@ -24,6 +24,7 @@ public class BlastStAXParser {
 
     /**
      * only return the first top hit for each iteration
+     * it seems to be faster to use the code directly than to get List<Iteration>
      * @param xmlFile
      * @return
      * @throws JAXBException
@@ -38,7 +39,6 @@ public class BlastStAXParser {
         Unmarshaller unmarshaller = jc.createUnmarshaller();
 
 //TODO        String iterationTag = Iteration.class.getClass().getAnnotation(XmlRootElement.class).name();
-        String iterationTag = "Iteration";
 
         List<Iteration> iterationList = new ArrayList<>();
         while(xmlStreamReader.hasNext()){
@@ -46,7 +46,7 @@ public class BlastStAXParser {
 
             if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                 String elementName = xmlStreamReader.getLocalName();
-                if(iterationTag.equals(elementName)){
+                if(Iteration.TAG.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
                     iteration.reduceToTopHits(); // limit 50
                     iterationList.add(iteration);
