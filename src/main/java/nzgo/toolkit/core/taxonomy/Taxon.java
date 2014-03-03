@@ -1,7 +1,10 @@
 package nzgo.toolkit.core.taxonomy;
 
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.util.Element;
 
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +17,8 @@ public class Taxon extends Element {
 
     protected String taxId;
     protected Rank rank;
-    protected Taxon parentTaxon;
+    protected String parentTaxId;
+//    protected Taxon parentTaxon; //TODO Taxon or String?
 
     protected int gi;
 
@@ -44,14 +48,20 @@ public class Taxon extends Element {
      */
     public List<Taxon> getLineage () {
         List<Taxon> lineage = new ArrayList<>();
-        getParentLineage(lineage, this);
+        try {
+            getParentLineage(lineage, this);
+        } catch (IOException | XMLStreamException e) {
+            MyLogger.error("Cannot get taxonomy lineage of " + this);
+            e.printStackTrace();
+        }
         return lineage;
     }
 
-    protected void getParentLineage(List<Taxon> lineage, Taxon taxon) {
+    protected void getParentLineage(List<Taxon> lineage, Taxon taxon) throws IOException, XMLStreamException {
         if (!TaxaUtil.getCellularOrganisms().taxIdEquals(taxon) && taxon.getParentTaxon() != null) {
-            lineage.add(taxon.getParentTaxon());
             getParentLineage(lineage, taxon.getParentTaxon());
+            // add "cellular organisms" first, which is the first in xml
+            lineage.add(taxon.getParentTaxon());
         }
     }
 
@@ -129,13 +139,22 @@ public class Taxon extends Element {
         this.taxId = taxId;
     }
 
-    public Taxon getParentTaxon() {
-        return parentTaxon;
+
+    public String getParentTaxId() {
+        return parentTaxId;
     }
 
-    public void setParentTaxon(Taxon parentTaxon) {
-        this.parentTaxon = parentTaxon;
+    public void setParentTaxId(String parentTaxId) {
+        this.parentTaxId = parentTaxId;
     }
+
+    public Taxon getParentTaxon() throws IOException, XMLStreamException {
+        return TaxaUtil.getTaxonById(parentTaxId);
+    }
+//
+//    public void setParentTaxon(Taxon parentTaxon) {
+//        this.parentTaxon = parentTaxon;
+//    }
 
     public Rank getRank() {
         return rank;

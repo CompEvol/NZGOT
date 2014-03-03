@@ -1,10 +1,8 @@
 package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.blast.*;
-import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
-import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SampleNameParser;
@@ -56,56 +54,10 @@ public class TaxaUtil {
             if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                 String elementName = xmlStreamReader.getLocalName();
                 if(Iteration.TAG.equals(elementName)){
-                    long lStartTime = System.currentTimeMillis();
-
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
                     iteration.reduceToTopHits(); // limit 50
 
-                    // a set of taxid
-                    Taxa taxidSet = new Taxa();
-
-                    String otuName = iteration.getIterationQueryDef();
-
-                    MyLogger.debug("\niteration: " + otuName);
-
-                    IterationHits hits = iteration.getIterationHits();
-                    for(Hit hit : hits.getHit()) {
-                        String hitId = hit.getHitId();
-                        String[] fields = sampleNameParser.getSeparator(0).parse(hitId);
-                        String gi = fields[GI_INDEX];
-
-                        MyLogger.debug("hit id: " + hitId + ", get gi = " + gi);
-
-                        MyLogger.debug("hit length: " + hit.getHitLen());
-
-                        HitHsps hitHsps = hit.getHitHsps();
-                        for(Hsp hsp : hitHsps.getHsp()) {
-                            MyLogger.debug("hsp num: " + hsp.getHspNum());
-                            MyLogger.debug("hsp bit score: " + hsp.getHspBitScore());
-                            MyLogger.debug("hsp e-value: " + hsp.getHspEvalue());
-                            MyLogger.debug("identity/len: " + hsp.getHspIdentity() + " / " + hsp.getHspAlignLen() + " = " +
-                                    Double.parseDouble(hsp.getHspIdentity()) / Double.parseDouble(hsp.getHspAlignLen()));
-                        }
-
-                        String taxid = giTaxidIO.mapGIToTaxid(gi);
-
-                        if (taxid != null) taxidSet.add(taxid);
-                    }
-
-
-                    if (otuTaxaMap.containsKey(otuName)) {
-                        throw new IllegalArgumentException("BLAST result contains duplicate OTU name : " + otuName);
-                    } else if (taxidSet.size() < 1) {
-                        MyLogger.warn("BLAST has no result for OTU : " + otuName);
-                    } else {
-                        Taxon taxonAgreed = TaxonAgreed.getTaxonAgreed(taxidSet);
-
-                        otuTaxaMap.put(otuName, taxonAgreed);
-                    }
-
-                    long lEndTime = System.currentTimeMillis();
-
-                    MyLogger.debug("Elapsed seconds: " + (lEndTime - lStartTime) / 1000000 + "\n");
+                    fillOTUTaxaMap(iteration, otuTaxaMap, giTaxidIO);
                 }
             }
         }
@@ -113,6 +65,57 @@ public class TaxaUtil {
         return otuTaxaMap;
     }
 
+    public static void fillOTUTaxaMap(Iteration iteration, SortedMap<String, Taxon> otuTaxaMap, GiTaxidIO giTaxidIO) throws JAXBException, IOException, XMLStreamException {
+        long lStartTime = System.currentTimeMillis();
+
+        // a set of taxid
+        Taxa taxidSet = new Taxa();
+
+        String otuName = iteration.getIterationQueryDef();
+
+        MyLogger.debug("\niteration: " + otuName);
+
+        IterationHits hits = iteration.getIterationHits();
+        for(Hit hit : hits.getHit()) {
+            String hitId = hit.getHitId();
+            String[] fields = sampleNameParser.getSeparator(0).parse(hitId);
+            String gi = fields[GI_INDEX];
+
+            MyLogger.debug("hit id: " + hitId + ", get gi = " + gi);
+
+            MyLogger.debug("hit length: " + hit.getHitLen());
+
+            HitHsps hitHsps = hit.getHitHsps();
+            for(Hsp hsp : hitHsps.getHsp()) {
+                MyLogger.debug("hsp num: " + hsp.getHspNum());
+                MyLogger.debug("hsp bit score: " + hsp.getHspBitScore());
+                MyLogger.debug("hsp e-value: " + hsp.getHspEvalue());
+                MyLogger.debug("identity/len: " + hsp.getHspIdentity() + " / " + hsp.getHspAlignLen() + " = " +
+                        Double.parseDouble(hsp.getHspIdentity()) / Double.parseDouble(hsp.getHspAlignLen()));
+            }
+
+            String taxid = giTaxidIO.mapGIToTaxid(gi);
+
+            if (taxid != null) taxidSet.add(taxid);
+        }
+
+
+        if (otuTaxaMap.containsKey(otuName)) {
+            throw new IllegalArgumentException("BLAST result contains duplicate OTU name : " + otuName);
+        } else if (taxidSet.size() < 1) {
+            MyLogger.warn("BLAST has no result for OTU : " + otuName);
+        } else {
+            Taxon taxonAgreed = TaxonAgreed.getTaxonAgreed(taxidSet);
+
+            otuTaxaMap.put(otuName, taxonAgreed);
+        }
+
+        long lEndTime = System.currentTimeMillis();
+
+        MyLogger.debug("Elapsed seconds: " + (lEndTime - lStartTime) / 1000000 + "\n");
+    }
+
+    // slow?
     public static void setTaxaToOTUsByBLAST(File xmlBLASTOutputFile, File gi_taxid_raf_nucl, OTUs otus) throws JAXBException, IOException, XMLStreamException {
 
         SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
@@ -167,17 +170,16 @@ public class TaxaUtil {
 
         try {
 //            File otusFile = new File(workPath + "otus1.fasta");
-            File otuMappingFile = new File(workPath + "map.uc");
-            // TODO: change to Community and setAlias to OTU, so that can use writeCommunityMatrix
-            Community community = new Community(otuMappingFile);
+//            File otuMappingFile = new File(workPath + "map.uc");
+//            Community community = new Community(otuMappingFile);
 
             File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
             File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
 
 //            setTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl, community);
-//
-            String outFileAndPath = workPath + File.separator + "community_matrix.csv";
-            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
+
+//            String outFileAndPath = workPath + File.separator + "community_matrix.csv";
+//            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
 
             SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
             Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");

@@ -82,7 +82,7 @@ public class EFetchStAXParser {
      */
     public static Taxon parseTaxon(XMLStreamReader xmlStreamReader) throws XMLStreamException {
         Taxon taxon = new Taxon();
-        String parentTaxId = null;
+
         while(xmlStreamReader.hasNext()){
             xmlStreamReader.next();
 
@@ -95,28 +95,28 @@ public class EFetchStAXParser {
                 String elementName = xmlStreamReader.getLocalName();
                 if (NCBIeUtils.isTaxId(elementName)) {
                     String taxId = xmlStreamReader.getElementText();
-                    // return "cellular organisms"
-                    if (TaxaUtil.getCellularOrganisms().getTaxId().contentEquals(taxId))
-                        // stop recursive here
-                        return TaxaUtil.getCellularOrganisms();
-
+//                    // return "cellular organisms"
+//                    if (TaxaUtil.getCellularOrganisms().getTaxId().contentEquals(taxId))
+//                        // stop recursive here
+//                        return TaxaUtil.getCellularOrganisms();
                     taxon.setTaxId(taxId); // required
                 } else if (NCBIeUtils.isScientificName(elementName)) {
                     taxon.setScientificName(xmlStreamReader.getElementText());
                 } else if (NCBIeUtils.isParentTaxId(elementName)) {
-                    //set before read LineageEx
-                    parentTaxId = xmlStreamReader.getElementText();
+                    taxon.setParentTaxId(xmlStreamReader.getElementText());
                 } else if (NCBIeUtils.isRank(elementName)) {
                     Rank rank = Rank.fromString(xmlStreamReader.getElementText());
                     taxon.setRank(rank); // if text not included in Rank, then rank == null
                 } else if (NCBIeUtils.isLineageEx(elementName)) {
-                    // start from "cellular organisms" in xml
-                    setParentFromLineage(xmlStreamReader, taxon);
+                    return taxon; // not parse lineage, use List<Taxon> getLineage () now
 
-                    Taxon parentTaxon = taxon.getParentTaxon();
-                    if (parentTaxId == null || parentTaxon == null || !parentTaxId.contentEquals(parentTaxon.getTaxId()))
-                        throw new IllegalArgumentException(taxon + "'s parent TaxId not match : " + parentTaxId +
-                                " != " + (parentTaxon == null?null:parentTaxon.getTaxId()));
+                    // start from "cellular organisms" in xml
+//                    setParentFromLineage(xmlStreamReader, taxon);
+//
+//                    Taxon parentTaxon = taxon.getParentTaxon();
+//                    if (parentTaxId == null || parentTaxon == null || !parentTaxId.contentEquals(parentTaxon.getTaxId()))
+//                        throw new IllegalArgumentException(taxon + "'s parent TaxId not match : " + parentTaxId +
+//                                " != " + (parentTaxon == null?null:parentTaxon.getTaxId()));
                 }
             }
         }
@@ -129,6 +129,7 @@ public class EFetchStAXParser {
      * @param taxon
      * @throws XMLStreamException
      */
+    @Deprecated
     protected static void setParentFromLineage(XMLStreamReader xmlStreamReader, Taxon taxon) throws XMLStreamException {
         List<Taxon> lineage = new ArrayList<>();
         while(xmlStreamReader.hasNext()){
@@ -148,7 +149,7 @@ public class EFetchStAXParser {
 
         Taxon t = taxon;
         for(int i = lineage.size() - 1; i >= 0; i--){
-            t.setParentTaxon(lineage.get(i));
+//            t.setParentTaxon(lineage.get(i));
             t = lineage.get(i);
         }
     }

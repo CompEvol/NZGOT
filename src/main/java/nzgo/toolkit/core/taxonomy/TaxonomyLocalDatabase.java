@@ -27,6 +27,14 @@ public class TaxonomyLocalDatabase {
     public static final String DB_DIR = "TaxID";
     public static final Path taxonLDBDir = SystemUtil.getUserDir(SystemUtil.APP_DIR + File.separator + DB_DIR);
 
+    /**
+     * return eFetch result xml given a taxid
+     * if not exist taxid.xml in taxonLDBDir, then eFetch and create xml in taxonLDBDir
+     * @param taxId
+     * @return
+     * @throws IOException
+     * @throws XMLStreamException
+     */
     public static XMLStreamReader getAndAddTaxId(String taxId) throws IOException, XMLStreamException {
         String taxIdXML = taxId + NameSpace.SUFFIX_TAX_ID_FILE;
 
