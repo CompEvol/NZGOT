@@ -6,11 +6,7 @@ import nzgo.toolkit.core.io.ConfigFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
-import nzgo.toolkit.core.taxonomy.Rank;
-import nzgo.toolkit.core.taxonomy.Taxa;
-import nzgo.toolkit.core.taxonomy.TaxaAssignment;
-import nzgo.toolkit.core.taxonomy.Taxon;
-import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
+import nzgo.toolkit.core.taxonomy.*;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -41,7 +37,7 @@ public class TaxonomyAssignment extends Module{
         Taxon bioClass = null;
         if (taxIdNCBI != null) {
             try {
-                bioClass = EFetchStAXParser.getTaxonById(taxIdNCBI);
+                bioClass = TaxaUtil.getTaxonById(taxIdNCBI);
 
                 MyLogger.info("Initializing biological classification : " +
                         bioClass.getScientificName() + ", " + bioClass.getTaxId());
