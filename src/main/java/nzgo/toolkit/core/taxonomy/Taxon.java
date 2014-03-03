@@ -18,7 +18,8 @@ public class Taxon extends Element {
 
     protected int gi;
     // start from "cellular organisms"
-    public List<Taxon> lineage = new ArrayList<>();
+    public List<Taxon> lineage = new ArrayList<>(); // TODO many duplications in lineage, change to Taxon parent
+    public Taxon parentTaxon;
 
     public Taxon() {
         super();
