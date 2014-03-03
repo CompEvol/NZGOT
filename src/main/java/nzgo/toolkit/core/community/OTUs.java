@@ -77,7 +77,7 @@ public class OTUs<E> extends BioSortedSet<E> {
             OTU otu = (OTU) e;
             if (otu.hasTaxon()) {
                 // may have multi-otus assigned to same taxon
-                taxa.addElement(otu.getTaxonAgreed());
+                taxa.add(otu.getTaxonAgreed());
             }
         }
 

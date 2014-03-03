@@ -56,6 +56,8 @@ public class TaxaUtil {
             if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
                 String elementName = xmlStreamReader.getLocalName();
                 if(Iteration.TAG.equals(elementName)){
+                    long lStartTime = System.currentTimeMillis();
+
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
                     iteration.reduceToTopHits(); // limit 50
 
@@ -87,17 +89,23 @@ public class TaxaUtil {
 
                         String taxid = giTaxidIO.mapGIToTaxid(gi);
 
-                        taxidSet.addElement(taxid);
+                        if (taxid != null) taxidSet.add(taxid);
                     }
 
-                    Taxon taxonAgreed = TaxonAgreed.getTaxonAgreed(taxidSet);
 
                     if (otuTaxaMap.containsKey(otuName)) {
                         throw new IllegalArgumentException("BLAST result contains duplicate OTU name : " + otuName);
-
+                    } else if (taxidSet.size() < 1) {
+                        MyLogger.warn("BLAST has no result for OTU : " + otuName);
                     } else {
+                        Taxon taxonAgreed = TaxonAgreed.getTaxonAgreed(taxidSet);
+
                         otuTaxaMap.put(otuName, taxonAgreed);
                     }
+
+                    long lEndTime = System.currentTimeMillis();
+
+                    MyLogger.debug("Elapsed seconds: " + (lEndTime - lStartTime) / 1000000 + "\n");
                 }
             }
         }
@@ -144,6 +152,10 @@ public class TaxaUtil {
         }
 
         return null;
+    }
+
+    public static Taxon getCellularOrganisms() {
+        return new Taxon("cellular organisms", "131567"); // no parentTaxon
     }
 
     //Main method

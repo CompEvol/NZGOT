@@ -14,12 +14,9 @@ public class Taxon extends Element {
 
     protected String taxId;
     protected Rank rank;
-    protected String parentTaxId;
+    protected Taxon parentTaxon;
 
     protected int gi;
-    // start from "cellular organisms"
-    public List<Taxon> lineage = new ArrayList<>(); // TODO many duplications in lineage, change to Taxon parent
-    public Taxon parentTaxon;
 
     public Taxon() {
         super();
@@ -41,6 +38,24 @@ public class Taxon extends Element {
     }
 
     /**
+     * lineage NOT including this Taxon
+     * start from "cellular organisms", whose parent is root
+     * @return
+     */
+    public List<Taxon> getLineage () {
+        List<Taxon> lineage = new ArrayList<>();
+        getParentLineage(lineage, this);
+        return lineage;
+    }
+
+    protected void getParentLineage(List<Taxon> lineage, Taxon taxon) {
+        if (!TaxaUtil.getCellularOrganisms().taxIdEquals(taxon) && taxon.getParentTaxon() != null) {
+            lineage.add(taxon.getParentTaxon());
+            getParentLineage(lineage, taxon.getParentTaxon());
+        }
+    }
+
+    /**
      * if this taxon belong to given biology classification
      * if give null return true
      * @param bioClassification
@@ -49,8 +64,10 @@ public class Taxon extends Element {
     public boolean belongsTo (Taxon bioClassification) {
         if (bioClassification == null)
             return true;
-        if (getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
+        if (taxIdEquals(bioClassification))
             return true;
+
+        List<Taxon> lineage = getLineage();
         for(int i = lineage.size() - 1; i >= 0; i--){
             if (lineage.get(i).getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
                 return true;
@@ -65,6 +82,7 @@ public class Taxon extends Element {
      * @return
      */
     public Taxon getParentTaxonOn(Rank rank) {
+        List<Taxon> lineage = getLineage();
         for(int i = lineage.size() - 1; i >= 0; i--){
             if (rank.equals(lineage.get(i).getRank()))
                 return lineage.get(i);
@@ -83,6 +101,7 @@ public class Taxon extends Element {
         if (taxon2 == null || taxon2.belongsTo(this))
             return this;
 
+        List<Taxon> lineage = getLineage();
         for(int i = lineage.size() - 1; i >= 0; i--){
             if (taxon2.belongsTo(lineage.get(i)))
                 return lineage.get(i);
@@ -110,12 +129,12 @@ public class Taxon extends Element {
         this.taxId = taxId;
     }
 
-    public String getParentTaxId() {
-        return parentTaxId;
+    public Taxon getParentTaxon() {
+        return parentTaxon;
     }
 
-    public void setParentTaxId(String parentTaxId) {
-        this.parentTaxId = parentTaxId;
+    public void setParentTaxon(Taxon parentTaxon) {
+        this.parentTaxon = parentTaxon;
     }
 
     public Rank getRank() {
@@ -127,7 +146,7 @@ public class Taxon extends Element {
     }
 
     public boolean taxIdEquals(Taxon taxon) {
-        return this.getTaxId().equals(taxon.getTaxId());
+        return this.getTaxId().contentEquals(taxon.getTaxId());
     }
 
     public int getGi() {

@@ -9,6 +9,7 @@ import java.util.TreeSet;
 
 /**
  * BioSortedSet
+ * use add no warning no exception
  * @author Walter Xie
  */
 public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
@@ -31,15 +32,12 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
     }
 
     /**
-     * no exception to find duplication
+     * no exception to find duplication, but log warning
+     * use add no warning no exception
      * @param e
      */
     public void addElement(E e) {
-        add(e);
-    }
-
-    public void addElement(E e, boolean warnDuplicate) {
-        if (!add(e) && warnDuplicate)
+        if (!add(e))
             MyLogger.warn("find duplicate " + e.toString() + " in " + getName() + " !");
     }
 

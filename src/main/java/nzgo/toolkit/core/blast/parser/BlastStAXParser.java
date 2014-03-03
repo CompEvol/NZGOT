@@ -48,7 +48,7 @@ public class BlastStAXParser {
                 String elementName = xmlStreamReader.getLocalName();
                 if(Iteration.TAG.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
-                    iteration.reduceToTopHits(); // limit 50
+                    iteration.reduceToTopHits(); // limit 10
                     iterationList.add(iteration);
                 }
             }

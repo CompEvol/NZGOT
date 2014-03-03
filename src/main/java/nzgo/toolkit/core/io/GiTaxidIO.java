@@ -17,7 +17,7 @@ import java.util.SortedMap;
  */
 public class GiTaxidIO extends FileIO {
 
-    public static int COUNT_LIMIT = 60;
+    public static int SEARCH_LIMIT = 60;
     public static RandomAccessFile gi_taxid_raf;
     public static long filePointer;
 
@@ -96,7 +96,7 @@ public class GiTaxidIO extends FileIO {
 
             count++;
 
-        } while (filePointer != -1 && count < COUNT_LIMIT);
+        } while (filePointer != -1 && count < SEARCH_LIMIT);
 
         if (taxid == null) {
             MyLogger.error("\nCannot find gi " + sourceGi + " after " + count + " searches.");
@@ -169,13 +169,13 @@ public class GiTaxidIO extends FileIO {
         File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
         GiTaxidIO giTaxidIO = new GiTaxidIO(gi_taxid_raf_nucl);
 
-        long start = System.currentTimeMillis();
+        long lStartTime = System.currentTimeMillis();
 
         String taxid = giTaxidIO.mapGIToTaxid("22535996");
 
-        long elapsedTimeMillis = System.currentTimeMillis()-start;
+        long lEndTime = System.currentTimeMillis();
 
-        MyLogger.info("\nIt takes " + elapsedTimeMillis + " milliseconds");
+        MyLogger.info("Elapsed milliseconds: " + (lEndTime - lStartTime));
     }
 
 }

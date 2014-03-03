@@ -96,7 +96,7 @@ public class OTUsFileIO extends FileIO {
                         } else {
                             DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, size);
 
-                            otu.addElement(hit);
+                            otu.add(hit);
 
                             if (samples != null) {
                                 // if by plot, then add plot to TreeSet, otherwise add subplot

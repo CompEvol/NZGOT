@@ -46,7 +46,7 @@ public class TaxonomyLocalDatabase {
         InputStream input = url.openStream();
 
         Path newXML = Paths.get(taxonLDBDir.toString(), taxIdXML);
-        BufferedWriter writer = FileIO.getWriter(newXML, "Create new taxId XML " + newXML);
+        BufferedWriter writer = FileIO.getWriter(newXML, "Create new taxId XML");
 
         int byteRead;
         // Read a raw byte, returns an int of 0 to 255.
