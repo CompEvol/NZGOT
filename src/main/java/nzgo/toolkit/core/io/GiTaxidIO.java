@@ -1,16 +1,10 @@
 package nzgo.toolkit.core.io;
 
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.taxonomy.Rank;
-import nzgo.toolkit.core.taxonomy.Taxon;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.SortedMap;
 
 /**
  * Large File IO
@@ -29,37 +23,6 @@ public class GiTaxidIO extends FileIO {
 
         long rafLength = gi_taxid_raf.length();
         filePointer = rafLength / 2;
-    }
-
-    /**
-     * key is OTU, value is LCA
-     * if ranks = null, then no rank column
-     * @param outFilePath
-     * @param otuTaxaMap
-     * @param ranks
-     * @throws IOException
-     */
-    public static void writeOTUTaxaMap(Path outFilePath, SortedMap<String, Taxon> otuTaxaMap, Rank... ranks) throws IOException {
-        BufferedWriter writer = getWriter(outFilePath, "OTU taxa map");
-
-        //        writer.write("# \n");
-        for (Map.Entry<String, Taxon> entry : otuTaxaMap.entrySet()) {
-            Taxon taxon = entry.getValue();
-            writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon) + "\t" + (taxon==null?"":taxon.getTaxId()) +
-                    "\t" + (taxon==null?"":taxon.getRank()));
-
-            if (taxon != null && ranks != null) {
-                for (Rank rank : ranks) {
-                    Taxon t = taxon.getParentTaxonOn(rank);
-                    writer.write("\t" + (t==null?"":t));
-                }
-            }
-
-            writer.write("\n");
-        }
-
-        writer.flush();
-        writer.close();
     }
 
 

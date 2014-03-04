@@ -4,6 +4,7 @@ import nzgo.toolkit.core.blast.*;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.io.GiTaxidIO;
+import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
@@ -136,6 +137,14 @@ public class TaxaUtil {
 
     }
 
+    /**
+     * return Taxon given a taxid
+     * if not exist taxid.xml in taxonLDBDir, then eFetch and create xml in taxonLDBDir
+     * @param taxId
+     * @return
+     * @throws XMLStreamException
+     * @throws IOException
+     */
     public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
         XMLStreamReader xmlStreamReader = TaxonomyLocalDatabase.getAndAddTaxId(taxId);
 
@@ -181,9 +190,14 @@ public class TaxaUtil {
 //            String outFileAndPath = workPath + File.separator + "community_matrix.csv";
 //            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
 
-            SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
+//            SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
+//            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
+//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
+
+            Path inFilePath = Paths.get(workPath, "otus_taxa_id.tsv");
+            SortedMap<String, Taxon> otuTaxaMap = TaxonomyFileIO.importElementTaxonomyMap(inFilePath);
             Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
-            GiTaxidIO.writeOTUTaxaMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
+            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
         }
         catch (Exception e) {
             e.printStackTrace();
