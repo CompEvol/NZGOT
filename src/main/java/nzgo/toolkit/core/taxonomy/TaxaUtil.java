@@ -183,7 +183,7 @@ public class TaxaUtil {
 
             SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
             Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
-            GiTaxidIO.writeOTUTaxaMap(outFilePath, otuTaxaMap);
+            GiTaxidIO.writeOTUTaxaMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
         }
         catch (Exception e) {
             e.printStackTrace();
