@@ -2,7 +2,7 @@ package nzgo.toolkit.core.tree;
 
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
-import nzgo.toolkit.core.io.ConfigFileIO;
+import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.io.TreeFileIO;
 import nzgo.toolkit.core.naming.NameParser;
 
@@ -81,7 +81,7 @@ public class TreeAnnotation {
      * @throws IOException
      */
     public void importPreTaxaTraits(Path traitsMapTSV) throws IOException {
-        preTaxaTraits = ConfigFileIO.importPreTaxaTraits(traitsMapTSV);
+        preTaxaTraits = TaxonomyFileIO.importPreTaxaTraits(traitsMapTSV);
     }
 
     /**
@@ -90,7 +90,7 @@ public class TreeAnnotation {
      * @throws IOException
      */
     public void writeTaxaTraits(Path traitsMapTSV) throws IOException {
-        ConfigFileIO.writeTaxaTraits(traitsMapTSV, getTaxaTraits());
+        TaxonomyFileIO.writeTaxaTraits(traitsMapTSV, getTaxaTraits());
     }
 
     /**

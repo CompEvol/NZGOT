@@ -5,8 +5,8 @@ import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.Sequence;
 import nzgo.toolkit.NZGOToolkit;
 import nzgo.toolkit.core.io.Arguments;
-import nzgo.toolkit.core.io.ConfigFileIO;
 import nzgo.toolkit.core.io.SequenceFileIO;
+import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.io.TreeFileIO;
 import nzgo.toolkit.core.naming.Assembler;
 import nzgo.toolkit.core.naming.NameSpace;
@@ -134,7 +134,7 @@ public class NameAssembler extends Module{
             }
             Path traitsMapTSV = module.validateInputFile(working, traitsMapTSVName, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping");
             try {
-                traitsMap = ConfigFileIO.importPreTaxaTraits(traitsMapTSV);
+                traitsMap = TaxonomyFileIO.importPreTaxaTraits(traitsMapTSV);
             } catch (IOException e) {
                 e.printStackTrace();
             }

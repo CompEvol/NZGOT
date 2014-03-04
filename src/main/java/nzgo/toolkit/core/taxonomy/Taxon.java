@@ -107,7 +107,7 @@ public class Taxon extends Element {
      * @param taxon2
      * @return
      */
-    public Taxon getTaxonAgreed(Taxon taxon2) {
+    public Taxon getTaxonLCA(Taxon taxon2) {
         if (taxon2 == null || taxon2.belongsTo(this))
             return this;
 

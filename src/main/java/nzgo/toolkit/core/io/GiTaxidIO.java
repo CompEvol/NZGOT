@@ -30,6 +30,12 @@ public class GiTaxidIO extends FileIO {
         filePointer = rafLength / 2;
     }
 
+    /**
+     * key is OTU, value is LCA
+     * @param outFilePath
+     * @param otuTaxaMap
+     * @throws IOException
+     */
     public static void writeOTUTaxaMap(Path outFilePath, SortedMap<String, Taxon> otuTaxaMap) throws IOException {
         BufferedWriter writer = getWriter(outFilePath, "OTU taxa map");
 

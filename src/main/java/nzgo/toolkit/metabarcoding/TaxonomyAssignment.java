@@ -3,6 +3,7 @@ package nzgo.toolkit.metabarcoding;
 import nzgo.toolkit.NZGOToolkit;
 import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.io.ConfigFileIO;
+import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
@@ -29,7 +30,7 @@ public class TaxonomyAssignment extends Module{
 
         Taxa taxa = null;
         try {
-            taxa = ConfigFileIO.importTaxa(inputFile);
+            taxa = TaxonomyFileIO.importTaxa(inputFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,9 +59,9 @@ public class TaxonomyAssignment extends Module{
 
         try {
             if (outFile == null) {
-                ConfigFileIO.writeTaxaMap(inputFile, taxaSortMap);
+                TaxonomyFileIO.writeTaxaMap(inputFile, taxaSortMap);
             } else {
-                ConfigFileIO.writeTaxaMap(outFile, taxaSortMap);
+                TaxonomyFileIO.writeTaxaMap(outFile, taxaSortMap);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -68,7 +69,7 @@ public class TaxonomyAssignment extends Module{
 
         if (errorOutFile != null) {
             try {
-                ConfigFileIO.writeConfigMap(errorOutFile, taxaAssignment.getErrors(), "errors");
+                ConfigFileIO.writeTSVFileFromMap(errorOutFile, taxaAssignment.getErrors(), "errors");
             } catch (IOException e) {
                 e.printStackTrace();
             }

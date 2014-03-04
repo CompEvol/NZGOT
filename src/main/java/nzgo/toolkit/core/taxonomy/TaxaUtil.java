@@ -105,14 +105,14 @@ public class TaxaUtil {
         } else if (taxidSet.size() < 1) {
             MyLogger.warn("BLAST has no result for OTU : " + otuName);
         } else {
-            Taxon taxonAgreed = TaxonAgreed.getTaxonAgreed(taxidSet);
+            Taxon taxonLCA = TaxonLCA.getTaxonLCA(taxidSet);
 
-            otuTaxaMap.put(otuName, taxonAgreed);
+            otuTaxaMap.put(otuName, taxonLCA);
         }
 
         long lEndTime = System.currentTimeMillis();
 
-        MyLogger.debug("Elapsed seconds: " + (lEndTime - lStartTime) / 1000000 + "\n");
+        MyLogger.debug("Elapsed milliseconds: " + (lEndTime - lStartTime) + "\n");
     }
 
     // slow?
@@ -130,7 +130,7 @@ public class TaxaUtil {
             } else if (taxon == null) {
                 MyLogger.error("Error: cannot find taxonomy " + taxon + " from OTU " + otu.getName());
             } else {
-                otu.setTaxonAgreed(taxon);
+                otu.setTaxonLCA(taxon);
             }
         }
 

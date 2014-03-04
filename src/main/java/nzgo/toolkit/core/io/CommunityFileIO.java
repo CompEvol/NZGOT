@@ -84,8 +84,8 @@ public class CommunityFileIO extends OTUsFileIO {
 
             // print AlphaDiversity column
             if (otu.hasTaxon()) {
-                Taxon taxonAgreed = otu.getTaxonAgreed();
-                out.print("," + taxonAgreed);
+                Taxon taxonLCA = otu.getTaxonLCA();
+                out.print("," + taxonLCA);
             }
 
             out.print("\n");

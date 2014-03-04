@@ -13,7 +13,7 @@ import nzgo.toolkit.core.util.BioSortedSet;
 public class OTU<E> extends BioSortedSet<E> {
 
     protected AlphaDiversity alphaDiversity; //
-    protected Taxon taxonAgreed;
+    protected Taxon taxonLCA;
 
     @Deprecated
     protected Reference reference;
@@ -53,14 +53,14 @@ public class OTU<E> extends BioSortedSet<E> {
     }
 
     public boolean hasTaxon() {
-        return taxonAgreed != null;
+        return taxonLCA != null;
     }
 
-    public Taxon getTaxonAgreed() {
-        return taxonAgreed;
+    public Taxon getTaxonLCA() {
+        return taxonLCA;
     }
 
-    public void setTaxonAgreed(Taxon taxonAgreed) {
-        this.taxonAgreed = taxonAgreed;
+    public void setTaxonLCA(Taxon taxonLCA) {
+        this.taxonLCA = taxonLCA;
     }
 }
