@@ -3,8 +3,8 @@ package nzgo.toolkit.core.taxonomy.parser;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.taxonomy.NCBIeUtils;
 import nzgo.toolkit.core.taxonomy.Rank;
-import nzgo.toolkit.core.taxonomy.TaxaUtil;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.taxonomy.TaxonomyPool;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.stream.XMLStreamConstants;
@@ -35,7 +35,7 @@ public class EFetchStAXParser {
         MyLogger.debug("\neFetch " + scientificName + " get : " + idList);
 
         for (String taxId : idList) {
-            Taxon taxon = TaxaUtil.getTaxonById(taxId);
+            Taxon taxon = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
             if (taxon != null) taxonList.add(taxon);
         }
 
@@ -50,7 +50,6 @@ public class EFetchStAXParser {
      * @throws XMLStreamException
      * @throws IOException
      */
-    @Deprecated
     public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
         URL url = NCBIeUtils.eFetch(taxId);
         XMLStreamReader xmlStreamReader = XMLUtil.parse(url);

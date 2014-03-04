@@ -3,8 +3,8 @@ package nzgo.toolkit.core.io;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxa;
-import nzgo.toolkit.core.taxonomy.TaxaUtil;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.taxonomy.TaxonomyPool;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -93,7 +93,7 @@ public class TaxonomyFileIO extends FileIO {
                 if (otuTaxaMap.containsKey(items[0]))
                     throw new IllegalArgumentException("Find duplicate name for " + items[0]);
 
-                Taxon taxon = TaxaUtil.getTaxonById(items[1]);
+                Taxon taxon = TaxonomyPool.getAndAddTaxIdByMemory(items[1]);
                 otuTaxaMap.put(items[0], taxon);
             }
 
@@ -137,7 +137,7 @@ public class TaxonomyFileIO extends FileIO {
         //        writer.write("# \n");
         for (Map.Entry<String, Taxon> entry : otuTaxaMap.entrySet()) {
             Taxon taxon = entry.getValue();
-            writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon) + "\t" + (taxon==null?"":taxon.getTaxId()) +
+            writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon.getScientificName()) + "\t" + (taxon==null?"":taxon.getTaxId()) +
                     "\t" + (taxon==null?"":taxon.getRank()));
 
             if (taxon != null && ranks != null) {

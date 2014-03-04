@@ -1,8 +1,10 @@
 package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.blast.*;
+import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
@@ -145,8 +147,9 @@ public class TaxaUtil {
      * @throws XMLStreamException
      * @throws IOException
      */
+    @Deprecated
     public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
-        XMLStreamReader xmlStreamReader = TaxonomyLocalDatabase.getAndAddTaxId(taxId);
+        XMLStreamReader xmlStreamReader = TaxonomyPool.getAndAddTaxIdByFileSystem(taxId);
 
         try {
             while(xmlStreamReader.hasNext()){
@@ -179,25 +182,25 @@ public class TaxaUtil {
 
         try {
 //            File otusFile = new File(workPath + "otus1.fasta");
-//            File otuMappingFile = new File(workPath + "map.uc");
-//            Community community = new Community(otuMappingFile);
+            File otuMappingFile = new File(workPath + "map.uc");
+            Community community = new Community(otuMappingFile);
 
             File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
             File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
 
 //            setTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl, community);
 
-//            String outFileAndPath = workPath + File.separator + "community_matrix.csv";
-//            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
+            String outFileAndPath = workPath + File.separator + "community_matrix.csv";
+            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
 
-//            SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
-//            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
-//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
-
-            Path inFilePath = Paths.get(workPath, "otus_taxa_id.tsv");
-            SortedMap<String, Taxon> otuTaxaMap = TaxonomyFileIO.importElementTaxonomyMap(inFilePath);
+            SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
             Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
             TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
+
+//            Path inFilePath = Paths.get(workPath, "otus_taxa_id.tsv");
+//            SortedMap<String, Taxon> otuTaxaMap = TaxonomyFileIO.importElementTaxonomyMap(inFilePath);
+//            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
+//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
         }
         catch (Exception e) {
             e.printStackTrace();

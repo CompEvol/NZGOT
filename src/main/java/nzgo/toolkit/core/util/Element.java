@@ -44,7 +44,7 @@ public class Element implements Comparable, Countable{
 
     @Override
     public int compareTo(Object o) {
-        return name.compareTo(o.toString());
+        return toString().compareTo(o.toString());
     }
 
     public int compareCountTo(Element element) {
@@ -53,6 +53,6 @@ public class Element implements Comparable, Countable{
 
     @Override
     public boolean equals(Object obj) {
-        return (name.equalsIgnoreCase(obj.toString()));
+        return (toString().equalsIgnoreCase(obj.toString()));
     }
 }

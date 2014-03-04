@@ -38,7 +38,7 @@ public class TaxonomyAssignment extends Module{
         Taxon bioClass = null;
         if (taxIdNCBI != null) {
             try {
-                bioClass = TaxaUtil.getTaxonById(taxIdNCBI);
+                bioClass = TaxonomyPool.getAndAddTaxIdByMemory(taxIdNCBI);
 
                 MyLogger.info("Initializing biological classification : " +
                         bioClass.getScientificName() + ", " + bioClass.getTaxId());

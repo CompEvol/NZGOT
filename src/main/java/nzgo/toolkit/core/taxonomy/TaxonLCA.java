@@ -25,10 +25,10 @@ public class TaxonLCA {
 
         for (Object taxid : taxidSet) {
 //            Taxon taxon2 = EFetchStAXParser.getTaxonById(taxid.toString());
-            Taxon taxon2 = TaxaUtil.getTaxonById(taxid.toString());
+            Taxon taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxid.toString());
 
             if (taxon2 == null) {
-                MyLogger.error("Error: cannot find taxid " + taxid + " from EFetch !");
+                MyLogger.error("Error: cannot find taxid " + taxid + " getAndAddTaxIdByMemory !");
             } else if (taxonLCA == null) {
                 taxonLCA = taxon2;
             } else {
@@ -40,7 +40,7 @@ public class TaxonLCA {
             MyLogger.error("Error: cannot find LCA taxon " + taxonLCA +
                     " from taxid set: " + taxidSet.elementsToString());
         } else {
-            MyLogger.debug("find LCA taxon " + taxonLCA + ", rank " + taxonLCA.getRank() +
+            MyLogger.debug("find LCA taxon " + taxonLCA.getScientificName() + ", rank " + taxonLCA.getRank() +
                     ", from taxid set: "+ taxidSet.elementsToString());
         }
 
@@ -55,7 +55,7 @@ public class TaxonLCA {
         try {
             Taxon taxonLCA = TaxonLCA.getTaxonLCA(taxidSet);
 
-            MyLogger.info("\nTaxonomy LCA is " + taxonLCA + ", taxid = " + taxonLCA.getTaxId() +
+            MyLogger.info("\nTaxonomy LCA is " + taxonLCA.getScientificName() + ", taxid = " + taxonLCA.getTaxId() +
                     ", rank = " + taxonLCA.getRank());
 
         } catch (IOException | XMLStreamException e) {

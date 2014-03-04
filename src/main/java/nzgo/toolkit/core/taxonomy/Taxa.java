@@ -30,4 +30,19 @@ public class Taxa<E> extends BioSortedSet<E> {
         }
     }
 
+    public boolean containsTaxon(String taxId) {
+        for (E e : this) {
+            if (e.toString().contentEquals(taxId))
+                return true;
+        }
+        return false;
+    }
+
+    public E getTaxon(String taxId) {
+        for (E e : this) {
+            if (e.toString().contentEquals(taxId))
+                return e;
+        }
+        return null;
+    }
 }

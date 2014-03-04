@@ -3,6 +3,7 @@ package nzgo.toolkit.core.taxonomy;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.util.SystemUtil;
 import nzgo.toolkit.core.util.XMLUtil;
 
@@ -22,20 +23,42 @@ import java.nio.file.Paths;
  * Taxonomy Local Database
  * @author Walter Xie
  */
-public class TaxonomyLocalDatabase {
+public class TaxonomyPool {
 
     public static final String DB_DIR = "TaxID";
     public static final Path taxonLDBDir = SystemUtil.getUserDir(SystemUtil.APP_DIR + File.separator + DB_DIR);
 
+    public static Taxa<Taxon> taxonPool = new Taxa<>();
+
     /**
-     * return eFetch result xml given a taxid
-     * if not exist taxid.xml in taxonLDBDir, then eFetch and create xml in taxonLDBDir
+     * return Taxon given a taxid
+     * if not exist in taxonPool, then eFetch and add in taxonPool
      * @param taxId
      * @return
      * @throws IOException
      * @throws XMLStreamException
      */
-    public static XMLStreamReader getAndAddTaxId(String taxId) throws IOException, XMLStreamException {
+    public static Taxon getAndAddTaxIdByMemory(String taxId) throws IOException, XMLStreamException {
+        if (!taxonPool.containsTaxon(taxId)) {
+            // if not exist in taxonPool, then eFetch and add in taxonPool
+            Taxon taxon = EFetchStAXParser.getTaxonById(taxId);
+            taxonPool.addElement(taxon);
+            return taxon;
+        }
+        return taxonPool.getTaxon(taxId);
+    }
+
+    /**
+     * return eFetch result xml given a taxid
+     * if not exist taxid.xml in taxonLDBDir, then eFetch and create xml in taxonLDBDir
+     * even slower than eFetch TODO NoSql?
+     * @param taxId
+     * @return
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    @Deprecated
+    public static XMLStreamReader getAndAddTaxIdByFileSystem(String taxId) throws IOException, XMLStreamException {
         String taxIdXML = taxId + NameSpace.SUFFIX_TAX_ID_FILE;
 
         try(DirectoryStream<Path> stream = Files.newDirectoryStream(taxonLDBDir)) {
@@ -73,7 +96,7 @@ public class TaxonomyLocalDatabase {
         MyLogger.info("\nTaxonomy local database path = " + taxonLDBDir);
 
         try {
-            TaxonomyLocalDatabase.getAndAddTaxId("1372409");
+            getAndAddTaxIdByMemory("1372409");
         } catch (IOException | XMLStreamException e) {
             e.printStackTrace();
         }

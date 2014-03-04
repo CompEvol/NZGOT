@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * Taxon
- * TODO move BLAST specific code to another class for generalization?
+ * toString() return taxId, if it is null, return name
  * @author Walter Xie
  */
 public class Taxon extends Element {
@@ -20,24 +20,17 @@ public class Taxon extends Element {
     protected String parentTaxId;
 //    protected Taxon parentTaxon; //TODO Taxon or String?
 
-    protected int gi;
-
     public Taxon() {
         super();
     }
 
+    // name
     public Taxon(String scientificName) {
         super(scientificName);
     }
 
     public Taxon(String scientificName, String taxId) {
         this(scientificName);
-        setTaxId(taxId);
-    }
-
-    public Taxon(int gi, String taxId) {
-        this();
-        setGi(gi);
         setTaxId(taxId);
     }
 
@@ -130,7 +123,7 @@ public class Taxon extends Element {
     }
 
     public String getTaxId() {
-        if (taxId == null )
+        if (taxId == null)
             throw new IllegalArgumentException("Taxon " + this + " requires a unique id ! ");
         return taxId;
     }
@@ -149,7 +142,7 @@ public class Taxon extends Element {
     }
 
     public Taxon getParentTaxon() throws IOException, XMLStreamException {
-        return TaxaUtil.getTaxonById(parentTaxId);
+        return TaxonomyPool.getAndAddTaxIdByMemory(parentTaxId);
     }
 //
 //    public void setParentTaxon(Taxon parentTaxon) {
@@ -168,12 +161,10 @@ public class Taxon extends Element {
         return this.getTaxId().contentEquals(taxon.getTaxId());
     }
 
-    public int getGi() {
-        return gi;
-    }
-
-    public void setGi(int gi) {
-        this.gi = gi;
+    public String toString() {
+        if (taxId == null)
+            return getName();
+        return getTaxId();
     }
 
 }
