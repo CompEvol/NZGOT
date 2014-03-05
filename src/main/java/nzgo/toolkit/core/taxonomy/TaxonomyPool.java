@@ -20,7 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Taxonomy Local Database
+ * Taxonomy Pool
  * @author Walter Xie
  */
 public class TaxonomyPool {
@@ -51,13 +51,14 @@ public class TaxonomyPool {
     /**
      * return eFetch result xml given a taxid
      * if not exist taxid.xml in taxonLDBDir, then eFetch and create xml in taxonLDBDir
-     * even slower than eFetch TODO NoSql?
+     *
      * @param taxId
      * @return
      * @throws IOException
      * @throws XMLStreamException
      */
-    @Deprecated
+    // even slower than eFetch
+    // TODO NoSql? or create subdir each 10,000?
     public static XMLStreamReader getAndAddTaxIdByFileSystem(String taxId) throws IOException, XMLStreamException {
         String taxIdXML = taxId + NameSpace.SUFFIX_TAX_ID_FILE;
 
