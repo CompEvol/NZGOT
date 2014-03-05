@@ -24,7 +24,7 @@ public class TaxonLCA {
         Taxon taxonLCA = null;
 
         for (Object taxid : taxidSet) {
-//            Taxon taxon2 = EFetchStAXParser.getTaxonById(taxid.toString());
+//            Taxon taxon2 = TaxaUtil.getTaxonByeFetch(taxid.toString());
             Taxon taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxid.toString());
 
             if (taxon2 == null) {

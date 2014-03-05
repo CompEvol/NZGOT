@@ -51,7 +51,7 @@ public class Taxon extends Element {
     }
 
     protected void getParentLineage(List<Taxon> lineage, Taxon taxon) throws IOException, XMLStreamException {
-        if (!TaxaUtil.getCellularOrganisms().taxIdEquals(taxon) && taxon.getParentTaxon() != null) {
+        if (!TaxaUtil.isRoot(taxon.getTaxId()) && taxon.getParentTaxon() != null) {
             getParentLineage(lineage, taxon.getParentTaxon());
             // add "cellular organisms" first, which is the first in xml
             lineage.add(taxon.getParentTaxon());
@@ -90,7 +90,8 @@ public class Taxon extends Element {
             if (rank.equals(lineage.get(i).getRank()))
                 return lineage.get(i);
         }
-        if (this.rank.compareTo(rank) >= 0) return this;
+        if (this.rank != null && this.rank.compareTo(rank) >= 0)
+            return this;
         return null;
     }
 
@@ -112,7 +113,6 @@ public class Taxon extends Element {
 
         return null; // exception
     }
-
 
     public String getScientificName() {
         return getName();

@@ -24,7 +24,7 @@ public class TaxaAssignment {
     protected Rank rankToBreak;
     // the high level taxonomy of biological classification that all given taxa should belong to
     // e.g. new Taxon("Insecta", "50557");
-    // or EFetchStAXParser.getTaxonById("50557");
+    // or TaxaUtil.getTaxonByeFetch("50557");
     protected Taxon bioClass;
     private final Separator regexPrefixSeparator;
 

@@ -26,15 +26,15 @@ import javax.xml.bind.annotation.*;
 })
 @XmlRootElement(name = "Iteration")
 public class Iteration {
-    public static final int TOP_HITS_LIMITS = 10;
     public static final String TAG = "Iteration";
 
 
     /**
      * only return the first top hit for each iteration
+     * @param topHitsLimits
      */
-    public void reduceToTopHits() {
-        iterationHits.reduceToTopHits(TOP_HITS_LIMITS);
+    public void reduceToTopHits(int topHitsLimits) {
+        iterationHits.reduceToTopHits(topHitsLimits);
     }
 
     @XmlElement(name = "Iteration_iter-num", required = true)

@@ -1,6 +1,7 @@
 package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.blast.*;
+import nzgo.toolkit.core.blast.parser.BlastStAXParser;
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
@@ -20,6 +21,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -58,7 +60,7 @@ public class TaxaUtil {
                 String elementName = xmlStreamReader.getLocalName();
                 if(Iteration.TAG.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
-                    iteration.reduceToTopHits(); // limit 50
+                    iteration.reduceToTopHits(BlastStAXParser.TOP_HITS_LIMITS);
 
                     fillOTUTaxaMap(iteration, otuTaxaMap, giTaxidIO);
                 }
@@ -140,37 +142,31 @@ public class TaxaUtil {
     }
 
     /**
-     * return Taxon given a taxid
-     * if not exist taxid.xml in taxonLDBDir, then eFetch and create xml in taxonLDBDir
+     * return Taxon given NCBI taxId
      * @param taxId
      * @return
-     * @throws XMLStreamException
-     * @throws IOException
+     * @throws javax.xml.stream.XMLStreamException
+     * @throws java.io.IOException
      */
-    @Deprecated
-    public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
-        XMLStreamReader xmlStreamReader = TaxonomyPool.getAndAddTaxIdByFileSystem(taxId);
+    public static Taxon getTaxonByeFetch(String taxId) throws XMLStreamException, IOException {
+        MyLogger.debug("eFetch " + taxId + " ...");
 
-        try {
-            while(xmlStreamReader.hasNext()){
-                xmlStreamReader.next();
+        URL url = NCBIeUtils.eFetch(taxId);
+        XMLStreamReader xmlStreamReader = XMLUtil.parse(url);
 
-                if(xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT){
-                    String elementName = xmlStreamReader.getLocalName();
-                    if (NCBIeUtils.isTaxon(elementName)) {
-                        return EFetchStAXParser.parseTaxon(xmlStreamReader);
-                    }
-                }
-            }
-        } finally {
-            xmlStreamReader.close();
-        }
-
-        return null;
+        return EFetchStAXParser.getTaxon(xmlStreamReader);
     }
 
     public static Taxon getCellularOrganisms() {
         return new Taxon("cellular organisms", "131567"); // no parentTaxon
+    }
+
+    public static Taxon getRoot() {
+        return new Taxon("root", "1"); // no parentTaxon
+    }
+
+    public static boolean isRoot(String taxId) {
+        return "1".contentEquals(taxId);
     }
 
     //Main method
@@ -207,5 +203,4 @@ public class TaxaUtil {
         }
 
     }
-
 }

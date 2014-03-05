@@ -5,13 +5,11 @@ import nzgo.toolkit.core.taxonomy.NCBIeUtils;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonomyPool;
-import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,19 +41,12 @@ public class EFetchStAXParser {
     }
 
     /**
-     * replaced by TaxaUtil.getTaxonById(taxId)
-     * return Taxon given NCBI taxId
-     * @param taxId
+     * return Taxon given eFetch XMLStreamReader
+     * @param xmlStreamReader
      * @return
      * @throws XMLStreamException
-     * @throws IOException
      */
-    public static Taxon getTaxonById(String taxId) throws XMLStreamException, IOException {
-        MyLogger.debug("eFetch " + taxId + " ...");
-
-        URL url = NCBIeUtils.eFetch(taxId);
-        XMLStreamReader xmlStreamReader = XMLUtil.parse(url);
-
+    public static Taxon getTaxon(XMLStreamReader xmlStreamReader) throws XMLStreamException {
         try {
             while(xmlStreamReader.hasNext()){
                 xmlStreamReader.next();

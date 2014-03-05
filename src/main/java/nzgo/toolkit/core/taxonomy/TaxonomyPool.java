@@ -26,13 +26,14 @@ import java.nio.file.Paths;
 public class TaxonomyPool {
 
     public static final String DB_DIR = "TaxID";
-    public static final Path taxonLDBDir = SystemUtil.getUserDir(SystemUtil.APP_DIR + File.separator + DB_DIR);
+    public static final String taxonLDBDir = SystemUtil.APP_DIR + File.separator + DB_DIR;
 
     public static Taxa<Taxon> taxonPool = new Taxa<>();
 
     /**
      * return Taxon given a taxid
-     * if not exist in taxonPool, then eFetch and add in taxonPool
+     * if not exist in taxonPool, then search local file system, if not again, then eFetch,
+     * and then add in taxonPool
      * @param taxId
      * @return
      * @throws IOException
@@ -41,7 +42,8 @@ public class TaxonomyPool {
     public static Taxon getAndAddTaxIdByMemory(String taxId) throws IOException, XMLStreamException {
         if (!taxonPool.containsTaxon(taxId)) {
             // if not exist in taxonPool, then eFetch and add in taxonPool
-            Taxon taxon = EFetchStAXParser.getTaxonById(taxId);
+//            Taxon taxon = TaxaUtil.getTaxonByeFetch(taxId);
+            Taxon taxon = getAndAddTaxIdByFileSystem(taxId);
             taxonPool.addElement(taxon);
             return taxon;
         }
@@ -57,17 +59,18 @@ public class TaxonomyPool {
      * @throws IOException
      * @throws XMLStreamException
      */
-    // even slower than eFetch
-    // TODO NoSql? or create subdir each 10,000?
-    public static XMLStreamReader getAndAddTaxIdByFileSystem(String taxId) throws IOException, XMLStreamException {
+    public static Taxon getAndAddTaxIdByFileSystem(String taxId) throws IOException, XMLStreamException {
         String taxIdXML = taxId + NameSpace.SUFFIX_TAX_ID_FILE;
+        Path taxIdXMLDir = getTaxonLDBDirByTaxId(taxId);
 
-        try(DirectoryStream<Path> stream = Files.newDirectoryStream(taxonLDBDir)) {
+        // better not > 500 files
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(taxIdXMLDir)) {
             for(Path xmlFile : stream) {
                 if (Files.exists(xmlFile)) {
                     String fileName = xmlFile.getFileName().toString();
                     if (taxIdXML.contentEquals(fileName)) {
-                        return XMLUtil.parse(xmlFile.toFile());
+                        XMLStreamReader xmlStreamReader = XMLUtil.parse(xmlFile.toFile());
+                        return EFetchStAXParser.getTaxon(xmlStreamReader);
                     }
                 }
             }
@@ -77,7 +80,7 @@ public class TaxonomyPool {
         URL url = NCBIeUtils.eFetch(taxId);
         InputStream input = url.openStream();
 
-        Path newXML = Paths.get(taxonLDBDir.toString(), taxIdXML);
+        Path newXML = Paths.get(taxIdXMLDir.toString(), taxIdXML);
         BufferedWriter writer = FileIO.getWriter(newXML, "Create new taxId XML");
 
         int byteRead;
@@ -89,18 +92,56 @@ public class TaxonomyPool {
         input.close();
         writer.close();
 
-        return XMLUtil.parse(url);
+        XMLStreamReader xmlStreamReader = XMLUtil.parse(url);
+        return EFetchStAXParser.getTaxon(xmlStreamReader);
+    }
+
+    protected static Path getTaxonLDBDirByTaxId(String taxId) {
+        int taxIdInt = Integer.parseInt(taxId);
+        int dirInt = taxIdInt / 10000; // 10,000
+        String dir = Integer.toString(dirInt);
+        return SystemUtil.getUserDir(taxonLDBDir + File.separator + dir);
+    }
+
+    protected static void organizeTaxIdXML() throws IOException {
+        Path sourceDir = SystemUtil.getUserDir(taxonLDBDir);
+
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(sourceDir)) {
+            for(Path xmlFile : stream) {
+                if (Files.exists(xmlFile)) {
+                    String fileName = xmlFile.getFileName().toString();
+                    String taxId = fileName.substring(0, fileName.lastIndexOf(".xml"));
+                    Path targertDir = getTaxonLDBDirByTaxId(taxId);
+
+                    if (!Files.exists(targertDir)) {
+                        Files.createDirectory(targertDir);
+                        MyLogger.debug("create dir " + targertDir);
+                    }
+
+                    Files.move(xmlFile, Paths.get(targertDir.toString(), fileName));
+                    MyLogger.debug("move " + xmlFile + " to " + Paths.get(targertDir.toString(), fileName));
+                }
+            }
+        }
+
     }
 
     //Main method
     public static void main(final String[] args) {
         MyLogger.info("\nTaxonomy local database path = " + taxonLDBDir);
+//
+//        try {
+//            getAndAddTaxIdByMemory("1372409");
+//        } catch (IOException | XMLStreamException e) {
+//            e.printStackTrace();
+//        }
 
         try {
-            getAndAddTaxIdByMemory("1372409");
-        } catch (IOException | XMLStreamException e) {
+            organizeTaxIdXML();
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
 
     }
 

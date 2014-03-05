@@ -45,7 +45,6 @@ public class GiTaxidIO extends FileIO {
 //            MyLogger.debug("line = " + line + ", filePointer = " + filePointer);
 
             String[] map = lineParser.getSeparator(0).parse(line);
-//            MyLogger.debug("\nFound: gi = " + map[0] + ", taxid = " + map[1]);
 
             int curGi = Integer.parseInt(map[0]);
 
@@ -68,7 +67,7 @@ public class GiTaxidIO extends FileIO {
 
                 pointer = estimateNextFilePointer(prePointer, sourceGi, curGi, step);
 
-                MyLogger.debug("curGi = " + curGi + ", step = " + step + ", pointer = " + pointer + ", filePointer = " + filePointer + ", prePointer = " + prePointer);
+//                MyLogger.debug("curGi = " + curGi + ", step = " + step + ", pointer = " + pointer + ", filePointer = " + filePointer + ", prePointer = " + prePointer);
             }
 
             preGi = curGi;
@@ -112,11 +111,9 @@ public class GiTaxidIO extends FileIO {
             String line = gi_taxid_raf.readLine();
             filePointer = gi_taxid_raf.getFilePointer();
 
-            MyLogger.debug("line = " + line + ", filePointer = " + filePointer);
+//            MyLogger.debug("line = " + line + ", filePointer = " + filePointer);
 
             String[] map = lineParser.getSeparator(0).parse(line);
-
-//            MyLogger.debug("\nFound: gi = " + map[0] + ", taxid = " + map[1]);
 
             int curGi = Integer.parseInt(map[0]);
 

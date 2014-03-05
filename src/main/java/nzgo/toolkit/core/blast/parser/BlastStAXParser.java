@@ -21,7 +21,7 @@ import java.util.List;
  * @author Walter Xie
  */
 public class BlastStAXParser {
-
+    public static final int TOP_HITS_LIMITS = 2;
     /**
      * only return the first top hit for each iteration
      * it seems to be faster to use the code directly than to get List<Iteration>
@@ -48,7 +48,7 @@ public class BlastStAXParser {
                 String elementName = xmlStreamReader.getLocalName();
                 if(Iteration.TAG.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
-                    iteration.reduceToTopHits(); // limit 10
+                    iteration.reduceToTopHits(TOP_HITS_LIMITS); // limit 10
                     iterationList.add(iteration);
                 }
             }
