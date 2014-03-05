@@ -143,7 +143,9 @@ public class TaxonomyFileIO extends FileIO {
             if (taxon != null && ranks != null) {
                 for (Rank rank : ranks) {
                     Taxon t = taxon.getParentTaxonOn(rank);
-                    writer.write("\t" + (t==null?"":t));
+                    String str = ("no " + rank.toString()).toLowerCase();
+                    writer.write("\t" + (t==null?str:t.getScientificName()));
+                    writer.write("\t" + (t==null?str:t.getTaxId()));
                 }
             }
 
