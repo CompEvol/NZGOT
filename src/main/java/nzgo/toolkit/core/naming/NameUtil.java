@@ -6,6 +6,18 @@ package nzgo.toolkit.core.naming;
  */
 public class NameUtil {
 
+    public static String getNameWithoutExtension (String fileName) {
+        if (fileName == null)
+            return null;
+
+        int dot = fileName.lastIndexOf(".");
+
+        if (dot < 0)
+            return fileName;
+
+        return fileName.substring(0, dot);
+    }
+
     public static String getPrefix(String label, String separator) {
         int index = label.indexOf(separator);
         if (index > 0)

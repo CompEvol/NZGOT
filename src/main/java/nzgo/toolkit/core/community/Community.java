@@ -2,7 +2,9 @@ package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.OTUsFileIO;
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,17 +38,29 @@ public class Community<E> extends OTUs<E> {
         this(null, otuMappingFile, refSeqMappingFile);
     }
 
+    /**
+     * create communit matrix from either otusFile or otuMappingFile or both
+     * refSeqMappingFile is optional
+     * if otuMappingFile null, then no elements (sequences) in OTU
+     * @param otusFile
+     * @param otuMappingFile
+     * @param refSeqMappingFile
+     */
     public Community(File otusFile, File otuMappingFile, File refSeqMappingFile) {
-        super(otusFile != null ? otusFile.getName() : otuMappingFile.getName());
+        super(otusFile != null ? NameUtil.getNameWithoutExtension(otusFile.getName()) : NameUtil.getNameWithoutExtension(otuMappingFile.getName()));
         this.otusFile = otusFile;
         this.otuMappingFile = otuMappingFile;
         this.refSeqMappingFile = refSeqMappingFile;
+
+        if (otusFile == null && otuMappingFile == null)
+            throw new IllegalArgumentException("Community needs either OTUs or mapping file ! ");
 
         try {
             if (otusFile != null)
                 OTUsFileIO.importOTUs(otusFile, this);
 
-            CommunityFileIO.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null);
+            if (otuMappingFile != null)
+                CommunityFileIO.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null);
 
             if (refSeqMappingFile != null)
                 OTUsFileIO.importRefSeqMappingFromUCFile(refSeqMappingFile, this);
@@ -79,7 +93,7 @@ public class Community<E> extends OTUs<E> {
     public void setSampleType(String sampleType) {
         this.sampleType = sampleType;
         if (samples != null) {
-        //TODO update matrix and diversity
+            //TODO update matrix and diversity
         }
     }
 
@@ -91,4 +105,25 @@ public class Community<E> extends OTUs<E> {
         return refSeqMappingFile;
     }
 
+    //Main method
+    public static void main(final String[] args) {
+        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
+
+        String workPath = args[0];
+        MyLogger.info("\nWorking path = " + workPath);
+
+
+        File otusFile = new File(workPath + "reads-Arthropoda.fasta");
+        File otuMappingFile = new File(workPath + "map.uc");
+        Community community = new Community(otusFile, otuMappingFile, null);
+
+        String outFileAndPath = workPath + File.separator + community.getName() + "_community_matrix.csv";
+        try {
+            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 }

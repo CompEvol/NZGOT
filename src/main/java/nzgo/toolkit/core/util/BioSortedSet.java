@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.TreeSet;
 
 /**
- * BioSortedSet
- * use add no warning no exception
+ * BioSortedSet for most of bioinformatics concept
+ * use add(E e) from super class, no warning no exception
+ * use addElement(E e), no exception
+ * use addUniqueElement(E e), throw exception if duplicate
  * @author Walter Xie
  */
 public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{

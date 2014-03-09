@@ -2,8 +2,10 @@ package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.blast.*;
 import nzgo.toolkit.core.blast.parser.BlastStAXParser;
+import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
@@ -58,7 +60,7 @@ public class TaxaUtil {
                 String elementName = xmlStreamReader.getLocalName();
                 if(Iteration.TAG.equals(elementName)){
                     Iteration iteration = (Iteration) unmarshaller.unmarshal(xmlStreamReader);
-                    iteration.reduceToTopHits(BlastStAXParser.TOP_HITS_LIMITS);
+                    iteration.reduceToTopHits(BlastStAXParser.TOP_HITS_LIMITS); // keep top hits by limit
 
                     fillOTUTaxaMap(iteration, otuTaxaMap, giTaxidIO);
                 }
@@ -176,13 +178,13 @@ public class TaxaUtil {
 
         try {
 //            File otusFile = new File(workPath + "otus1.fasta");
-/*            File otuMappingFile = new File(workPath + "map.uc");
+            File otuMappingFile = new File(workPath + "map.uc");
             Community community = new Community(otuMappingFile);
 
 //            setTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl, community);
 
             String outFileAndPath = workPath + File.separator + "community_matrix.csv";
-            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);  */
+            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
 
             File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
             File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");

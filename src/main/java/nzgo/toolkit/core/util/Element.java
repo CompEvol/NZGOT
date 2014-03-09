@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.util;
 
 /**
- * Element: basic class for naming
+ * Element: basic class for naming, Comparable, Countable
  * @author Walter Xie
  */
 public class Element implements Comparable, Countable{

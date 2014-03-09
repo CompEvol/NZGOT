@@ -28,6 +28,7 @@ import java.util.Map;
 /**
  * standard newick tree
  * depend on BEAST 2
+ * TODO need tidy up
  * @author Walter Xie
  */
 public class TreeUtil {
@@ -52,6 +53,7 @@ public class TreeUtil {
      * @param newickTree
      * @return
      */
+    @Deprecated
     public static BioSortedSet<Element> getTaxaTraitsFromTree(Tree newickTree) {
         BioSortedSet<Element> traits = new BioSortedSet<>("taxa");
 
@@ -90,6 +92,7 @@ public class TreeUtil {
      * @param label
      * @return
      */
+    @Deprecated
     protected static String getTaxon(String label) {
         char c = label.charAt(0);
 //        String[] fields = sampleNameParser.parse(label);
@@ -150,6 +153,7 @@ public class TreeUtil {
         return taxaTraits;
     }
 
+    @Deprecated
     protected static void printTraits(List traits) {
         MyLogger.info("\n" + traits.size() + " Taxa extracted from tree tips labels : ");
         for (Object taxon : traits) {
@@ -162,6 +166,7 @@ public class TreeUtil {
      * @param label
      * @return
      */
+    @Deprecated
     protected static String simplifyLabel(String label) {
         char c = label.charAt(0);
         if (Character.isDigit(c)) {
@@ -175,6 +180,7 @@ public class TreeUtil {
         }
     }
 
+    @Deprecated
     protected static void simplifyLabelsOfTree(Tree newickTree) {
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
             Node leafNode = newickTree.getNode(i);
@@ -216,6 +222,7 @@ public class TreeUtil {
         return mixedOTUsList;
     }
 
+    @Deprecated
     protected static String getMetaStringByDB(String label, List<String> mixedOTUs) {
         if (mixedOTUs.contains(label)) {
             return "col=MIXED";
@@ -263,6 +270,7 @@ public class TreeUtil {
         return label;
     }
 
+    @Deprecated
     public static String getNewickTreeFromFile(File treeFile) throws IOException {
         BufferedReader reader = FileIO.getReader(treeFile, "tree");
         String newickTree = reader.readLine();
@@ -271,6 +279,7 @@ public class TreeUtil {
         return newickTree;
     }
 
+    @Deprecated
     public static void annotateTree(Tree newickTree, List traits) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
@@ -285,6 +294,7 @@ public class TreeUtil {
 
     }
 
+    @Deprecated
     public static void annotateTree(Tree newickTree, Map traits) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
@@ -299,6 +309,7 @@ public class TreeUtil {
 
     }
 
+    @Deprecated
     protected static void annotateTreeByOTUs(Tree newickTree, List<String> mixedOTUs) {
 
         for (int i = 0; i < newickTree.getLeafNodeCount(); i++) {
@@ -310,6 +321,7 @@ public class TreeUtil {
 
     }
 
+    @Deprecated
     public static void assignTaxaAndAnnotateTree(String workPath, String stem, String cleanedNewickTree) throws Exception {
         Tree newickTree = new TreeParser(cleanedNewickTree, false, false, true, 1);
         simplifyLabelsOfTree(newickTree);
