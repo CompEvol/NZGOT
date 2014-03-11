@@ -53,7 +53,7 @@ public class OTU<E> extends BioSortedSet<E> {
     }
 
     public boolean hasTaxon() {
-        return taxonLCA != null;
+        return taxonLCA != null && taxonLCA.isClassified();
     }
 
     public Taxon getTaxonLCA() {

@@ -27,6 +27,7 @@ public class TaxonomyPool {
 
     public static final String DB_DIR = "TaxID";
     public static final String taxonLDBDir = SystemUtil.APP_DIR + File.separator + DB_DIR;
+    public static final int POOL_INDEX = 10000; // 10,000
 
     public static Taxa<Taxon> taxonPool = new Taxa<>();
 
@@ -98,7 +99,7 @@ public class TaxonomyPool {
 
     protected static Path getTaxonLDBDirByTaxId(String taxId) {
         int taxIdInt = Integer.parseInt(taxId);
-        int dirInt = taxIdInt / 10000; // 10,000
+        int dirInt = taxIdInt / POOL_INDEX; // 10,000
         String dir = Integer.toString(dirInt);
         return SystemUtil.getUserDir(taxonLDBDir + File.separator + dir);
     }

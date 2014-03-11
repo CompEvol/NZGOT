@@ -76,7 +76,7 @@ public class CommunityMatrixAnalysis {
             MyLogger.info("\nWarning: create community analysis without providing reference sequence. ");
         }
 
-        Path outCMFilePath = Paths.get(workPath, "community_matrix.csv");
+        Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX +  ".csv");
         CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
     }
 

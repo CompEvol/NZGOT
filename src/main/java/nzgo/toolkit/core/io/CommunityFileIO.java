@@ -20,6 +20,8 @@ import java.util.TreeSet;
  */
 public class CommunityFileIO extends OTUsFileIO {
 
+    public static final String COMMUNITY_MATRIX = "community_matrix";
+
     /**
      * Ideally otuMappingUCFile should have all OTUs,
      * so that the validation assumed to be done before this method

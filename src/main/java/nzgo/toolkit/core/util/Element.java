@@ -5,6 +5,7 @@ package nzgo.toolkit.core.util;
  * @author Walter Xie
  */
 public class Element implements Comparable, Countable{
+    public static final String DEFAULT_NAME = "Unknown";
 
     protected String name;
     protected int count = 0;
@@ -16,7 +17,7 @@ public class Element implements Comparable, Countable{
     }
 
     public String getName() {
-        if (name == null ) setName("Unknown");
+        if (name == null ) setName(DEFAULT_NAME);
         return name;
     }
 

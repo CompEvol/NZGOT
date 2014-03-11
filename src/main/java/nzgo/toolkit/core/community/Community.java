@@ -5,6 +5,8 @@ import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
+import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.util.BioSortedSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +30,18 @@ public class Community<E> extends OTUs<E> {
     // the final samples already parsed from label
     protected String[] samples;
 
-    protected final File otusFile;
-    protected final File otuMappingFile;
-    protected final File refSeqMappingFile; // optional: Sanger sequence for reference
+//    protected final File otusFile;
+//    protected final File otuMappingFile;
+//    protected final File refSeqMappingFile; // optional: Sanger sequence for reference
+
+    public Community(Community community, String name) {
+        super(name);
+//        otusFile = null;
+//        otuMappingFile = null;
+//        refSeqMappingFile = null;
+        this.sampleType = community.getSampleType();
+        this.samples = community.getSamples();
+    }
 
     public Community(File otuMappingFile) {
         this(null, otuMappingFile, null);
@@ -50,9 +61,9 @@ public class Community<E> extends OTUs<E> {
      */
     public Community(File otusFile, File otuMappingFile, File refSeqMappingFile) {
         super(otusFile != null ? NameUtil.getNameWithoutExtension(otusFile.getName()) : NameUtil.getNameWithoutExtension(otuMappingFile.getName()));
-        this.otusFile = otusFile;
-        this.otuMappingFile = otuMappingFile;
-        this.refSeqMappingFile = refSeqMappingFile;
+//        this.otusFile = otusFile;
+//        this.otuMappingFile = otuMappingFile;
+//        this.refSeqMappingFile = refSeqMappingFile;
 
         if (otusFile == null && otuMappingFile == null)
             throw new IllegalArgumentException("Community needs either OTUs or mapping file ! ");
@@ -71,6 +82,51 @@ public class Community<E> extends OTUs<E> {
         }
     }
 
+    /**
+     *
+     * @return  Community only has taxonomy
+     */
+    public Community<E> getClassifiedCommunity() {
+        Community<E> classifiedCommunity = new Community<>(this, this.getName() + "_classified");
+
+        for(E e : this){
+            OTU otu = (OTU) e;
+            if (otu.hasTaxon()) {
+                classifiedCommunity.add(e);
+            }
+        }
+
+        return classifiedCommunity;
+    }
+
+    /**
+     * return taxonomy assignment of OTUs
+     * E has to be OTU
+     * @return
+     */
+    public BioSortedSet<Taxon> getTaxonomyAssignment() {
+        BioSortedSet<Taxon> taxonomySet = new BioSortedSet<>();
+
+        for(E e : this){
+            OTU otu = (OTU) e;
+            Taxon taxonLCA = otu.getTaxonLCA();
+
+            if (taxonLCA == null)
+                throw new IllegalArgumentException("OTU " + otu + " does not have taxonomic identification !");
+            if (otu.size() < 1)
+                throw new IllegalArgumentException("OTU " + otu + " does not have any elements, size = " + otu.size() + " !");
+
+            if (taxonomySet.containsUniqueElement(taxonLCA.getScientificName())) {
+                Taxon taxonAssigned = taxonomySet.getUniqueElement(taxonLCA.getScientificName());
+                taxonAssigned.incrementCount(otu.size());
+            } else {
+                taxonLCA.setCount(otu.size());
+                taxonomySet.add(taxonLCA);
+            }
+        }
+        return taxonomySet;
+    }
+
     protected void initSamplesBy(TreeSet<String> samples){
         if (samples == null || samples.size() < 1)
             throw new IllegalArgumentException("Error: cannot parse sample from read name : " + samples);
@@ -78,6 +134,10 @@ public class Community<E> extends OTUs<E> {
         this.samples = samples.toArray(new String[samples.size()]);
     }
 
+    /**
+     * E has to be OTU
+     * @param samples
+     */
     public void setSamplesAndDiversities(TreeSet<String> samples) {
         initSamplesBy(samples);
 
@@ -103,9 +163,9 @@ public class Community<E> extends OTUs<E> {
         return samples;
     }
 
-    public File getRefSeqMappingFile() {
-        return refSeqMappingFile;
-    }
+//    public File getRefSeqMappingFile() {
+//        return refSeqMappingFile;
+//    }
 
     //Main method
     public static void main(final String[] args) {

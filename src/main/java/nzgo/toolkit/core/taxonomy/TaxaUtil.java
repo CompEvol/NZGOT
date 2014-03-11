@@ -36,6 +36,7 @@ import java.util.TreeMap;
  */
 public class TaxaUtil {
 
+    public static final String UNCLASSIFIED = "unclassified";
     public static SampleNameParser sampleNameParser = new SampleNameParser();
 
     // gi|261497976|gb|GU013865.1|
@@ -200,8 +201,12 @@ public class TaxaUtil {
         return EFetchStAXParser.getTaxon(xmlStreamReader);
     }
 
+    public static Taxon getUnclassified() {
+        return new Taxon(UNCLASSIFIED, "12908", "1");
+    }
+
     public static Taxon getCellularOrganisms() {
-        return new Taxon("cellular organisms", "131567"); // no parentTaxon
+        return new Taxon("cellular organisms", "131567", "1");
     }
 
     public static Taxon getRoot() {
@@ -228,8 +233,9 @@ public class TaxaUtil {
             SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
             community.setTaxa(otuTaxaMap);
 
-            Path outCMFilePath = Paths.get(workPath, "community_matrix-Arthopoda.csv");
-            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community, true);
+            Community communityArthopoda = community.getClassifiedCommunity();
+            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
+            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda, true);
 
 //            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
 //            File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
@@ -242,6 +248,9 @@ public class TaxaUtil {
 //            SortedMap<String, Taxon> otuTaxaMap = TaxonomyFileIO.importElementTaxonomyMap(inFilePath);
             Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
             TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
+
+            TaxonomyFileIO.writeTaxonomyAssignment(workPath, communityArthopoda, Rank.CLASS, Rank.ORDER);
+
         }
         catch (Exception e) {
             e.printStackTrace();

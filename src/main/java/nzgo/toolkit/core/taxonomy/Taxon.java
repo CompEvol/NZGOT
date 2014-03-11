@@ -34,6 +34,11 @@ public class Taxon extends Element {
         setTaxId(taxId);
     }
 
+    public Taxon(String scientificName, String taxId, String parentTaxId) {
+        this(scientificName, taxId);
+        setParentTaxId(parentTaxId);
+    }
+
     /**
      * lineage NOT including this Taxon
      * start from "cellular organisms", whose parent is root
@@ -112,6 +117,14 @@ public class Taxon extends Element {
         }
 
         return null; // exception
+    }
+
+    /**
+     * taxonomy is classified
+     * @return
+     */
+    public boolean isClassified() {
+        return getScientificName().toLowerCase().contains(TaxaUtil.UNCLASSIFIED) || !getScientificName().equalsIgnoreCase(DEFAULT_NAME);
     }
 
     public String getScientificName() {

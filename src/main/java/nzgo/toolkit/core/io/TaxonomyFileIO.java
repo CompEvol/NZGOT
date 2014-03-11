@@ -1,16 +1,19 @@
 package nzgo.toolkit.core.io;
 
+import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxa;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonomyPool;
+import nzgo.toolkit.core.util.BioSortedSet;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -20,6 +23,7 @@ import java.util.TreeMap;
  * @author Walter Xie
  */
 public class TaxonomyFileIO extends FileIO {
+    public static final String TAXONOMY_ASSIGNMENT = "taxonomy_assignment";
 
     public static Taxa importTaxa (Path taxaTSV) throws IOException {
         Taxa taxa = new Taxa();
@@ -154,4 +158,58 @@ public class TaxonomyFileIO extends FileIO {
         writer.flush();
         writer.close();
     }
+
+    /**
+     * multi-output-files of Taxonomy Assignment
+     *
+     * @param workPath
+     * @param community
+     * @param ranks
+     * @throws IOException
+     */
+    public static void writeTaxonomyAssignment(String workPath, Community community, Rank... ranks) throws IOException {
+
+        Path outTAFilePath = Paths.get(workPath, TAXONOMY_ASSIGNMENT + ".tsv");
+        // assignment of overall
+        writeTaxonomyAssignment(outTAFilePath, community, null);
+
+        for (Rank rank : ranks) {
+            // assignment of given rank
+            outTAFilePath = Paths.get(workPath, TAXONOMY_ASSIGNMENT + "_" + rank + ".tsv");
+            writeTaxonomyAssignment(outTAFilePath, community, rank);
+        }
+    }
+
+    /**
+     * Taxonomy Assignment of Community at Rank
+     * if rank == null, then get the assignment of overall
+     *
+     * @param outTAFilePath
+     * @param community
+     * @param rank
+     * @throws IOException
+     */
+    public static void writeTaxonomyAssignment(Path outTAFilePath, Community community, Rank rank) throws IOException {
+
+        BufferedWriter writer = getWriter(outTAFilePath, "taxonomy assignment of community matrix");
+
+        BioSortedSet<Taxon> taxonomySet = community.getTaxonomyAssignment();
+
+        for(Taxon t : taxonomySet){
+            String taxonName = t.getScientificName(); // rank == null
+            if (rank != null) {
+                // get parent taxon at the given rank
+                Taxon ta = t.getParentTaxonOn(rank);
+                String str = ("no " + rank.toString()).toLowerCase();
+                taxonName = (ta==null?str:ta.getScientificName());
+            }
+            writer.write(taxonName);
+            writer.write("\t" + t.getCount());
+            writer.write("\n");
+        }
+
+        writer.flush();
+        writer.close();
+    }
+
 }

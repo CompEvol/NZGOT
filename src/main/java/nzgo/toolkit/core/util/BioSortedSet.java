@@ -56,13 +56,13 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
 
     /**
      * given name to find the element matching this name in the set
-     * @param name
+     * @param name   Ignore Case
      * @return
      * @throws IllegalArgumentException
      */
     public E getUniqueElement(String name) throws IllegalArgumentException {
         for (E e : this) {
-            if (e.toString().contentEquals(name))
+            if (e.toString().equalsIgnoreCase(name))
                 return e;
         }
         return null;
@@ -70,7 +70,7 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
 
     public boolean containsUniqueElement(String name) throws IllegalArgumentException {
         for (E e : this) {
-            if (e.toString().contentEquals(name))
+            if (e.toString().equalsIgnoreCase(name))
                 return true;
         }
         return false;
