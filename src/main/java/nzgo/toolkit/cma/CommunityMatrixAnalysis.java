@@ -7,6 +7,8 @@ import nzgo.toolkit.core.logger.MyLogger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Community Matrix Analysis
@@ -74,8 +76,8 @@ public class CommunityMatrixAnalysis {
             MyLogger.info("\nWarning: create community analysis without providing reference sequence. ");
         }
 
-        outFileAndPath = workPath + File.separator + "community_matrix.csv";
-        CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
+        Path outCMFilePath = Paths.get(workPath, "community_matrix.csv");
+        CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
     }
 
 }

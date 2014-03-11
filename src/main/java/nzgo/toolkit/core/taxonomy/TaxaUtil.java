@@ -6,6 +6,7 @@ import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.io.CommunityFileIO;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
@@ -19,6 +20,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -40,7 +42,7 @@ public class TaxaUtil {
     public static final int GI_INDEX = 1;
 
     // use xml parser code directly for large search, to make it faster.
-    public static SortedMap<String, Taxon> mapTaxaToOTUsByBLAST(File xmlBLASTOutputFile, File gi_taxid_raf_nucl) throws JAXBException, IOException, XMLStreamException {
+    public static SortedMap<String, Taxon> getOTUTaxaMapByBLAST(File xmlBLASTOutputFile, File gi_taxid_raf_nucl) throws JAXBException, IOException, XMLStreamException {
 
         SortedMap<String, Taxon> otuTaxaMap = new TreeMap<>();
 
@@ -121,9 +123,9 @@ public class TaxaUtil {
     }
 
     // slow?
-    public static void setTaxaToOTUsByBLAST(File xmlBLASTOutputFile, File gi_taxid_raf_nucl, OTUs otus) throws JAXBException, IOException, XMLStreamException {
+    public static void getOTUTaxaMapByBLAST(File xmlBLASTOutputFile, File gi_taxid_raf_nucl, OTUs otus) throws JAXBException, IOException, XMLStreamException {
 
-        SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
+        SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
 
         for (Map.Entry<String, Taxon> entry : otuTaxaMap.entrySet()) {
 
@@ -139,6 +141,47 @@ public class TaxaUtil {
             }
         }
 
+    }
+
+    /**
+     *
+     * @param otuTaxidMappingFile   1st column otu, 2nd taxid
+     * @return
+     * @throws JAXBException
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    public static SortedMap<String, Taxon> getOTUTaxaMapByFile(File otuTaxidMappingFile) throws JAXBException, IOException, XMLStreamException {
+
+        SortedMap<String, Taxon> otuTaxaMap = new TreeMap<>();
+
+        BufferedReader reader = FileIO.getReader(otuTaxidMappingFile, "taxonomic mapping");
+
+        String line = reader.readLine();
+        while (line != null) {
+            if (FileIO.hasContent(line)) { // not comments or empty
+                String[] items = FileIO.lineParser.getSeparator(0).parse(line);
+                if (items.length < 2)
+                    throw new IllegalArgumentException("Invalid file format for taxonomic mapping, line : " + line);
+                if (otuTaxaMap.containsKey(items[0]))
+                    throw new IllegalArgumentException("Find duplicate name for OTU : " + items[0]);
+
+                Taxon taxon = TaxonomyPool.getAndAddTaxIdByMemory(items[1]);
+                if (taxon == null) {
+                    MyLogger.error("Cannot find taxon from taxid " + items[1]);
+                } else {
+                    otuTaxaMap.put(items[0], taxon);
+                }
+            }
+
+            line = reader.readLine();
+        }
+        reader.close();
+
+        if (otuTaxaMap.size() < 1)
+            throw new IllegalArgumentException("It needs at least one separator !");
+
+        return otuTaxaMap;
     }
 
     /**
@@ -181,22 +224,24 @@ public class TaxaUtil {
             File otuMappingFile = new File(workPath + "map.uc");
             Community community = new Community(otuMappingFile);
 
-//            setTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl, community);
+            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
+            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
+            community.setTaxa(otuTaxaMap);
 
-            String outFileAndPath = workPath + File.separator + "community_matrix.csv";
-            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
+            Path outCMFilePath = Paths.get(workPath, "community_matrix-Arthopoda.csv");
+            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community, true);
 
-            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
-            File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
-
-            SortedMap<String, Taxon> otuTaxaMap = mapTaxaToOTUsByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
-            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
-            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
+//            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
+//            File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
+//
+//            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
+//            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
+//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
 
 //            Path inFilePath = Paths.get(workPath, "otus_taxa_id.tsv");
 //            SortedMap<String, Taxon> otuTaxaMap = TaxonomyFileIO.importElementTaxonomyMap(inFilePath);
-//            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
-//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
+            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
+            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
         }
         catch (Exception e) {
             e.printStackTrace();

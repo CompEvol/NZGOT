@@ -1,10 +1,12 @@
 package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.taxonomy.Taxa;
+import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.util.BioSortedSet;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * the set to keep all OTUs
@@ -64,6 +66,15 @@ public class OTUs<E> extends BioSortedSet<E> {
         }
 
         return readsCountMap;
+    }
+
+    public void setTaxa(SortedMap<String, Taxon> otuTaxaMap) {
+        for(E e : this){
+            OTU otu = (OTU) e;
+            Taxon taxon = otuTaxaMap.get(otu.getName());
+            if (taxon != null)
+                otu.setTaxonLCA(taxon);
+        }
     }
 
     /**

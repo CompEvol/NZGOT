@@ -50,11 +50,10 @@ public class TaxonomyFileIO extends FileIO {
         Map<String, String> preTaxaTraits = new TreeMap<>();
         BufferedReader reader = getReader(traitsMapTSV, "pre-defined taxa traits mapping");
 
-        Separator lineSeparator = new Separator("\t");
         String line = reader.readLine();
         while (line != null) {
             if (hasContent(line)) { // not comments or empty
-                String[] items = lineSeparator.parse(line);
+                String[] items = lineParser.getSeparator(0).parse(line);
                 if (items.length < 2)
                     throw new IllegalArgumentException("Invalid file format for taxa traits mapping, line : " + line);
                 if (preTaxaTraits.containsKey(items[0]))
@@ -132,20 +131,20 @@ public class TaxonomyFileIO extends FileIO {
      * @throws java.io.IOException
      */
     public static void writeElementTaxonomyMap(Path outFilePath, SortedMap<String, Taxon> otuTaxaMap, Rank... ranks) throws IOException {
-        BufferedWriter writer = getWriter(outFilePath, "Element taxonomy map");
+        BufferedWriter writer = getWriter(outFilePath, "taxonomic mapping" + (ranks==null?"":" and assignment") );
 
         //        writer.write("# \n");
         for (Map.Entry<String, Taxon> entry : otuTaxaMap.entrySet()) {
             Taxon taxon = entry.getValue();
-            writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon.getScientificName()) + "\t" + (taxon==null?"":taxon.getTaxId()) +
-                    "\t" + (taxon==null?"":taxon.getRank()));
+            writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon.getScientificName()));
+            writer.write("\t" + (taxon==null?"":taxon.getTaxId()) + "\t" + (taxon==null?"":taxon.getRank()));
 
             if (taxon != null && ranks != null) {
                 for (Rank rank : ranks) {
                     Taxon t = taxon.getParentTaxonOn(rank);
                     String str = ("no " + rank.toString()).toLowerCase();
                     writer.write("\t" + (t==null?str:t.getScientificName()));
-                    writer.write("\t" + (t==null?str:t.getTaxId()));
+                    writer.write("\t" + (t==null?str:t.getTaxId()) + "\t" + (t==null?str:t.getRank()) );
                 }
             }
 

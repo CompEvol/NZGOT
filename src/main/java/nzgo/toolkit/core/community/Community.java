@@ -8,6 +8,8 @@ import nzgo.toolkit.core.naming.NameUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.TreeSet;
 
 /**
@@ -117,9 +119,9 @@ public class Community<E> extends OTUs<E> {
         File otuMappingFile = new File(workPath + "map.uc");
         Community community = new Community(otusFile, otuMappingFile, null);
 
-        String outFileAndPath = workPath + File.separator + community.getName() + "_community_matrix.csv";
+        Path outCMFilePath = Paths.get(workPath, community.getName() + "_community_matrix.csv");
         try {
-            CommunityFileIO.writeCommunityMatrix(outFileAndPath, community);
+            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
         } catch (IOException e) {
             e.printStackTrace();
         }

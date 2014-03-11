@@ -6,12 +6,9 @@ import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.taxonomy.Taxon;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -52,47 +49,65 @@ public class CommunityFileIO extends OTUsFileIO {
     /**
      * write community matrix
      * A COLUMN PER SAMPLE AND A ROW FOR EACH SPECIES/OTU
-     * @param outFileAndPath
+     *
+     * @param outCMFilePath
      * @param community
+     * @param filterNoTaxonomy      not print the OTU that has no taxonomy
+     //* @param ranks
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static void writeCommunityMatrix(String outFileAndPath, Community community) throws IOException, IllegalArgumentException {
+    //TODO tidy up my strange code
+    public static void writeCommunityMatrix(Path outCMFilePath, Community community, boolean filterNoTaxonomy/*, Rank... ranks*/) throws IOException, IllegalArgumentException {
 
-        PrintStream out = new PrintStream(new FileOutputStream(outFileAndPath));
-
-        MyLogger.info("\nReport community matrix " + community.getName() + " in the file : " + outFileAndPath);
+        BufferedWriter writer = getWriter(outCMFilePath, "community matrix");
 
         for (String sample : community.getSamples()) {
-            out.print("," + sample);
+            writer.write("," + sample);
         }
-        out.print("\n");
+        writer.write("\n");
 
         for(Object o : community){
             OTU otu = (OTU) o;
-            out.print(otu.getName());
 
-            // print AlphaDiversity column
-            AlphaDiversity alphaDiversity = otu.getAlphaDiversity();
-            if (alphaDiversity != null) {
+            if (!filterNoTaxonomy || (filterNoTaxonomy && otu.hasTaxon()) ) {
+                writer.write(otu.getName());
+
+                // print AlphaDiversity column
+                AlphaDiversity alphaDiversity = otu.getAlphaDiversity();
+                if (alphaDiversity != null) {
 //                throw new IllegalArgumentException("Error: cannot AlphaDiversity report for OTU : " + otu);
 
-                for (int a : alphaDiversity.getAlphaDiversity()) {
-                    out.print("," + a);
+                    for (int a : alphaDiversity.getAlphaDiversity()) {
+                        writer.write("," + a);
+                    }
                 }
             }
 
-            // print AlphaDiversity column
-            if (otu.hasTaxon()) {
-                Taxon taxonLCA = otu.getTaxonLCA();
-                out.print("," + taxonLCA);
-            }
+            // print Taxon column
+//            if (otu.hasTaxon()) {
+//                Taxon taxonLCA = otu.getTaxonLCA();
+//                writer.write("," + taxonLCA.getScientificName());
+//                if (taxonLCA != null && ranks != null) {
+//                    for (Rank rank : ranks) {
+//                        Taxon t = taxonLCA.getParentTaxonOn(rank);
+//                        String str = ("no " + rank.toString()).toLowerCase();
+//                        writer.write("," + (t==null?str:t.getScientificName()));
+//                    }
+//                }
+//            }
 
-            out.print("\n");
+            if (!filterNoTaxonomy || (filterNoTaxonomy && otu.hasTaxon()) )
+                writer.write("\n");
+
         }
 
-        out.flush();
-        out.close();
+        writer.flush();
+        writer.close();
+    }
+
+    public static void writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {
+        writeCommunityMatrix(outCMFilePath, community, false);
     }
 
     /**
