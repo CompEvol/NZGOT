@@ -1,19 +1,32 @@
 package nzgo.toolkit.core.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Element: basic class for naming, Comparable, Countable
  * @author Walter Xie
  */
-public class Element implements Comparable, Countable{
+public class Element implements Comparable{
     public static final String DEFAULT_NAME = "Unknown";
 
     protected String name;
-    protected int count = 0;
+    protected List<Counter> counters = new ArrayList<>();
 
-    public Element() { }
+    public Element() {
+        addCounterStartFrom(0);
+    }
 
     public Element(String name) {
         setName(name);
+        addCounterStartFrom(0);
+    }
+
+    public Element(String name, int numOfCounters) {
+        setName(name);
+        for (int i=0; i < numOfCounters; i++) {
+            addCounterStartFrom(0);
+        }
     }
 
     public String getName() {
@@ -25,18 +38,27 @@ public class Element implements Comparable, Countable{
         this.name = name;
     }
 
-    public int getCount() {
-        return count;
+    public void addCounter() {
+        addCounterStartFrom(0);
     }
 
-    @Override
-    public void incrementCount(int step) {
-        this.count = count + step;
+    /**
+     * add counter started from initCount
+     * @param initCount
+     */
+    public void addCounterStartFrom(int initCount) {
+        Counter counter = new Counter(initCount);
+        counters.add(counter);
     }
 
-    @Override
-    public void setCount(int count) {
-        this.count = count;
+    public Counter getCounter(int counterId) {
+        if (counterId >= counters.size())
+            throw new IllegalArgumentException("Invalid counter index, counterId = " + counterId + ", counters = " + counters);
+        return counters.get(counterId);
+    }
+
+    public void setCounter(int counterId, Counter counter) {
+        counters.set(counterId, counter);
     }
 
     public String toString() {
@@ -46,10 +68,6 @@ public class Element implements Comparable, Countable{
     @Override
     public int compareTo(Object o) {
         return toString().compareTo(o.toString());
-    }
-
-    public int compareCountTo(Element element) {
-        return Integer.compare(this.count, element.getCount());
     }
 
     @Override

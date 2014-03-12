@@ -67,19 +67,19 @@ public class TreeUtil {
 
             if (taxon == null || "null".equalsIgnoreCase(taxon)) {
 //                MyLogger.warn("Find invalid taxon " + taxon + " from tip " + leafNode.getID());
-                notIdentified.incrementCount(1);
+                notIdentified.getCounter(0).incrementCount(1);
             } else {
                 if (!traits.containsUniqueElement(taxon)) {
                     Element countableTaxon = new Element(taxon);
-                    countableTaxon.incrementCount(1); // default count 0
+                    countableTaxon.getCounter(0).incrementCount(1); // default count 0
                     traits.add(countableTaxon);
                 } else {
                     Element countableTaxon = traits.getUniqueElement(taxon);
-                    countableTaxon.incrementCount(1);
+                    countableTaxon.getCounter(0).incrementCount(1);
                 }
             }
         }
-        if (notIdentified.getCount() > 0)
+        if (notIdentified.getCounter(0).getCount() > 0)
             traits.add(notIdentified);
 
         return traits;
@@ -123,7 +123,7 @@ public class TreeUtil {
 
             if (taxon == null || "null".equalsIgnoreCase(taxon)) {
 //                MyLogger.warn("Find invalid taxon " + taxon + " from tip " + leafNode.getID());
-                notIdentified.incrementCount(1);
+                notIdentified.getCounter(0).incrementCount(1);
                 taxaTraits.set(i, notIdentified);
             } else {
                 Element countableTaxon;
@@ -132,7 +132,7 @@ public class TreeUtil {
                 } else {
                     countableTaxon = new Element(taxon);
                 }
-                countableTaxon.incrementCount(1);
+                countableTaxon.getCounter(0).incrementCount(1);
 
 //                for (Element trait : taxaTraits) {
 //                    if (trait.compareTo(taxon) == 0) {

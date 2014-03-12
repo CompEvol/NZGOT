@@ -6,6 +6,8 @@ import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.taxonomy.Rank;
+import nzgo.toolkit.core.taxonomy.Taxon;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -54,13 +56,13 @@ public class CommunityFileIO extends OTUsFileIO {
      *
      * @param outCMFilePath
      * @param community
-     * @param filterNoTaxonomy      not print the OTU that has no taxonomy
-     //* @param ranks
+     * @param printTaxonomy      print the OTU's taxonomy
+     * @param ranks              has to set printTaxonomy = true
      * @throws IOException
      * @throws IllegalArgumentException
      */
     //TODO tidy up my strange code
-    public static void writeCommunityMatrix(Path outCMFilePath, Community community, boolean filterNoTaxonomy/*, Rank... ranks*/) throws IOException, IllegalArgumentException {
+    public static void writeCommunityMatrix(Path outCMFilePath, Community community, boolean printTaxonomy, Rank... ranks) throws IOException, IllegalArgumentException {
 
         BufferedWriter writer = getWriter(outCMFilePath, "community matrix");
 
@@ -72,35 +74,32 @@ public class CommunityFileIO extends OTUsFileIO {
         for(Object o : community){
             OTU otu = (OTU) o;
 
-            if (!filterNoTaxonomy || (filterNoTaxonomy && otu.hasTaxon()) ) {
-                writer.write(otu.getName());
+            writer.write(otu.getName());
 
-                // print AlphaDiversity column
-                AlphaDiversity alphaDiversity = otu.getAlphaDiversity();
-                if (alphaDiversity != null) {
+            // print AlphaDiversity column
+            AlphaDiversity alphaDiversity = otu.getAlphaDiversity();
+            if (alphaDiversity != null) {
 //                throw new IllegalArgumentException("Error: cannot AlphaDiversity report for OTU : " + otu);
 
-                    for (int a : alphaDiversity.getAlphaDiversity()) {
-                        writer.write("," + a);
+                for (int a : alphaDiversity.getAlphaDiversity()) {
+                    writer.write("," + a);
+                }
+            }
+
+//            print Taxon column
+            if (printTaxonomy && otu.hasTaxon()) {
+                Taxon taxonLCA = otu.getTaxonLCA();
+                writer.write("," + taxonLCA.getScientificName());
+                if (taxonLCA != null && ranks != null) {
+                    for (Rank rank : ranks) {
+                        Taxon t = taxonLCA.getParentTaxonOn(rank);
+                        String str = ("no " + rank.toString()).toLowerCase();
+                        writer.write("," + (t==null?str:t.getScientificName()));
                     }
                 }
             }
 
-            // print Taxon column
-//            if (otu.hasTaxon()) {
-//                Taxon taxonLCA = otu.getTaxonLCA();
-//                writer.write("," + taxonLCA.getScientificName());
-//                if (taxonLCA != null && ranks != null) {
-//                    for (Rank rank : ranks) {
-//                        Taxon t = taxonLCA.getParentTaxonOn(rank);
-//                        String str = ("no " + rank.toString()).toLowerCase();
-//                        writer.write("," + (t==null?str:t.getScientificName()));
-//                    }
-//                }
-//            }
-
-            if (!filterNoTaxonomy || (filterNoTaxonomy && otu.hasTaxon()) )
-                writer.write("\n");
+            writer.write("\n");
 
         }
 

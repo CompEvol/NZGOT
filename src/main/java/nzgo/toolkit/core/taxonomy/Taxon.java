@@ -124,7 +124,7 @@ public class Taxon extends Element {
      * @return
      */
     public boolean isClassified() {
-        return getScientificName().toLowerCase().contains(TaxaUtil.UNCLASSIFIED) || !getScientificName().equalsIgnoreCase(DEFAULT_NAME);
+        return !(getScientificName().toLowerCase().contains(TaxaUtil.UNCLASSIFIED) || getScientificName().equalsIgnoreCase(DEFAULT_NAME));
     }
 
     public String getScientificName() {

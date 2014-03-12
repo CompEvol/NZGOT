@@ -116,11 +116,13 @@ public class Community<E> extends OTUs<E> {
             if (otu.size() < 1)
                 throw new IllegalArgumentException("OTU " + otu + " does not have any elements, size = " + otu.size() + " !");
 
-            if (taxonomySet.containsUniqueElement(taxonLCA.getScientificName())) {
-                Taxon taxonAssigned = taxonomySet.getUniqueElement(taxonLCA.getScientificName());
-                taxonAssigned.incrementCount(otu.size());
+            if (taxonomySet.containsUniqueElement(taxonLCA.toString())) {
+                Taxon taxonAssigned = taxonomySet.getUniqueElement(taxonLCA.toString());
+                taxonAssigned.getCounter(0).incrementCount(otu.size());
+                taxonAssigned.getCounter(1).incrementCount(1);
             } else {
-                taxonLCA.setCount(otu.size());
+                taxonLCA.addCounter(); // add 2nd counter for number of otu
+                taxonLCA.getCounter(0).setCount(otu.size());
                 taxonomySet.add(taxonLCA);
             }
         }
@@ -179,7 +181,7 @@ public class Community<E> extends OTUs<E> {
         File otuMappingFile = new File(workPath + "map.uc");
         Community community = new Community(otusFile, otuMappingFile, null);
 
-        Path outCMFilePath = Paths.get(workPath, community.getName() + "_community_matrix.csv");
+        Path outCMFilePath = Paths.get(workPath, community.getName() + "_" + CommunityFileIO.COMMUNITY_MATRIX + ".csv");
         try {
             CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
         } catch (IOException e) {

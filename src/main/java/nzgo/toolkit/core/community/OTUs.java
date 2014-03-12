@@ -75,7 +75,7 @@ public class OTUs<E> extends BioSortedSet<E> {
      * then setTaxonLCA unclassified
      * @param otuTaxaMap
      */
-    public void setTaxa(SortedMap<String, Taxon> otuTaxaMap) {
+    public void setTaxonomy(SortedMap<String, Taxon> otuTaxaMap) {
         for(E e : this){
             OTU otu = (OTU) e;
             Taxon taxon = otuTaxaMap.get(otu.getName());

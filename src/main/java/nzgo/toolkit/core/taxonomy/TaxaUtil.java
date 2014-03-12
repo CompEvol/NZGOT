@@ -231,11 +231,11 @@ public class TaxaUtil {
 
             File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
             SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
-            community.setTaxa(otuTaxaMap);
+            community.setTaxonomy(otuTaxaMap);
 
             Community communityArthopoda = community.getClassifiedCommunity();
             Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
-            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda, true);
+            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
 
 //            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
 //            File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");

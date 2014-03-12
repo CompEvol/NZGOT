@@ -197,7 +197,7 @@ public class TaxaAssignment {
         for (Object name : taxa) {
             // 1st column count
             if (name instanceof Element)
-                out.write(((Element) name).getCount() + "\t");
+                out.write(((Element) name).getCounter(0).getCount() + "\t");
             // 2nd column taxa
             out.write(name.toString());
 
