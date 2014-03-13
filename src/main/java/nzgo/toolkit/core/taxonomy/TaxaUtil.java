@@ -8,7 +8,6 @@ import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
-import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
@@ -221,7 +220,8 @@ public class TaxaUtil {
     public static void main(final String[] args) {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        String workPath = args[0];
+//        String workPath = args[0];
+        String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/CO1-soilkit/otus97/";
         MyLogger.info("\nWorking path = " + workPath);
 
         try {
@@ -229,13 +229,16 @@ public class TaxaUtil {
             File otuMappingFile = new File(workPath + "map.uc");
             Community community = new Community(otuMappingFile);
 
-            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
-            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
-            community.setTaxonomy(otuTaxaMap);
+//            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
+//            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
+//            community.setTaxonomy(otuTaxaMap);
 
-            Community communityArthopoda = community.getClassifiedCommunity();
-            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
-            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
+            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + ".csv");
+            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+
+//            Community communityArthopoda = community.getClassifiedCommunity();
+//            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
+//            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
 
 //            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
 //            File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
@@ -244,12 +247,10 @@ public class TaxaUtil {
 //            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
 //            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
 
-//            Path inFilePath = Paths.get(workPath, "otus_taxa_id.tsv");
-//            SortedMap<String, Taxon> otuTaxaMap = TaxonomyFileIO.importElementTaxonomyMap(inFilePath);
-            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
-            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
-
-            TaxonomyFileIO.writeTaxonomyAssignment(workPath, communityArthopoda, Rank.CLASS, Rank.ORDER);
+//            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
+//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
+//
+//            TaxonomyFileIO.writeTaxonomyAssignment(workPath, communityArthopoda, Rank.CLASS, Rank.ORDER);
 
         }
         catch (Exception e) {

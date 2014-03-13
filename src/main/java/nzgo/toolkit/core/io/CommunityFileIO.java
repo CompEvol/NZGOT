@@ -71,6 +71,7 @@ public class CommunityFileIO extends OTUsFileIO {
         }
         writer.write("\n");
 
+        int total = 0;
         for(Object o : community){
             OTU otu = (OTU) o;
 
@@ -101,10 +102,14 @@ public class CommunityFileIO extends OTUsFileIO {
 
             writer.write("\n");
 
+            total += otu.size();
         }
 
         writer.flush();
         writer.close();
+
+        MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences, " +
+                community.getSamples().length + " samples = " + community.getSamples());
     }
 
     public static void writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {

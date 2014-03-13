@@ -1,6 +1,10 @@
 package nzgo.toolkit.core.io;
 
-import nzgo.toolkit.core.community.*;
+import nzgo.toolkit.core.community.Community;
+import nzgo.toolkit.core.community.OTU;
+import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.community.Reference;
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.uc.UCParser;
@@ -67,7 +71,7 @@ public class OTUsFileIO extends FileIO {
         SampleNameParser sampleNameParser = new SampleNameParser();
 
         BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
-
+        int total = 0;
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
@@ -82,7 +86,6 @@ public class OTUsFileIO extends FileIO {
                     otuName = UCParser.getLabelNoAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
                 if (!UCParser.isNA(otuName)) {
-
                     String hitName = UCParser.getLabelNoAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
                     double identity = UCParser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
                     int size = UCParser.getSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
@@ -94,9 +97,9 @@ public class OTUsFileIO extends FileIO {
                             throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
                                     ", from the mapping file which does not exist in OTUs file !");
                         } else {
-                            DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, size);
-
-                            otu.add(hit);
+//                            DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, size);
+                            // TODO bug to use DereplicatedSequence, may move to a new input, check if affect ER
+                            otu.add(hitName);
 
                             if (samples != null) {
                                 // if by plot, then add plot to TreeSet, otherwise add subplot
@@ -107,10 +110,12 @@ public class OTUsFileIO extends FileIO {
                         }
                     } else if (canCreateOTU) {
                         OTU otu = new OTU(otuName);
-                        DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, size);
-                        otu.addElement(hit);
+//                        DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, size);
+                        otu.addElement(hitName);
                         otus.addUniqueElement(otu);
                     }
+
+                    total++;
                 }
             }
 
@@ -118,6 +123,8 @@ public class OTUsFileIO extends FileIO {
         }
 
         reader.close();
+
+        MyLogger.debug("total = " + total);
 
     }
 
