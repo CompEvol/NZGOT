@@ -6,16 +6,35 @@ package nzgo.toolkit.core.naming;
  */
 public class SampleNameParser extends NameParser {
 
-    // mostly use for sequences annotation (*.fasta)
-    // eg IDME8NK01ETVXF|DirectSoil|LB1-A
+    public static final int LABEL_SAMPLE_INDEX = 2;
+
+    // the sampling location parsed is determined by sampleType
+    // e.g. 454 soil data: by subplot is 2-C and 2-N, by plot is 2
+    public final String sampleType; //default by subplot
+
     public SampleNameParser () {
-        this("\\|", "-");
-        getSeparator(0).setSplitIndex(2); // TODO
+        this(NameSpace.BY_SUBPLOT);
     }
 
-    public SampleNameParser(String separator, String secondarySeparator){
-        super(separator, secondarySeparator);
+    public SampleNameParser (String sampleType) {
+        this(sampleType, LABEL_SAMPLE_INDEX);
     }
+
+    // mostly use for sequences annotation (*.fasta)
+    // eg IDME8NK01ETVXF|DirectSoil|LB1-A
+    public SampleNameParser (String sampleType, int labelSampleId) {
+        super("\\|", "-");
+        getSeparator(0).setSplitIndex(labelSampleId);
+        this.sampleType = sampleType;
+    }
+
+
+//    public void setSampleType(String sampleType) {
+//        this.sampleType = sampleType;
+//        if (samples != null) {
+//            //TODO update matrix and diversity
+//        }
+//    }
 
     /**
      * parse read name into sample location, e.g. 2-C
@@ -47,8 +66,8 @@ public class SampleNameParser extends NameParser {
     }
 
 
-    public String getSampleBy (String samplesBy, String readName) {
+    public String getSample(String readName) {
         String sample = getSampleFromRead(readName);
-        return samplesBy == NameSpace.BY_PLOT ? getPlotFromSample(sample)[0] : sample;
+        return sampleType == NameSpace.BY_PLOT ? getPlotFromSample(sample)[0] : sample;
     }
 }

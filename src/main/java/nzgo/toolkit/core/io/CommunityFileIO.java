@@ -5,14 +5,15 @@ import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxon;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.TreeSet;
 
 /**
  * Community Matrix FileIO
@@ -23,32 +24,6 @@ import java.util.TreeSet;
 public class CommunityFileIO extends OTUsFileIO {
 
     public static final String COMMUNITY_MATRIX = "community_matrix";
-
-    /**
-     * Ideally otuMappingUCFile should have all OTUs,
-     * so that the validation assumed to be done before this method
-     * 1st set sampleType, default to BY_PLOT
-     * 2nd load reads into each OTU, and parse label to get sample array
-     * 3rd set sample array, and calculate Alpha diversity for each OTU
-     * @param otuMappingUCFile
-     * @param community
-     * @throws java.io.IOException
-     * @throws IllegalArgumentException
-     */
-    public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, Community community, boolean canCreateOTU) throws IOException, IllegalArgumentException {
-        TreeSet<String> samples = new TreeSet<>();
-
-        // 1st, set sampleType, default to BY_PLOT
-        community.setSampleType(NameSpace.BY_SUBPLOT);
-        MyLogger.info("\nSet sample type: " + community.getSampleType());
-
-        // 2nd, parse label to get sample
-        importOTUsAndMappingFromUCFile(otuMappingUCFile, community, canCreateOTU, samples);
-
-        // 3rd, set diversities and samples
-        community.setSamplesAndDiversities(samples);
-    }
-
 
     /**
      * write community matrix
@@ -72,6 +47,8 @@ public class CommunityFileIO extends OTUsFileIO {
         writer.write("\n");
 
         int total = 0;
+        int otu1Read = 0;
+        int otu2Reads = 0;
         for(Object o : community){
             OTU otu = (OTU) o;
 
@@ -102,13 +79,20 @@ public class CommunityFileIO extends OTUsFileIO {
 
             writer.write("\n");
 
-            total += otu.size();
+            int size = otu.size();
+            total += size;
+            if (size == 1) {
+                otu1Read ++;
+            } else if (size == 2) {
+                otu2Reads ++;
+            }
         }
 
         writer.flush();
         writer.close();
 
         MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences, " +
+                otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads, " +
                 community.getSamples().length + " samples = " + community.getSamples());
     }
 

@@ -3,8 +3,8 @@ package nzgo.toolkit.core.community;
 import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
+import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.util.BioSortedSet;
 
@@ -17,6 +17,7 @@ import java.util.TreeSet;
 /**
  * Community Matrix
  * elementsSet contains OTU
+ * same as OTUs, but including IO inputs and sample parser
  * load all OTUs and mappings from 3 files
  * 2 compulsory files: otusFile, otuMappingFile
  * 1 optional file: refSeqMappingFile
@@ -24,11 +25,9 @@ import java.util.TreeSet;
  */
 public class Community<E> extends OTUs<E> {
 
-    // the sampling location determined by sampleType, default by plot
-    // e.g. 454 soil data: by subplot is 2-C and 2-N, by plot is 2
-    protected String sampleType = NameSpace.BY_PLOT;
+    public final SampleNameParser sampleNameParser;
     // the final samples already parsed from label
-    protected String[] samples;
+    public String[] samples;
 
 //    protected final File otusFile;
 //    protected final File otuMappingFile;
@@ -39,16 +38,16 @@ public class Community<E> extends OTUs<E> {
 //        otusFile = null;
 //        otuMappingFile = null;
 //        refSeqMappingFile = null;
-        this.sampleType = community.getSampleType();
-        this.samples = community.getSamples();
+        this.sampleNameParser = community.sampleNameParser;
+        this.samples = community.samples;
     }
 
-    public Community(File otuMappingFile) {
-        this(null, otuMappingFile, null);
+    public Community(SampleNameParser sampleNameParser, File otuMappingFile) {
+        this(sampleNameParser, null, otuMappingFile, null);
     }
 
-    public Community(File otuMappingFile, File refSeqMappingFile) {
-        this(null, otuMappingFile, refSeqMappingFile);
+    public Community(SampleNameParser sampleNameParser, File otuMappingFile, File refSeqMappingFile) {
+        this(sampleNameParser, null, otuMappingFile, refSeqMappingFile);
     }
 
     /**
@@ -59,11 +58,13 @@ public class Community<E> extends OTUs<E> {
      * @param otuMappingFile
      * @param refSeqMappingFile
      */
-    public Community(File otusFile, File otuMappingFile, File refSeqMappingFile) {
+    public Community(SampleNameParser sampleNameParser, File otusFile, File otuMappingFile, File refSeqMappingFile) {
         super(otusFile != null ? NameUtil.getNameWithoutExtension(otusFile.getName()) : NameUtil.getNameWithoutExtension(otuMappingFile.getName()));
 //        this.otusFile = otusFile;
 //        this.otuMappingFile = otuMappingFile;
 //        this.refSeqMappingFile = refSeqMappingFile;
+
+        this.sampleNameParser = sampleNameParser;
 
         if (otusFile == null && otuMappingFile == null)
             throw new IllegalArgumentException("Community needs either OTUs or mapping file ! ");
@@ -72,14 +73,21 @@ public class Community<E> extends OTUs<E> {
             if (otusFile != null)
                 OTUsFileIO.importOTUs(otusFile, this);
 
-            if (otuMappingFile != null)
-                CommunityFileIO.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null);
+            TreeSet<String> samples = OTUsFileIO.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null, sampleNameParser);
+
+            // if samples is null, then no samples being parsed
+            if (samples != null && samples.size() > 0) {
+                this.samples = samples.toArray(new String[samples.size()]);
+                setSamplesAndDiversities(sampleNameParser);
+            }
 
             if (refSeqMappingFile != null)
                 OTUsFileIO.importRefSeqMappingFromUCFile(refSeqMappingFile, this);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     /**
@@ -129,40 +137,20 @@ public class Community<E> extends OTUs<E> {
         return taxonomySet;
     }
 
-    protected void initSamplesBy(TreeSet<String> samples){
-        if (samples == null || samples.size() < 1)
-            throw new IllegalArgumentException("Error: cannot parse sample from read name : " + samples);
-
-        this.samples = samples.toArray(new String[samples.size()]);
-    }
-
     /**
      * E has to be OTU
-     * @param samples
+     * @param sampleNameParser
      */
-    public void setSamplesAndDiversities(TreeSet<String> samples) {
-        initSamplesBy(samples);
-
+    public void setSamplesAndDiversities(SampleNameParser sampleNameParser) {
         for (E e : this) {
             OTU otu = (OTU) e;
-            AlphaDiversity alphaDiversity = new AlphaDiversity(sampleType, this.samples, otu);
+            AlphaDiversity alphaDiversity = new AlphaDiversity(sampleNameParser, samples, otu);
             otu.setAlphaDiversity(alphaDiversity);
         }
     }
 
-    public String getSampleType() {
-        return sampleType;
-    }
-
-    public void setSampleType(String sampleType) {
-        this.sampleType = sampleType;
-        if (samples != null) {
-            //TODO update matrix and diversity
-        }
-    }
-
     public String[] getSamples() {
-        return samples;
+        return (samples == null) ? new String[0] : samples;
     }
 
 //    public File getRefSeqMappingFile() {
@@ -179,7 +167,8 @@ public class Community<E> extends OTUs<E> {
 
         File otusFile = new File(workPath + "reads-Arthropoda.fasta");
         File otuMappingFile = new File(workPath + "map.uc");
-        Community community = new Community(otusFile, otuMappingFile, null);
+        SampleNameParser sampleNameParser = new SampleNameParser();
+        Community community = new Community(sampleNameParser, otusFile, otuMappingFile, null);
 
         Path outCMFilePath = Paths.get(workPath, community.getName() + "_" + CommunityFileIO.COMMUNITY_MATRIX + ".csv");
         try {

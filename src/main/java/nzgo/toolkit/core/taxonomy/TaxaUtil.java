@@ -221,19 +221,22 @@ public class TaxaUtil {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
 //        String workPath = args[0];
-        String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/CO1-soilkit/otus97/";
+        String[] experiments = new String[]{"ITS","16S","CO1-soilkit","CO1-indirect"};
+        for (String experiment : experiments) {
+        String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/" + experiment + "/otus97/";
         MyLogger.info("\nWorking path = " + workPath);
 
         try {
 //            File otusFile = new File(workPath + "otus1.fasta");
             File otuMappingFile = new File(workPath + "map.uc");
-            Community community = new Community(otuMappingFile);
+            SampleNameParser sampleNameParser = new SampleNameParser();
+            Community community = new Community(sampleNameParser, otuMappingFile);
 
 //            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
 //            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
 //            community.setTaxonomy(otuTaxaMap);
 
-            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + ".csv");
+            Path outCMFilePath = Paths.get(workPath, experiment + ".csv");
             CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
 
 //            Community communityArthopoda = community.getClassifiedCommunity();
@@ -256,6 +259,6 @@ public class TaxaUtil {
         catch (Exception e) {
             e.printStackTrace();
         }
-
+        }
     }
 }

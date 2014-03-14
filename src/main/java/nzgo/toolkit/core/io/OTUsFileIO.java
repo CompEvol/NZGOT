@@ -1,6 +1,5 @@
 package nzgo.toolkit.core.io;
 
-import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.community.Reference;
@@ -48,27 +47,41 @@ public class OTUsFileIO extends FileIO {
     }
 
     // default to create OTUs from mapping file
-    public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
-        importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, true);
-    }
-
-    public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU) throws IOException, IllegalArgumentException {
-        importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, canCreateOTU, null);
+    public static TreeSet<String> importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
+        return importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, true);
     }
 
     /**
+     * Ideally otuMappingUCFile should have all OTUs,
+     * so that the validation assumed to be done before this method
+     * @param otuMappingUCFile
+     * @param otus
+     * @param canCreateOTU
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
+    public static TreeSet<String> importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU) throws IOException, IllegalArgumentException {
+        SampleNameParser sampleNameParser = new SampleNameParser();
+        return importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, canCreateOTU, sampleNameParser);
+    }
+
+    /**
+     * 1st set sampleType in sampleNameParser, default to BY_PLOT
+     * 2nd load reads into each OTU, and parse label to get sample array
+     * 3rd set sample array, and calculate Alpha diversity for each OTU
+     *
      * set hits into each OTU, if no OTU is uploaded, then create new OTUs from mapping file
      * e.g. S	17	300	*	*	*	*	*	HA5K40001BTFNL|IndirectSoil|3-H;size=177;	*
      * e.g. H	11	300	98.3	+	0	0	300M	G86XGG201B3O46|IndirectSoil|5-I;size=166;	G86XGG201B3YD9|IndirectSoil|5-N;size=248;
      * @param otuMappingUCFile
      * @param otus
-     * @param canCreateOTU     if use otuMappingUCFile to create OTUs
-     * @param samples          used only for community to store samples
+     * @param canCreateOTU              if use otuMappingUCFile to create OTUs
+     * @param sampleNameParser          used only for community, if null then ignore samples
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static void importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU, TreeSet<String> samples) throws IOException, IllegalArgumentException {
-        SampleNameParser sampleNameParser = new SampleNameParser();
+    public static TreeSet<String> importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU, SampleNameParser sampleNameParser) throws IOException, IllegalArgumentException {
+        TreeSet<String> samples = null;
 
         BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
         int total = 0;
@@ -101,10 +114,15 @@ public class OTUsFileIO extends FileIO {
                             // TODO bug to use DereplicatedSequence, may move to a new input, check if affect ER
                             otu.add(hitName);
 
-                            if (samples != null) {
+                            if (sampleNameParser != null) {
+                                if (samples == null) {
+                                    samples = new TreeSet<>();
+
+                                    MyLogger.info("\nSample type: " + sampleNameParser.sampleType);
+                                }
+
                                 // if by plot, then add plot to TreeSet, otherwise add subplot
-                                String sampleType = ((Community) otus).getSampleType();
-                                String sampleLocation = sampleNameParser.getSampleBy(sampleType, hitName);
+                                String sampleLocation = sampleNameParser.getSample(hitName);
                                 samples.add(sampleLocation);
                             }
                         }
@@ -126,6 +144,7 @@ public class OTUsFileIO extends FileIO {
 
         MyLogger.debug("total = " + total);
 
+        return samples;
     }
 
     /**
