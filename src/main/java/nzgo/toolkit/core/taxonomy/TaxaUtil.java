@@ -22,6 +22,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -221,24 +222,35 @@ public class TaxaUtil {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
 //        String workPath = args[0];
-        String[] experiments = new String[]{"ITS","16S","CO1-soilkit","CO1-indirect"};
+        String[] experiments = new String[]{"16S"}; //"CO1-soilkit","CO1-indirect","ITS","16S"
         for (String experiment : experiments) {
-        String workPath = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/" + experiment + "/otus97/";
-        MyLogger.info("\nWorking path = " + workPath);
+            String workDir = "/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/" + experiment;
 
-        try {
+            PrintStream out = null;
+            try {
+                out = FileIO.getPrintStream(workDir + "/" + experiment + "_report.tsv", "community matrix");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            out.println("Threshold\tOTUs\tReads\tOTUs1Read\tOTUs2Reads");
+
+            for (int thre=90; thre<=97; thre++) {
+                String workPath = workDir + "/otus" + thre + "/";
+                MyLogger.info("\nWorking path = " + workPath);
+
+                try {
 //            File otusFile = new File(workPath + "otus1.fasta");
-            File otuMappingFile = new File(workPath + "map.uc");
-            SampleNameParser sampleNameParser = new SampleNameParser();
-            Community community = new Community(sampleNameParser, otuMappingFile);
+                    File otuMappingFile = new File(workPath + "map.uc");
+                    SampleNameParser sampleNameParser = new SampleNameParser();
+                    Community community = new Community(sampleNameParser, otuMappingFile);
 
 //            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
 //            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
 //            community.setTaxonomy(otuTaxaMap);
 
-            Path outCMFilePath = Paths.get(workPath, experiment + ".csv");
-            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
-
+                    Path outCMFilePath = Paths.get(workPath, experiment + "_otus" + thre + ".csv");
+                    int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+                    out.println(thre + "\t" + report[0] + "\t" + report[1] + "\t" + report[2] + "\t" + report[3]);
 //            Community communityArthopoda = community.getClassifiedCommunity();
 //            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
 //            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
@@ -255,10 +267,13 @@ public class TaxaUtil {
 //
 //            TaxonomyFileIO.writeTaxonomyAssignment(workPath, communityArthopoda, Rank.CLASS, Rank.ORDER);
 
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            out.close();
         }
     }
 }

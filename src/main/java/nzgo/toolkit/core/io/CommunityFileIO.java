@@ -37,7 +37,7 @@ public class CommunityFileIO extends OTUsFileIO {
      * @throws IllegalArgumentException
      */
     //TODO tidy up my strange code
-    public static void writeCommunityMatrix(Path outCMFilePath, Community community, boolean printTaxonomy, Rank... ranks) throws IOException, IllegalArgumentException {
+    public static int[] writeCommunityMatrix(Path outCMFilePath, Community community, boolean printTaxonomy, Rank... ranks) throws IOException, IllegalArgumentException {
 
         BufferedWriter writer = getWriter(outCMFilePath, "community matrix");
 
@@ -94,10 +94,12 @@ public class CommunityFileIO extends OTUsFileIO {
         MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences, " +
                 otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads, " +
                 community.getSamples().length + " samples = " + community.getSamples());
+
+        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSamples().length};
     }
 
-    public static void writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {
-        writeCommunityMatrix(outCMFilePath, community, false);
+    public static int[] writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {
+        return writeCommunityMatrix(outCMFilePath, community, false);
     }
 
     /**

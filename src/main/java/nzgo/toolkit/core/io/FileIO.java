@@ -52,4 +52,15 @@ public class FileIO {
 
         return writer;
     }
+
+    public static PrintStream getPrintStream(String outFileAndPath, String msg) throws IOException {
+
+        PrintStream out = new PrintStream(new FileOutputStream(outFileAndPath));
+
+        if (msg != null)
+            MyLogger.info("\nOutput " + msg + " file: " + outFileAndPath);
+
+        return out;
+    }
+
 }
