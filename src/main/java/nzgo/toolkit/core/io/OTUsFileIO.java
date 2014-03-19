@@ -236,7 +236,7 @@ public class OTUsFileIO extends FileIO {
             Path outFile = Paths.get(workPath.toString(), experiment + reportFileName);
             BufferedWriter writer = FileIO.getWriter(outFile, "OTUs summary report at " + experiment);
 
-            writer.write("Threshold\tOTUs\tReads\tOTUs1Read\tOTUs2Reads");
+            writer.write("Threshold\tOTUs\tReads\tOTUs1Read\tOTUs2Reads\n");
 
             for (int thre : thresholds) {
                 Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
@@ -247,7 +247,7 @@ public class OTUsFileIO extends FileIO {
 
                 Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
                 int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
-                writer.write(thre + "\t" + report[0] + "\t" + report[1] + "\t" + report[2] + "\t" + report[3]);
+                writer.write(thre + "\t" + report[0] + "\t" + report[1] + "\t" + report[2] + "\t" + report[3] + "\n");
             }
 
             writer.close();
@@ -274,7 +274,7 @@ public class OTUsFileIO extends FileIO {
 
         String[] experiments = new String[]{"CO1-soilkit","CO1-indirect","ITS","trnL","16S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S"
         int[] thresholds = new int[]{90,91,92,93,94,95,96,97,98,99,100}; // 90,91,92,93,94,95,96,97,98,99,100
-        Path workDir = Paths.get("/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
+        Path workDir = Paths.get("~/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
         String otuMappingFileName = "map.uc";
         String reportFileName = "_otus_report.tsv";
         String cmFileName = "_cm.csv";
