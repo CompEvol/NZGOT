@@ -1,5 +1,6 @@
 package nzgo.toolkit.core.io;
 
+import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.community.Reference;
@@ -9,8 +10,11 @@ import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.uc.UCParser;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.TreeSet;
 
 /**
@@ -217,6 +221,41 @@ public class OTUsFileIO extends FileIO {
         reader.close();
     }
 
+    /**
+     * this method only works for specific directory structure
+     */
+    public static void reportOTUs (Path workDir, String otuMappingFileName, String reportFileName, String cmFileName, String[] experiments, int[] thresholds) throws IOException {
+        if (!UCParser.isUCFile(otuMappingFileName))
+            throw new IllegalArgumentException("Invalid OTU mapping file name : " + otuMappingFileName);
+
+        for (String experiment : experiments) {
+            // go into each gene folder
+            Path workPath = Paths.get(workDir.toString(), experiment);
+            MyLogger.info("\nWorking path = " + workPath);
+
+            Path outFile = Paths.get(workPath.toString(), experiment + reportFileName);
+            BufferedWriter writer = FileIO.getWriter(outFile, "OTUs summary report at " + experiment);
+
+            writer.write("Threshold\tOTUs\tReads\tOTUs1Read\tOTUs2Reads");
+
+            for (int thre : thresholds) {
+                Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
+
+                File otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
+                SampleNameParser sampleNameParser = new SampleNameParser();
+                Community community = new Community(sampleNameParser, otuMappingFile);
+
+                Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
+                int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+                writer.write(thre + "\t" + report[0] + "\t" + report[1] + "\t" + report[2] + "\t" + report[3]);
+            }
+
+            writer.close();
+        }
+    }
+
+
+
     public static boolean isOTUsFile(String fileName) {
         return fileName.startsWith(NameSpace.PREFIX_OTUS_RELABELED) && fileName.endsWith(NameSpace.SUFFIX_OTUS);
     }
@@ -229,7 +268,25 @@ public class OTUsFileIO extends FileIO {
         return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && UCParser.isUCFile(fileName);
     }
 
-    // TODO is this efficient?
+
+    //Main method
+    public static void main(final String[] args) {
+
+        String[] experiments = new String[]{"CO1-soilkit","CO1-indirect","ITS","trnL","16S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S"
+        int[] thresholds = new int[]{90,91,92,93,94,95,96,97,98,99,100}; // 90,91,92,93,94,95,96,97,98,99,100
+        Path workDir = Paths.get("/Users/dxie004/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
+        String otuMappingFileName = "map.uc";
+        String reportFileName = "_otus_report.tsv";
+        String cmFileName = "_cm.csv";
+
+        try {
+            reportOTUs (workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+        // TODO is this efficient?
 //    public static void importOTUsAndMapping(File otuMappingFile, OTUs otus, List<Sequence> sequences) throws IOException, IllegalArgumentException {
 //
 //        BufferedReader reader = getReader(otuMappingFile, "OTUs and OTU mapping from");
