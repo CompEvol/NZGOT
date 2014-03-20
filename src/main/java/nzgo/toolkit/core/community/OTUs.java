@@ -1,8 +1,8 @@
 package nzgo.toolkit.core.community;
 
-import nzgo.toolkit.core.taxonomy.Taxa;
-import nzgo.toolkit.core.taxonomy.TaxaUtil;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.taxonomy.TaxonSet;
+import nzgo.toolkit.core.taxonomy.TaxonomyUtil;
 import nzgo.toolkit.core.util.BioSortedSet;
 
 import java.util.HashMap;
@@ -83,7 +83,7 @@ public class OTUs<E> extends BioSortedSet<E> {
                 otu.setTaxonLCA(taxon);
         }
 
-        Taxon unclassified = TaxaUtil.getUnclassified();
+        Taxon unclassified = TaxonomyUtil.getUnclassified();
         for(E e : this){
             OTU otu = (OTU) e;
             if (!otu.hasTaxon())
@@ -95,19 +95,19 @@ public class OTUs<E> extends BioSortedSet<E> {
      * get Taxa from all Taxon of OTU in OTUs
      * @return
      */
-    public Taxa getTaxa() {
-        Taxa taxa = new Taxa();
+    public TaxonSet getTaxa() {
+        TaxonSet taxonSet = new TaxonSet();
 
         for(E e : this){
             OTU otu = (OTU) e;
             if (otu.hasTaxon()) {
                 // may have multi-otus assigned to same taxon
-                taxa.add(otu.getTaxonLCA());
+                taxonSet.add(otu.getTaxonLCA());
             }
         }
 
-        if (taxa.size() < 1) return null;
-        return taxa;
+        if (taxonSet.size() < 1) return null;
+        return taxonSet;
     }
 
     /**

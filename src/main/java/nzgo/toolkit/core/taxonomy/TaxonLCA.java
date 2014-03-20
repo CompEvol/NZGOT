@@ -20,11 +20,11 @@ public class TaxonLCA {
      * @throws IOException
      * @throws XMLStreamException
      */
-    public static Taxon getTaxonLCA(Taxa taxidSet) throws IOException, XMLStreamException {
+    public static Taxon getTaxonLCA(TaxonSet taxidSet) throws IOException, XMLStreamException {
         Taxon taxonLCA = null;
 
         for (Object taxid : taxidSet) {
-//            Taxon taxon2 = TaxaUtil.getTaxonByeFetch(taxid.toString());
+//            Taxon taxon2 = TaxonomyUtil.getTaxonByeFetch(taxid.toString());
             Taxon taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxid.toString());
 
             if (taxon2 == null) {
@@ -50,7 +50,7 @@ public class TaxonLCA {
     //Main method
     public static void main(final String[] args) {
 
-        Taxa taxidSet = new Taxa(Arrays.asList("104782", "104786", "104788", "317506", "563909", "563911"));
+        TaxonSet taxidSet = new TaxonSet(Arrays.asList("104782", "104786", "104788", "317506", "563909", "563911"));
 
         try {
             Taxon taxonLCA = TaxonLCA.getTaxonLCA(taxidSet);

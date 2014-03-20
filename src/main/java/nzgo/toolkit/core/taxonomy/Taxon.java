@@ -56,7 +56,7 @@ public class Taxon extends Element {
     }
 
     protected void getParentLineage(List<Taxon> lineage, Taxon taxon) throws IOException, XMLStreamException {
-        if (!TaxaUtil.isRoot(taxon.getTaxId()) && taxon.getParentTaxon() != null) {
+        if (!TaxonomyUtil.isRoot(taxon.getTaxId()) && taxon.getParentTaxon() != null) {
             getParentLineage(lineage, taxon.getParentTaxon());
             // add "cellular organisms" first, which is the first in xml
             lineage.add(taxon.getParentTaxon());
@@ -124,7 +124,7 @@ public class Taxon extends Element {
      * @return
      */
     public boolean isClassified() {
-        return !(getScientificName().toLowerCase().contains(TaxaUtil.UNCLASSIFIED) || getScientificName().equalsIgnoreCase(DEFAULT_NAME));
+        return !(getScientificName().toLowerCase().contains(TaxonomyUtil.UNCLASSIFIED) || getScientificName().equalsIgnoreCase(DEFAULT_NAME));
     }
 
     public String getScientificName() {

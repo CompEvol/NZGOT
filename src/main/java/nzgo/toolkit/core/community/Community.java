@@ -6,7 +6,7 @@ import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.Taxon;
-import nzgo.toolkit.core.util.BioSortedSet;
+import nzgo.toolkit.core.taxonomy.TaxonSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,8 +114,8 @@ public class Community<E> extends OTUs<E> {
      * E has to be OTU
      * @return
      */
-    public BioSortedSet<Taxon> getTaxonomyAssignment() {
-        BioSortedSet<Taxon> taxonomySet = new BioSortedSet<>();
+    public TaxonSet<Taxon> getTaxonomy() {
+        TaxonSet<Taxon> taxonomySet = new TaxonSet<>();
 
         for(E e : this){
             OTU otu = (OTU) e;
@@ -126,14 +126,15 @@ public class Community<E> extends OTUs<E> {
             if (otu.size() < 1)
                 throw new IllegalArgumentException("OTU " + otu + " does not have any elements, size = " + otu.size() + " !");
 
-            if (taxonomySet.containsUniqueElement(taxonLCA.toString())) {
-                Taxon taxonAssigned = taxonomySet.getUniqueElement(taxonLCA.toString());
+            if (taxonomySet.containsTaxon(taxonLCA.toString())) {
+                Taxon taxonAssigned = taxonomySet.getTaxon(taxonLCA.toString());
                 taxonAssigned.getCounter(READS_COUNTER_ID).incrementCount(otu.size());
                 taxonAssigned.getCounter(OTU_COUNTER_ID).incrementCount(1);
             } else {
                 taxonLCA.addCounter(); // add 2nd counter for number of otu
                 taxonLCA.getCounter(READS_COUNTER_ID).setCount(otu.size());
-                taxonomySet.add(taxonLCA);
+                taxonLCA.getCounter(OTU_COUNTER_ID).incrementCount(1);
+                taxonomySet.addTaxon(taxonLCA);
             }
         }
         return taxonomySet;

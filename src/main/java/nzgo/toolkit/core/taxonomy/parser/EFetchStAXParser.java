@@ -88,9 +88,9 @@ public class EFetchStAXParser {
                 if (NCBIeUtils.isTaxId(elementName)) {
                     String taxId = xmlStreamReader.getElementText();
 //                    // return "cellular organisms"
-//                    if (TaxaUtil.getCellularOrganisms().getTaxId().contentEquals(taxId))
+//                    if (TaxonomyUtil.getCellularOrganisms().getTaxId().contentEquals(taxId))
 //                        // stop recursive here
-//                        return TaxaUtil.getCellularOrganisms();
+//                        return TaxonomyUtil.getCellularOrganisms();
                     taxon.setTaxId(taxId); // required
                 } else if (NCBIeUtils.isScientificName(elementName)) {
                     taxon.setScientificName(xmlStreamReader.getElementText());

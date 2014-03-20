@@ -1,12 +1,12 @@
 package nzgo.toolkit.core.io;
 
 import nzgo.toolkit.core.community.Community;
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.taxonomy.Rank;
-import nzgo.toolkit.core.taxonomy.Taxa;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.taxonomy.TaxonomyPool;
-import nzgo.toolkit.core.util.BioSortedSet;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -25,8 +25,8 @@ import java.util.TreeMap;
 public class TaxonomyFileIO extends FileIO {
     public static final String TAXONOMY_ASSIGNMENT = "taxonomy_assignment";
 
-    public static Taxa importTaxa (Path taxaTSV) throws IOException {
-        Taxa taxa = new Taxa();
+    public static TaxonSet importTaxa (Path taxaTSV) throws IOException {
+        TaxonSet taxonSet = new TaxonSet();
         BufferedReader reader = getReader(taxaTSV, "taxa");
 
         Separator lineSeparator = new Separator("\t");
@@ -37,17 +37,17 @@ public class TaxonomyFileIO extends FileIO {
 //                if (items.length < 2)
 //                    throw new IllegalArgumentException("Invalid file format for taxa traits mapping, line : " + line);
 
-                taxa.addUniqueElement(items[0]);
+                taxonSet.addUniqueElement(items[0]);
             }
 
             line = reader.readLine();
         }
         reader.close();
 
-        if (taxa.size() < 1)
+        if (taxonSet.size() < 1)
             throw new IllegalArgumentException("It needs at least one taxon !");
 
-        return taxa;
+        return taxonSet;
     }
 
     public static Map<String, String> importPreTaxaTraits (Path traitsMapTSV) throws IOException {
@@ -137,7 +137,7 @@ public class TaxonomyFileIO extends FileIO {
     public static void writeElementTaxonomyMap(Path outFilePath, SortedMap<String, Taxon> otuTaxaMap, Rank... ranks) throws IOException {
         BufferedWriter writer = getWriter(outFilePath, "taxonomic mapping" + (ranks==null?"":" and assignment") );
 
-        //        writer.write("# \n");
+        int total = 0;
         for (Map.Entry<String, Taxon> entry : otuTaxaMap.entrySet()) {
             Taxon taxon = entry.getValue();
             writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon.getScientificName()));
@@ -153,30 +153,34 @@ public class TaxonomyFileIO extends FileIO {
             }
 
             writer.write("\n");
+
+            total++;
         }
 
         writer.flush();
         writer.close();
+
+        MyLogger.debug("Total entry in ElementTaxonomyMap = " + total);
     }
 
     /**
      * multi-output-files of Taxonomy Assignment
      *
      * @param workPath
-     * @param community
+     * @param taxonomySet
      * @param ranks
      * @throws IOException
      */
-    public static void writeTaxonomyAssignment(String workPath, Community community, Rank... ranks) throws IOException {
+    public static void writeTaxonomyAssignment(String workPath, TaxonSet<Taxon> taxonomySet, Rank... ranks) throws IOException {
 
         Path outTAFilePath = Paths.get(workPath, TAXONOMY_ASSIGNMENT + ".tsv");
         // assignment of overall
-        writeTaxonomyAssignment(outTAFilePath, community, null);
+        writeTaxonomyAssignment(outTAFilePath, taxonomySet, null);
 
         for (Rank rank : ranks) {
             // assignment of given rank
             outTAFilePath = Paths.get(workPath, TAXONOMY_ASSIGNMENT + "_" + rank + ".tsv");
-            writeTaxonomyAssignment(outTAFilePath, community, rank);
+            writeTaxonomyAssignment(outTAFilePath, taxonomySet, rank);
         }
     }
 
@@ -185,16 +189,16 @@ public class TaxonomyFileIO extends FileIO {
      * if rank == null, then get the assignment of overall
      *
      * @param outTAFilePath
-     * @param community
+     * @param taxonomySet
      * @param rank
      * @throws IOException
      */
-    public static void writeTaxonomyAssignment(Path outTAFilePath, Community community, Rank rank) throws IOException {
+    public static void writeTaxonomyAssignment(Path outTAFilePath, TaxonSet<Taxon> taxonomySet, Rank rank) throws IOException {
 
-        BufferedWriter writer = getWriter(outTAFilePath, "taxonomy assignment of community matrix");
+        BufferedWriter writer = getWriter(outTAFilePath, "taxonomy assignment");
 
-        BioSortedSet<Taxon> taxonomySet = community.getTaxonomyAssignment();
-
+        int total1 = 0;
+        int total2 = 0;
         for(Taxon t : taxonomySet){
             String taxonName = t.getScientificName(); // rank == null
             if (rank != null) {
@@ -204,13 +208,20 @@ public class TaxonomyFileIO extends FileIO {
                 taxonName = (ta==null?str:ta.getScientificName());
             }
             writer.write(taxonName);
-            writer.write("\t" + t.getCounter(Community.READS_COUNTER_ID).getCount());
-            writer.write("\t" + t.getCounter(Community.OTU_COUNTER_ID).getCount());
+            int c1 = t.getCounter(Community.READS_COUNTER_ID).getCount();
+            writer.write("\t" + c1);
+            int c2 = t.getCounter(Community.OTU_COUNTER_ID).getCount();
+            writer.write("\t" + c2);
             writer.write("\n");
+
+            total1 += c1;
+            total2 += c2;
         }
 
         writer.flush();
         writer.close();
+
+        MyLogger.debug("Total reads = " + total1 + ", total OTUs = " + total2);
     }
 
 }

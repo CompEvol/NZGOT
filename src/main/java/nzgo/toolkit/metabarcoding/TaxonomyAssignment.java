@@ -28,9 +28,9 @@ public class TaxonomyAssignment extends Module{
     private TaxonomyAssignment(Path inputFile, Path outFile, Path errorOutFile, Rank rankToBreak, String regexPrefix, String taxIdNCBI) {
         super();
 
-        Taxa taxa = null;
+        TaxonSet taxonSet = null;
         try {
-            taxa = TaxonomyFileIO.importTaxa(inputFile);
+            taxonSet = TaxonomyFileIO.importTaxa(inputFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,7 +48,7 @@ public class TaxonomyAssignment extends Module{
             }
         }
 
-        TaxaAssignment taxaAssignment = new TaxaAssignment(taxa, rankToBreak, regexPrefix, bioClass);
+        TaxaAssignment taxaAssignment = new TaxaAssignment(taxonSet, rankToBreak, regexPrefix, bioClass);
 
         Map<String, String> taxaSortMap = null;
         try {

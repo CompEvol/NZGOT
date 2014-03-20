@@ -11,9 +11,9 @@ import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.Rank;
-import nzgo.toolkit.core.taxonomy.Taxa;
 import nzgo.toolkit.core.taxonomy.TaxaAssignment;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.uc.MixedOTUs;
 import nzgo.toolkit.core.util.BioSortedSet;
 import nzgo.toolkit.core.util.Element;
@@ -334,8 +334,8 @@ public class TreeUtil {
         // taxa break
         Taxon bioClassification = new Taxon("Insecta", "50557");
         BioSortedSet<Element> taxaFromTree = getTaxaTraitsFromTree(newickTree);
-        Taxa taxa = new Taxa(taxaFromTree);
-        TaxaAssignment taxaAssignment = new TaxaAssignment(taxa, Rank.ORDER, bioClassification); // default to check prefix
+        TaxonSet taxonSet = new TaxonSet(taxaFromTree);
+        TaxaAssignment taxaAssignment = new TaxaAssignment(taxonSet, Rank.ORDER, bioClassification); // default to check prefix
         taxaAssignment.writeTaxaSortTable(workPath);
 
         // annotate tree by traits (taxa)

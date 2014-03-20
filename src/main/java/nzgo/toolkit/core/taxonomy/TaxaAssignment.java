@@ -19,12 +19,12 @@ import java.util.*;
 public class TaxaAssignment {
 
     private final Separator errMsgSeparator = new Separator("\t"); // for multi-column error message
-    protected final Taxa taxa;
+    protected final TaxonSet taxonSet;
 
     protected Rank rankToBreak;
     // the high level taxonomy of biological classification that all given taxa should belong to
     // e.g. new Taxon("Insecta", "50557");
-    // or TaxaUtil.getTaxonByeFetch("50557");
+    // or TaxonomyUtil.getTaxonByeFetch("50557");
     protected Taxon bioClass;
     private final Separator regexPrefixSeparator;
 
@@ -34,19 +34,19 @@ public class TaxaAssignment {
     public Map<String, String> errors = new TreeMap<>();
 
 
-    public TaxaAssignment(Taxa taxa, Rank rankToBreak, Taxon bioClass) {
-        this(taxa, rankToBreak, "_", bioClass);
+    public TaxaAssignment(TaxonSet taxonSet, Rank rankToBreak, Taxon bioClass) {
+        this(taxonSet, rankToBreak, "_", bioClass);
     }
 
     /**
      *
-     * @param taxa
+     * @param taxonSet
      * @param rankToBreak
      * @param regexPrefix
      * @param bioClass
      */
-    public TaxaAssignment(Taxa taxa, Rank rankToBreak, String regexPrefix, Taxon bioClass) {
-        this.taxa = taxa;
+    public TaxaAssignment(TaxonSet taxonSet, Rank rankToBreak, String regexPrefix, Taxon bioClass) {
+        this.taxonSet = taxonSet;
         setRankToBreak(rankToBreak);
         if (regexPrefix == null) {
             regexPrefixSeparator = null;
@@ -69,7 +69,7 @@ public class TaxaAssignment {
         taxaAssignementMap.clear();
         errors.clear();
 
-        for (Object name : taxa) {
+        for (Object name : taxonSet) {
             List<Taxon> taxonList = EFetchStAXParser.getTaxonByName(name.toString());
 
             // try prefix, such as Cotesia_ruficrus
@@ -168,15 +168,15 @@ public class TaxaAssignment {
         }
     }
 
-    public Taxa<String> getTaxaOnRank() {
-        Taxa<String> taxaOnRank = new Taxa<>();
+    public TaxonSet<String> getTaxaOnRank() {
+        TaxonSet<String> taxonSetOnRank = new TaxonSet<>();
         for (String queryTaxon : taxaAssignementMap.keySet()) {
             String taxonOnRank = taxaAssignementMap.get(queryTaxon);
-            if (!taxaOnRank.contains(taxonOnRank)) {
-                taxaOnRank.add(taxonOnRank);
+            if (!taxonSetOnRank.contains(taxonOnRank)) {
+                taxonSetOnRank.add(taxonOnRank);
             }
         }
-        return taxaOnRank;
+        return taxonSetOnRank;
     }
 
     /**
@@ -188,13 +188,13 @@ public class TaxaAssignment {
     public void writeTaxaSortTable(String workPath) throws IOException, XMLStreamException {
         fillTaxaSortMap();
 
-        MyLogger.info("\n" + taxa.size() + " Taxa extracted from tree tips labels : ");
+        MyLogger.info("\n" + taxonSet.size() + " Taxa extracted from tree tips labels : ");
 
         String outputFilePath = workPath + "taxaSortTable" + NameSpace.SUFFIX_TSV;
         BufferedWriter out = new BufferedWriter(new FileWriter(outputFilePath));
         // column head
         out.write("# count\ttaxa\t" + rankToBreak + "\terror\n");
-        for (Object name : taxa) {
+        for (Object name : taxonSet) {
             // 1st column count
             if (name instanceof Element)
                 out.write(((Element) name).getCounter().getCount() + "\t");
@@ -225,9 +225,9 @@ public class TaxaAssignment {
         outputFilePath = workPath + "taxaSortSummary" + NameSpace.SUFFIX_TSV;
         out = new BufferedWriter(new FileWriter(outputFilePath));
 
-        Taxa<String> taxaOnRank = getTaxaOnRank();
-        out.write("# " + taxa.size() + " taxa belong to " + taxaOnRank.size() + " " + rankToBreak + "s\n");
-        for (String t : taxaOnRank) {
+        TaxonSet<String> taxonSetOnRank = getTaxaOnRank();
+        out.write("# " + taxonSet.size() + " taxa belong to " + taxonSetOnRank.size() + " " + rankToBreak + "s\n");
+        for (String t : taxonSetOnRank) {
             out.write(t + "\n");
         }
 

@@ -29,7 +29,7 @@ public class TaxonomyPool {
     public static final String taxonLDBDir = SystemUtil.APP_DIR + File.separator + DB_DIR;
     public static final int POOL_INDEX = 10000; // 10,000
 
-    public static Taxa<Taxon> taxonPool = new Taxa<>();
+    public static TaxonSet<Taxon> taxonPool = new TaxonSet<>();
 
     /**
      * return Taxon given a taxid
@@ -43,7 +43,7 @@ public class TaxonomyPool {
     public static Taxon getAndAddTaxIdByMemory(String taxId) throws IOException, XMLStreamException {
         if (!taxonPool.containsTaxon(taxId)) {
             // if not exist in taxonPool, then eFetch and add in taxonPool
-//            Taxon taxon = TaxaUtil.getTaxonByeFetch(taxId);
+//            Taxon taxon = TaxonomyUtil.getTaxonByeFetch(taxId);
             Taxon taxon = getAndAddTaxIdByFileSystem(taxId);
             taxonPool.addElement(taxon);
             return taxon;

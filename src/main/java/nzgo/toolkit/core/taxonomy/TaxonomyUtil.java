@@ -34,7 +34,7 @@ import java.util.TreeMap;
  * Taxa Util
  * @author Walter Xie
  */
-public class TaxaUtil {
+public class TaxonomyUtil {
 
     public static final String UNCLASSIFIED = "unclassified";
     public static SampleNameParser sampleNameParser = new SampleNameParser();
@@ -77,7 +77,7 @@ public class TaxaUtil {
         long lStartTime = System.currentTimeMillis();
 
         // a set of taxid
-        Taxa taxidSet = new Taxa();
+        TaxonSet taxidSet = new TaxonSet();
 
         String otuName = iteration.getIterationQueryDef();
 
@@ -222,13 +222,13 @@ public class TaxaUtil {
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
-                MyLogger.info("\nWorking path = " + workPath);
+        MyLogger.info("\nWorking path = " + workPath);
 
-                try {
+        try {
 //            File otusFile = new File(workPath + "otus1.fasta");
-                    File otuMappingFile = new File(workPath + "map.uc");
-                    SampleNameParser sampleNameParser = new SampleNameParser();
-                    Community community = new Community(sampleNameParser, otuMappingFile);
+            File otuMappingFile = new File(workPath + "map.uc");
+            SampleNameParser sampleNameParser = new SampleNameParser();
+            Community community = new Community(sampleNameParser, otuMappingFile);
 
             File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
             SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
@@ -248,12 +248,14 @@ public class TaxaUtil {
             Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
             TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
 
-            TaxonomyFileIO.writeTaxonomyAssignment(workPath, communityArthopoda, Rank.CLASS, Rank.ORDER);
+            TaxonSet<Taxon> taxonomySet = communityArthopoda.getTaxonomy();
 
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
+            TaxonomyFileIO.writeTaxonomyAssignment(workPath, taxonomySet, Rank.CLASS, Rank.ORDER);
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 }
