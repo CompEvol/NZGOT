@@ -25,6 +25,8 @@ import java.util.TreeSet;
  */
 public class Community<E> extends OTUs<E> {
 
+    public static final int READS_COUNTER_ID = 0;
+    public static final int OTU_COUNTER_ID = 1;
     public final SampleNameParser sampleNameParser;
     // the final samples already parsed from label
     public String[] samples;
@@ -126,11 +128,11 @@ public class Community<E> extends OTUs<E> {
 
             if (taxonomySet.containsUniqueElement(taxonLCA.toString())) {
                 Taxon taxonAssigned = taxonomySet.getUniqueElement(taxonLCA.toString());
-                taxonAssigned.getCounter(0).incrementCount(otu.size());
-                taxonAssigned.getCounter(1).incrementCount(1);
+                taxonAssigned.getCounter(READS_COUNTER_ID).incrementCount(otu.size());
+                taxonAssigned.getCounter(OTU_COUNTER_ID).incrementCount(1);
             } else {
                 taxonLCA.addCounter(); // add 2nd counter for number of otu
-                taxonLCA.getCounter(0).setCount(otu.size());
+                taxonLCA.getCounter(READS_COUNTER_ID).setCount(otu.size());
                 taxonomySet.add(taxonLCA);
             }
         }

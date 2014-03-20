@@ -204,8 +204,8 @@ public class TaxonomyFileIO extends FileIO {
                 taxonName = (ta==null?str:ta.getScientificName());
             }
             writer.write(taxonName);
-            writer.write("\t" + t.getCounter(0).getCount());
-            writer.write("\t" + t.getCounter(1).getCount());
+            writer.write("\t" + t.getCounter(Community.READS_COUNTER_ID).getCount());
+            writer.write("\t" + t.getCounter(Community.OTU_COUNTER_ID).getCount());
             writer.write("\n");
         }
 

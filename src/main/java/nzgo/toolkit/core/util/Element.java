@@ -51,6 +51,10 @@ public class Element implements Comparable{
         counters.add(counter);
     }
 
+    public Counter getCounter() {
+        return getCounter(0);
+    }
+
     public Counter getCounter(int counterId) {
         if (counterId >= counters.size())
             throw new IllegalArgumentException("Invalid counter index, counterId = " + counterId + ", counters = " + counters);
@@ -74,4 +78,5 @@ public class Element implements Comparable{
     public boolean equals(Object obj) {
         return (toString().equalsIgnoreCase(obj.toString()));
     }
+
 }

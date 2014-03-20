@@ -5,8 +5,10 @@ import nzgo.toolkit.core.blast.parser.BlastStAXParser;
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
+import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SampleNameParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
@@ -22,6 +24,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -226,12 +230,12 @@ public class TaxaUtil {
                     SampleNameParser sampleNameParser = new SampleNameParser();
                     Community community = new Community(sampleNameParser, otuMappingFile);
 
-//            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
-//            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
-//            community.setTaxonomy(otuTaxaMap);
+            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
+            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
+            community.setTaxonomy(otuTaxaMap);
 
-//            Community communityArthopoda = community.getClassifiedCommunity();
-//            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
+            Community communityArthopoda = community.getClassifiedCommunity();
+            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
 //            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
 
 //            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
@@ -241,10 +245,10 @@ public class TaxaUtil {
 //            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
 //            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
 
-//            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
-//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
-//
-//            TaxonomyFileIO.writeTaxonomyAssignment(workPath, communityArthopoda, Rank.CLASS, Rank.ORDER);
+            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
+            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
+
+            TaxonomyFileIO.writeTaxonomyAssignment(workPath, communityArthopoda, Rank.CLASS, Rank.ORDER);
 
                 }
                 catch (Exception e) {
