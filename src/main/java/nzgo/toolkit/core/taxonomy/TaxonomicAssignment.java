@@ -1,5 +1,8 @@
 package nzgo.toolkit.core.taxonomy;
 
+import nzgo.toolkit.core.community.OTU;
+import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.Separator;
@@ -10,44 +13,145 @@ import javax.xml.stream.XMLStreamException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
  * Taxonomy Assignment
  * @author Walter Xie
  */
-public class TaxaAssignment {
+public class TaxonomicAssignment {
 
-    private final Separator errMsgSeparator = new Separator("\t"); // for multi-column error message
-    protected final TaxonSet taxonSet;
+    protected final OTUs<OTU> otus;
 
-    protected Rank rankToBreak;
     // the high level taxonomy of biological classification that all given taxa should belong to
-    // e.g. new Taxon("Insecta", "50557");
-    // or TaxonomyUtil.getTaxonByeFetch("50557");
+    // e.g. new Taxon("Insecta", "50557"); or TaxonomyUtil.getTaxonByeFetch("50557");
     protected Taxon bioClass;
-    private final Separator regexPrefixSeparator;
+
+    protected Rank[] ranksToBreak;
+
+    protected TaxonSet<Taxon> taxonomySet;
+
+    /**
+     * otus should be set Taxon already
+     * @param otus
+     */
+    public TaxonomicAssignment(OTUs<OTU> otus) {
+        this.otus = otus;
+        assignTaxonomy();
+    }
+
+    public TaxonomicAssignment(OTUs<OTU> otus, Rank... ranksToBreak) {
+        this(otus);
+        setRankToBreak(ranksToBreak);
+    }
+
+    public TaxonSet<Taxon> getTaxonomyOn(Rank rankToBreak) {
+        if (taxonomySet == null)
+            throw new IllegalArgumentException("Taxonomy set is not assigned ! Please run assignTaxonomy() first !");
+
+        TaxonSet<Taxon> taxonSetOnRank = new TaxonSet<>();
+        for (Taxon taxon : taxonomySet) {
+            Taxon taxonLCA = taxon.getParentTaxonOn(rankToBreak);
+
+            if (taxonLCA == null)
+                throw new IllegalArgumentException("Taxon " + taxon.getScientificName() +
+                        "(" + taxon.getRank() + ") has no parent on rank " + rankToBreak);
+
+            if (taxonSetOnRank.containsTaxon(taxonLCA.toString())) {
+                Taxon taxonAssigned = taxonSetOnRank.getTaxon(taxonLCA.toString());
+                taxonAssigned.getCounter(OTUs.READS_COUNTER_ID).incrementCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
+                taxonAssigned.getCounter(OTUs.OTU_COUNTER_ID).incrementCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
+            } else if (taxon.isSameAs(taxonLCA)) {
+                taxonSetOnRank.addTaxon(taxon);
+            } else {
+                taxonLCA.addCounter(); // add 2nd counter for number of otu
+                taxonLCA.getCounter(OTUs.READS_COUNTER_ID).setCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
+                taxonLCA.getCounter(OTUs.OTU_COUNTER_ID).setCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
+                taxonSetOnRank.addTaxon(taxonLCA);
+            }
+        }
+
+        return taxonSetOnRank;
+    }
+
+    protected void assignTaxonomy() {
+        taxonomySet = otus.getTaxonomy();
+    }
+
+    /**
+     * multi-output-files of Taxonomy Assignment
+     * @param workPath
+     * @throws IOException
+     */
+    public void writeTaxonomyAssignment(String workPath) throws IOException {
+        Path outTAFilePath = Paths.get(workPath, TaxonomyFileIO.TAXONOMY_ASSIGNMENT + ".tsv");
+        // assignment of overall
+        TaxonomyFileIO.writeTaxonomyAssignment(outTAFilePath, taxonomySet, null);
+
+        for (Rank rank : ranksToBreak) {
+            // assignment of given rank
+            outTAFilePath = Paths.get(workPath, TaxonomyFileIO.TAXONOMY_ASSIGNMENT + "_" + rank + ".tsv");
+
+            TaxonSet<Taxon> taxonSetOnRank = getTaxonomyOn(rank);
+            TaxonomyFileIO.writeTaxonomyAssignment(outTAFilePath, taxonSetOnRank, rank);
+        }
+    }
+
+
+
+
+    public void setRankToBreak(Rank... ranksToBreak) {
+        this.ranksToBreak = ranksToBreak;
+//        for (Rank rank : ranksToBreak) {
+//            if (rank == null || rank == Rank.NO_RANK)
+//                throw new IllegalArgumentException("Please give a correct taxonomic rank !");
+//            this.ranksToBreak = rank;
+//        }
+    }
+
+    public Taxon getBioClass() {
+        return bioClass;
+    }
+
+    public void setBioClass(Taxon bioClass) {
+        this.bioClass = bioClass;
+    }
+
+
+
+
+
+
+
+    /************* wait to tidy up ***************/
+
+    private Separator regexPrefixSeparator;
+    private Separator errMsgSeparator = new Separator("\t"); // for multi-column error message
 
     // key is query Taxon, value is either Error.? or Taxon assigned on certain condition
     // such as given a rank, or given a biology classification
+    @Deprecated
     public Map<String, String> taxaAssignementMap = new TreeMap<>();
     public Map<String, String> errors = new TreeMap<>();
 
-
-    public TaxaAssignment(TaxonSet taxonSet, Rank rankToBreak, Taxon bioClass) {
-        this(taxonSet, rankToBreak, "_", bioClass);
+    @Deprecated
+    public TaxonomicAssignment(TaxonSet taxonomySet, Rank rankToBreak, Taxon bioClass) {
+        this(taxonomySet, rankToBreak, "_", bioClass);
     }
 
     /**
      *
-     * @param taxonSet
+     * @param taxonomySet
      * @param rankToBreak
      * @param regexPrefix
      * @param bioClass
      */
-    public TaxaAssignment(TaxonSet taxonSet, Rank rankToBreak, String regexPrefix, Taxon bioClass) {
-        this.taxonSet = taxonSet;
-        setRankToBreak(rankToBreak);
+    @Deprecated
+    public TaxonomicAssignment(TaxonSet taxonomySet, Rank rankToBreak, String regexPrefix, Taxon bioClass) {
+        otus = null;
+        this.taxonomySet = taxonomySet;
         if (regexPrefix == null) {
             regexPrefixSeparator = null;
         } else {
@@ -69,7 +173,7 @@ public class TaxaAssignment {
         taxaAssignementMap.clear();
         errors.clear();
 
-        for (Object name : taxonSet) {
+        for (Object name : taxonomySet) {
             List<Taxon> taxonList = EFetchStAXParser.getTaxonByName(name.toString());
 
             // try prefix, such as Cotesia_ruficrus
@@ -104,7 +208,7 @@ public class TaxaAssignment {
             List<String> items = new ArrayList<>();
             items.add(taxon.getScientificName());
             for (int i = 1; i < taxonList.size(); i++) {
-                if (!taxon.taxIdEquals(taxonList.get(i))) {
+                if (!taxon.isSameAs(taxonList.get(i))) {
                     items.add(taxonList.get(i).getScientificName());
                 }
             }
@@ -131,14 +235,14 @@ public class TaxaAssignment {
                 errors.put(queryTaxon, errMsg);
                 taxaAssignementMap.put(queryTaxon, Error.UNIDENTIFIED.toString());
 
-            } else if (taxon.getRank().compareTo(rankToBreak) > 0) {
+            } else if (taxon.getRank().compareTo(ranksToBreak[0]) > 0) {
                 // taxon rank is higher than rankToBreak
                 String errMsg = appendPrefixMsg(Error.HIGHER_RANK.toString(), prefix);
                 errors.put(queryTaxon, errMsg);
                 taxaAssignementMap.put(queryTaxon, taxon.getScientificName());
             } else {
                 // normal cases
-                Taxon t = taxon.getParentTaxonOn(rankToBreak);
+                Taxon t = taxon.getParentTaxonOn(ranksToBreak[0]);
                 if (t == null) {
                     String errMsg = appendPrefixMsg(Error.NO_RANK.toString(), prefix);
                     errors.put(queryTaxon, errMsg);
@@ -188,13 +292,13 @@ public class TaxaAssignment {
     public void writeTaxaSortTable(String workPath) throws IOException, XMLStreamException {
         fillTaxaSortMap();
 
-        MyLogger.info("\n" + taxonSet.size() + " Taxa extracted from tree tips labels : ");
+        MyLogger.info("\n" + taxonomySet.size() + " Taxa extracted from tree tips labels : ");
 
         String outputFilePath = workPath + "taxaSortTable" + NameSpace.SUFFIX_TSV;
         BufferedWriter out = new BufferedWriter(new FileWriter(outputFilePath));
         // column head
-        out.write("# count\ttaxa\t" + rankToBreak + "\terror\n");
-        for (Object name : taxonSet) {
+        out.write("# count\ttaxa\t" + ranksToBreak + "\terror\n");
+        for (Object name : taxonomySet) {
             // 1st column count
             if (name instanceof Element)
                 out.write(((Element) name).getCounter().getCount() + "\t");
@@ -226,7 +330,7 @@ public class TaxaAssignment {
         out = new BufferedWriter(new FileWriter(outputFilePath));
 
         TaxonSet<String> taxonSetOnRank = getTaxaOnRank();
-        out.write("# " + taxonSet.size() + " taxa belong to " + taxonSetOnRank.size() + " " + rankToBreak + "s\n");
+        out.write("# " + taxonomySet.size() + " taxa belong to " + taxonSetOnRank.size() + " " + ranksToBreak + "s\n");
         for (String t : taxonSetOnRank) {
             out.write(t + "\n");
         }
@@ -235,25 +339,6 @@ public class TaxaAssignment {
         out.close();
 
     }
-
-    public Rank getRankToBreak() {
-        return rankToBreak;
-    }
-
-    public void setRankToBreak(Rank rankToBreak) {
-        if (rankToBreak == null || rankToBreak == Rank.NO_RANK)
-            throw new IllegalArgumentException("Please give a correct taxonomic rank !");
-        this.rankToBreak = rankToBreak;
-    }
-
-    public Taxon getBioClass() {
-        return bioClass;
-    }
-
-    public void setBioClass(Taxon bioClass) {
-        this.bioClass = bioClass;
-    }
-
 
 //    protected void writeParentTaxon(String queryTaxon, List<Taxon> taxonList, BufferedWriter out) throws IOException {
 //        for (Taxon taxon : taxonList) {
@@ -306,7 +391,7 @@ public class TaxaAssignment {
         }
 
         public static String[] valuesToString() {
-            return Arrays.copyOf(TaxaAssignment.Error.values(), TaxaAssignment.Error.values().length, String[].class);
+            return Arrays.copyOf(TaxonomicAssignment.Error.values(), TaxonomicAssignment.Error.values().length, String[].class);
         }
 
     }

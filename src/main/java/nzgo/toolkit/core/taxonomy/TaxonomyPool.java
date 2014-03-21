@@ -41,7 +41,7 @@ public class TaxonomyPool {
      * @throws XMLStreamException
      */
     public static Taxon getAndAddTaxIdByMemory(String taxId) throws IOException, XMLStreamException {
-        if (!taxonPool.containsTaxon(taxId)) {
+        if (taxId.compareTo("0") > 0 && !taxonPool.containsTaxon(taxId)) {
             // if not exist in taxonPool, then eFetch and add in taxonPool
 //            Taxon taxon = TaxonomyUtil.getTaxonByeFetch(taxId);
             Taxon taxon = getAndAddTaxIdByFileSystem(taxId);

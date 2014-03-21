@@ -124,6 +124,7 @@ public class TaxonomyUtil {
     }
 
     // slow?
+    @Deprecated
     public static void getOTUTaxaMapByBLAST(File xmlBLASTOutputFile, File gi_taxid_raf_nucl, OTUs otus) throws JAXBException, IOException, XMLStreamException {
 
         SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByBLAST(xmlBLASTOutputFile, gi_taxid_raf_nucl);
@@ -201,6 +202,11 @@ public class TaxonomyUtil {
         return EFetchStAXParser.getTaxon(xmlStreamReader);
     }
 
+    // customized taxId, use taxId.compareTo("0") > 0 to filter out
+    public static Taxon getNoRankOn(Rank rank) {
+        return new Taxon("no " + rank.toString(), "-1");
+    }
+
     public static Taxon getUnclassified() {
         return new Taxon(UNCLASSIFIED, "12908", "1");
     }
@@ -236,7 +242,10 @@ public class TaxonomyUtil {
 
             Community communityArthopoda = community.getClassifiedCommunity();
             Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
-//            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
+            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
+
+            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
+            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
 
 //            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
 //            File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
@@ -245,12 +254,13 @@ public class TaxonomyUtil {
 //            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
 //            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
 
-            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
-            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
+            TaxonomicAssignment taxonomicAssignment = new TaxonomicAssignment(communityArthopoda, Rank.CLASS, Rank.ORDER);
 
-            TaxonSet<Taxon> taxonomySet = communityArthopoda.getTaxonomy();
+            taxonomicAssignment.writeTaxonomyAssignment(workPath);
 
-            TaxonomyFileIO.writeTaxonomyAssignment(workPath, taxonomySet, Rank.CLASS, Rank.ORDER);
+//            TaxonSet<Taxon> taxonomySet = communityArthopoda.getTaxonomy();
+//
+//            TaxonomyFileIO.writeTaxonomyAssignment(workPath, taxonomySet, Rank.CLASS, Rank.ORDER);
 
         }
         catch (Exception e) {

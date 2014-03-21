@@ -48,11 +48,11 @@ public class TaxonomyAssignment extends Module{
             }
         }
 
-        TaxaAssignment taxaAssignment = new TaxaAssignment(taxonSet, rankToBreak, regexPrefix, bioClass);
+        TaxonomicAssignment taxonomicAssignment = new TaxonomicAssignment(taxonSet, rankToBreak, regexPrefix, bioClass);
 
         Map<String, String> taxaSortMap = null;
         try {
-            taxaSortMap = taxaAssignment.getTaxaAssignementMap();
+            taxaSortMap = taxonomicAssignment.getTaxaAssignementMap();
         } catch (IOException | XMLStreamException e) {
             e.printStackTrace();
         }
@@ -69,7 +69,7 @@ public class TaxonomyAssignment extends Module{
 
         if (errorOutFile != null) {
             try {
-                ConfigFileIO.writeTSVFileFromMap(errorOutFile, taxaAssignment.getErrors(), "errors");
+                ConfigFileIO.writeTSVFileFromMap(errorOutFile, taxonomicAssignment.getErrors(), "errors");
             } catch (IOException e) {
                 e.printStackTrace();
             }

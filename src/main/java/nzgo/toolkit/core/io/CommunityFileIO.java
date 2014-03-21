@@ -71,8 +71,8 @@ public class CommunityFileIO extends OTUsFileIO {
                 if (taxonLCA != null && ranks != null) {
                     for (Rank rank : ranks) {
                         Taxon t = taxonLCA.getParentTaxonOn(rank);
-                        String str = ("no " + rank.toString()).toLowerCase();
-                        writer.write("," + (t==null?str:t.getScientificName()));
+//                        String str = ("no " + rank.toString()).toLowerCase();
+                        writer.write("," + t.getScientificName());
                     }
                 }
             }

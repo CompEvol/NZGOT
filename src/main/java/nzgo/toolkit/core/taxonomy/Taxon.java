@@ -72,7 +72,7 @@ public class Taxon extends Element {
     public boolean belongsTo (Taxon bioClassification) {
         if (bioClassification == null)
             return true;
-        if (taxIdEquals(bioClassification))
+        if (isSameAs(bioClassification))
             return true;
 
         List<Taxon> lineage = getLineage();
@@ -97,7 +97,7 @@ public class Taxon extends Element {
         }
         if (this.rank != null && this.rank.compareTo(rank) >= 0)
             return this;
-        return null;
+        return TaxonomyUtil.getNoRankOn(rank);
     }
 
     /**
@@ -155,9 +155,9 @@ public class Taxon extends Element {
     }
 
     public Taxon getParentTaxon() throws IOException, XMLStreamException {
-        return TaxonomyPool.getAndAddTaxIdByMemory(parentTaxId);
+        return (parentTaxId != null) ? TaxonomyPool.getAndAddTaxIdByMemory(parentTaxId) : null;
     }
-//
+
 //    public void setParentTaxon(Taxon parentTaxon) {
 //        this.parentTaxon = parentTaxon;
 //    }
@@ -170,8 +170,13 @@ public class Taxon extends Element {
         this.rank = rank;
     }
 
-    public boolean taxIdEquals(Taxon taxon) {
-        return this.getTaxId().contentEquals(taxon.getTaxId());
+    public boolean isSameAs(Taxon taxon) {
+        if (taxId != null) {
+            return this.getTaxId().contentEquals(taxon.getTaxId());
+        } else {
+            // TODO
+            return this.getScientificName().equalsIgnoreCase(taxon.getScientificName());
+        }
     }
 
     public String toString() {

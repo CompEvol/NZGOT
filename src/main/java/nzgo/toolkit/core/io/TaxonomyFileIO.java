@@ -1,6 +1,6 @@
 package nzgo.toolkit.core.io;
 
-import nzgo.toolkit.core.community.Community;
+import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.taxonomy.Rank;
@@ -13,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -130,15 +129,15 @@ public class TaxonomyFileIO extends FileIO {
      * key is Element (Sequence/OTU/tree leaf), value is LCA, taxid, rank
      * if ranks = null, then no rank column
      * @param outFilePath
-     * @param otuTaxaMap
+     * @param elementTaxonMap
      * @param ranks
      * @throws java.io.IOException
      */
-    public static void writeElementTaxonomyMap(Path outFilePath, SortedMap<String, Taxon> otuTaxaMap, Rank... ranks) throws IOException {
+    public static void writeElementTaxonomyMap(Path outFilePath, SortedMap<String, Taxon> elementTaxonMap, Rank... ranks) throws IOException {
         BufferedWriter writer = getWriter(outFilePath, "taxonomic mapping" + (ranks==null?"":" and assignment") );
 
         int total = 0;
-        for (Map.Entry<String, Taxon> entry : otuTaxaMap.entrySet()) {
+        for (Map.Entry<String, Taxon> entry : elementTaxonMap.entrySet()) {
             Taxon taxon = entry.getValue();
             writer.write(entry.getKey() + "\t" + (taxon==null?"":taxon.getScientificName()));
             writer.write("\t" + (taxon==null?"":taxon.getTaxId()) + "\t" + (taxon==null?"":taxon.getRank()));
@@ -164,27 +163,6 @@ public class TaxonomyFileIO extends FileIO {
     }
 
     /**
-     * multi-output-files of Taxonomy Assignment
-     *
-     * @param workPath
-     * @param taxonomySet
-     * @param ranks
-     * @throws IOException
-     */
-    public static void writeTaxonomyAssignment(String workPath, TaxonSet<Taxon> taxonomySet, Rank... ranks) throws IOException {
-
-        Path outTAFilePath = Paths.get(workPath, TAXONOMY_ASSIGNMENT + ".tsv");
-        // assignment of overall
-        writeTaxonomyAssignment(outTAFilePath, taxonomySet, null);
-
-        for (Rank rank : ranks) {
-            // assignment of given rank
-            outTAFilePath = Paths.get(workPath, TAXONOMY_ASSIGNMENT + "_" + rank + ".tsv");
-            writeTaxonomyAssignment(outTAFilePath, taxonomySet, rank);
-        }
-    }
-
-    /**
      * Taxonomy Assignment of Community at Rank
      * if rank == null, then get the assignment of overall
      *
@@ -204,13 +182,13 @@ public class TaxonomyFileIO extends FileIO {
             if (rank != null) {
                 // get parent taxon at the given rank
                 Taxon ta = t.getParentTaxonOn(rank);
-                String str = ("no " + rank.toString()).toLowerCase();
-                taxonName = (ta==null?str:ta.getScientificName());
+//                String str = ("no " + rank.toString()).toLowerCase();
+                taxonName = ta.getScientificName();
             }
             writer.write(taxonName);
-            int c1 = t.getCounter(Community.READS_COUNTER_ID).getCount();
+            int c1 = t.getCounter(OTUs.READS_COUNTER_ID).getCount();
             writer.write("\t" + c1);
-            int c2 = t.getCounter(Community.OTU_COUNTER_ID).getCount();
+            int c2 = t.getCounter(OTUs.OTU_COUNTER_ID).getCount();
             writer.write("\t" + c2);
             writer.write("\n");
 

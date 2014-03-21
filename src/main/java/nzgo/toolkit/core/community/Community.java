@@ -5,8 +5,6 @@ import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SampleNameParser;
-import nzgo.toolkit.core.taxonomy.Taxon;
-import nzgo.toolkit.core.taxonomy.TaxonSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,8 +23,6 @@ import java.util.TreeSet;
  */
 public class Community<E> extends OTUs<E> {
 
-    public static final int READS_COUNTER_ID = 0;
-    public static final int OTU_COUNTER_ID = 1;
     public final SampleNameParser sampleNameParser;
     // the final samples already parsed from label
     public String[] samples;
@@ -99,46 +95,22 @@ public class Community<E> extends OTUs<E> {
     public Community<E> getClassifiedCommunity() {
         Community<E> classifiedCommunity = new Community<>(this, this.getName() + "_classified");
 
+        int reads = 0;
+        int otus = 0;
         for(E e : this){
             OTU otu = (OTU) e;
             if (otu.hasTaxon()) {
                 classifiedCommunity.add(e);
+                reads += otu.size();
+                otus++;
             }
         }
+
+        MyLogger.debug("Get classified community: total reads = " + reads + ", total OTUs = " + otus);
 
         return classifiedCommunity;
     }
 
-    /**
-     * return taxonomy assignment of OTUs
-     * E has to be OTU
-     * @return
-     */
-    public TaxonSet<Taxon> getTaxonomy() {
-        TaxonSet<Taxon> taxonomySet = new TaxonSet<>();
-
-        for(E e : this){
-            OTU otu = (OTU) e;
-            Taxon taxonLCA = otu.getTaxonLCA();
-
-            if (taxonLCA == null)
-                throw new IllegalArgumentException("OTU " + otu + " does not have taxonomic identification !");
-            if (otu.size() < 1)
-                throw new IllegalArgumentException("OTU " + otu + " does not have any elements, size = " + otu.size() + " !");
-
-            if (taxonomySet.containsTaxon(taxonLCA.toString())) {
-                Taxon taxonAssigned = taxonomySet.getTaxon(taxonLCA.toString());
-                taxonAssigned.getCounter(READS_COUNTER_ID).incrementCount(otu.size());
-                taxonAssigned.getCounter(OTU_COUNTER_ID).incrementCount(1);
-            } else {
-                taxonLCA.addCounter(); // add 2nd counter for number of otu
-                taxonLCA.getCounter(READS_COUNTER_ID).setCount(otu.size());
-                taxonLCA.getCounter(OTU_COUNTER_ID).incrementCount(1);
-                taxonomySet.addTaxon(taxonLCA);
-            }
-        }
-        return taxonomySet;
-    }
 
     /**
      * E has to be OTU

@@ -16,6 +16,9 @@ import java.util.SortedMap;
  */
 public class OTUs<E> extends BioSortedSet<E> {
 
+    public static final int READS_COUNTER_ID = 0;
+    public static final int OTU_COUNTER_ID = 1;
+
     public OTUs(String name) {
         super(name);
     }
@@ -92,22 +95,34 @@ public class OTUs<E> extends BioSortedSet<E> {
     }
 
     /**
-     * get Taxa from all Taxon of OTU in OTUs
+     * return taxonomy assignment of OTUs
+     * E has to be OTU
      * @return
      */
-    public TaxonSet getTaxa() {
-        TaxonSet taxonSet = new TaxonSet();
+    public TaxonSet<Taxon> getTaxonomy() {
+        TaxonSet<Taxon> taxonomySet = new TaxonSet<>();
 
         for(E e : this){
             OTU otu = (OTU) e;
-            if (otu.hasTaxon()) {
-                // may have multi-otus assigned to same taxon
-                taxonSet.add(otu.getTaxonLCA());
+            Taxon taxonLCA = otu.getTaxonLCA();
+
+            if (taxonLCA == null)
+                throw new IllegalArgumentException("OTU " + otu + " does not have taxonomic identification !");
+            if (otu.size() < 1)
+                throw new IllegalArgumentException("OTU " + otu + " does not have any elements, size = " + otu.size() + " !");
+
+            if (taxonomySet.containsTaxon(taxonLCA.toString())) {
+                Taxon taxonAssigned = taxonomySet.getTaxon(taxonLCA.toString());
+                taxonAssigned.getCounter(READS_COUNTER_ID).incrementCount(otu.size());
+                taxonAssigned.getCounter(OTU_COUNTER_ID).incrementCount(1);
+            } else {
+                taxonLCA.addCounter(); // add 2nd counter for number of otu
+                taxonLCA.getCounter(READS_COUNTER_ID).setCount(otu.size());
+                taxonLCA.getCounter(OTU_COUNTER_ID).setCount(1);
+                taxonomySet.addTaxon(taxonLCA);
             }
         }
-
-        if (taxonSet.size() < 1) return null;
-        return taxonSet;
+        return taxonomySet;
     }
 
     /**
