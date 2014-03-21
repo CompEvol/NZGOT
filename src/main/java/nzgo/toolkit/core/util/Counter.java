@@ -13,7 +13,7 @@ public class Counter implements Comparable, Countable{
 
     @Override
     public void incrementCount(int step) {
-        this.count = count + step;
+        count += step;
     }
 
     @Override

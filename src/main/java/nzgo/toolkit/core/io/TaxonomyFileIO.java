@@ -202,4 +202,8 @@ public class TaxonomyFileIO extends FileIO {
         MyLogger.debug("Total reads = " + total1 + ", total OTUs = " + total2);
     }
 
+    public static void writeTaxonomyReport(Path outTAFilePath, TaxonSet<Taxon> taxonomySet, Rank... rank) {
+
+    }
+
 }

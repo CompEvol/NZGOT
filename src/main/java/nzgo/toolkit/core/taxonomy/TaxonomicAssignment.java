@@ -47,29 +47,30 @@ public class TaxonomicAssignment {
         setRankToBreak(ranksToBreak);
     }
 
+    //TODO bug: keep adding
     public TaxonSet<Taxon> getTaxonomyOn(Rank rankToBreak) {
         if (taxonomySet == null)
             throw new IllegalArgumentException("Taxonomy set is not assigned ! Please run assignTaxonomy() first !");
 
         TaxonSet<Taxon> taxonSetOnRank = new TaxonSet<>();
         for (Taxon taxon : taxonomySet) {
-            Taxon taxonLCA = taxon.getParentTaxonOn(rankToBreak);
+            Taxon taxonToBreak = taxon.getParentTaxonOn(rankToBreak);
 
-            if (taxonLCA == null)
+            if (taxonToBreak == null)
                 throw new IllegalArgumentException("Taxon " + taxon.getScientificName() +
                         "(" + taxon.getRank() + ") has no parent on rank " + rankToBreak);
 
-            if (taxonSetOnRank.containsTaxon(taxonLCA.toString())) {
-                Taxon taxonAssigned = taxonSetOnRank.getTaxon(taxonLCA.toString());
+            if (taxonSetOnRank.containsTaxon(taxonToBreak.toString())) {
+                Taxon taxonAssigned = taxonSetOnRank.getTaxon(taxonToBreak.toString());
                 taxonAssigned.getCounter(OTUs.READS_COUNTER_ID).incrementCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
                 taxonAssigned.getCounter(OTUs.OTU_COUNTER_ID).incrementCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
-            } else if (taxon.isSameAs(taxonLCA)) {
+            } else if (taxon.isSameAs(taxonToBreak)) {
                 taxonSetOnRank.addTaxon(taxon);
             } else {
-                taxonLCA.addCounter(); // add 2nd counter for number of otu
-                taxonLCA.getCounter(OTUs.READS_COUNTER_ID).setCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
-                taxonLCA.getCounter(OTUs.OTU_COUNTER_ID).setCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
-                taxonSetOnRank.addTaxon(taxonLCA);
+                taxonToBreak.addCounter(); // add 2nd counter for number of otu
+                taxonToBreak.getCounter(OTUs.READS_COUNTER_ID).setCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
+                taxonToBreak.getCounter(OTUs.OTU_COUNTER_ID).setCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
+                taxonSetOnRank.addTaxon(taxonToBreak);
             }
         }
 

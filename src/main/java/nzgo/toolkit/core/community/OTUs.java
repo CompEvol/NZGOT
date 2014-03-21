@@ -1,5 +1,6 @@
 package nzgo.toolkit.core.community;
 
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.taxonomy.TaxonomyUtil;
@@ -79,19 +80,21 @@ public class OTUs<E> extends BioSortedSet<E> {
      * @param otuTaxaMap
      */
     public void setTaxonomy(SortedMap<String, Taxon> otuTaxaMap) {
+        Taxon unclassified = TaxonomyUtil.getUnclassified();
+        int cla = 0;
+        int uncla = 0;
         for(E e : this){
             OTU otu = (OTU) e;
             Taxon taxon = otuTaxaMap.get(otu.getName());
-            if (taxon != null)
+            if (taxon != null) {
                 otu.setTaxonLCA(taxon);
-        }
-
-        Taxon unclassified = TaxonomyUtil.getUnclassified();
-        for(E e : this){
-            OTU otu = (OTU) e;
-            if (!otu.hasTaxon())
+                cla ++;
+            } else {
                 otu.setTaxonLCA(unclassified);
+                uncla ++;
+            }
         }
+        MyLogger.debug("Classified OTUs = " + cla + ", unclassified OTUs = " + uncla);
     }
 
     /**
