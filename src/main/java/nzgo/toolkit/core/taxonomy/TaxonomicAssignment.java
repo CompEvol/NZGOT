@@ -67,7 +67,8 @@ public class TaxonomicAssignment {
             } else if (taxon.isSameAs(taxonToBreak)) {
                 taxonSetOnRank.addTaxon(taxon);
             } else {
-                taxonToBreak.addCounter(); // add 2nd counter for number of otu
+                if (taxonToBreak.getCountersSize() < 2)
+                    taxonToBreak.addCounter(); // add 2nd counter for number of otu
                 taxonToBreak.getCounter(OTUs.READS_COUNTER_ID).setCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
                 taxonToBreak.getCounter(OTUs.OTU_COUNTER_ID).setCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
                 taxonSetOnRank.addTaxon(taxonToBreak);

@@ -1,11 +1,15 @@
 package nzgo.toolkit.core.community;
 
+import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.taxonomy.TaxonomyUtil;
 import nzgo.toolkit.core.util.BioSortedSet;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -119,7 +123,8 @@ public class OTUs<E> extends BioSortedSet<E> {
                 taxonAssigned.getCounter(READS_COUNTER_ID).incrementCount(otu.size());
                 taxonAssigned.getCounter(OTU_COUNTER_ID).incrementCount(1);
             } else {
-                taxonLCA.addCounter(); // add 2nd counter for number of otu
+                if (taxonLCA.getCountersSize() < 2)
+                    taxonLCA.addCounter(); // add 2nd counter for number of otu
                 taxonLCA.getCounter(READS_COUNTER_ID).setCount(otu.size());
                 taxonLCA.getCounter(OTU_COUNTER_ID).setCount(1);
                 taxonomySet.addTaxon(taxonLCA);
@@ -145,4 +150,26 @@ public class OTUs<E> extends BioSortedSet<E> {
         }
         return isValid;
     }
+
+
+    //Main method
+    public static void main(final String[] args) {
+
+        String[] experiments = new String[]{"18S-guess"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
+        int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
+        String otuMappingFileName = "map.uc";
+        String reportFileName = "_otus_report.tsv";
+        String cmFileName = "_cm.csv";
+//        String otuMappingFileName = "map_size2.uc";
+//        String reportFileName = "_otus_size2_report.tsv";
+//        String cmFileName = "_cm_size2.csv";
+
+        try {
+            OTUsFileIO.reportOTUs(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -269,24 +269,7 @@ public class OTUsFileIO extends FileIO {
     }
 
 
-    //Main method
-    public static void main(final String[] args) {
-
-        String[] experiments = new String[]{"CO1-soilkit","CO1-indirect","ITS","trnL","16S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S"
-        int[] thresholds = new int[]{90,91,92,93,94,95,96,97,98,99,100}; // 90,91,92,93,94,95,96,97,98,99,100
-        Path workDir = Paths.get("~/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
-        String otuMappingFileName = "map.uc";
-        String reportFileName = "_otus_report.tsv";
-        String cmFileName = "_cm.csv";
-
-        try {
-            reportOTUs (workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-        // TODO is this efficient?
+    // TODO is this efficient?
 //    public static void importOTUsAndMapping(File otuMappingFile, OTUs otus, List<Sequence> sequences) throws IOException, IllegalArgumentException {
 //
 //        BufferedReader reader = getReader(otuMappingFile, "OTUs and OTU mapping from");

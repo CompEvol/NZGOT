@@ -38,6 +38,10 @@ public class Element implements Comparable{
         this.name = name;
     }
 
+    public int getCountersSize() {
+        return counters.size();
+    }
+
     public void addCounter() {
         addCounterStartFrom(0);
     }
