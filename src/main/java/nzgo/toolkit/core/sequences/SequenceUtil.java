@@ -50,13 +50,19 @@ public class SequenceUtil {
 
     }
 
-    public static void splitFastaBy(File inFastaFile, String regex) throws IOException {
+    /**
+     * split sequences into 2 fasta file by regex for labels
+     * @param inFastaFile
+     * @param outputFileNameStem
+     * @param regex
+     * @throws IOException
+     */
+    public static void splitFastaBy(File inFastaFile, String outputFileNameStem, String regex) throws IOException {
         String workPath = inFastaFile.getParent() + File.separator;
-        String fileNameStem = inFastaFile.getName().substring(0, inFastaFile.getName().indexOf(""));
 
-        File outFastaFile1 = new File(workPath + fileNameStem + "-1.fasta");
+        File outFastaFile1 = new File(workPath + outputFileNameStem + "-1.fasta");
         PrintStream out1 = new PrintStream(new FileOutputStream(outFastaFile1));
-        File outFastaFile2 = new File(workPath + fileNameStem + "-2.fasta");
+        File outFastaFile2 = new File(workPath + outputFileNameStem + "-2.fasta");
         PrintStream out2 = new PrintStream(new FileOutputStream(outFastaFile2));
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFile, "the original");
@@ -93,9 +99,9 @@ public class SequenceUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        File inFastaFile = new File(workPath + "NZ-insects-BOLD-2013-11-21-co1.fasta");
+        File inFastaFile = new File(workPath + "otus.fasta");
 //        String regex = ".*\\|28S.*";
-        String regex = ".*COI-3P.*";
-        splitFastaBy(inFastaFile, regex);
+        String regex = ".*prep1.*";
+        splitFastaBy(inFastaFile, "otus", regex);
     }
 }
