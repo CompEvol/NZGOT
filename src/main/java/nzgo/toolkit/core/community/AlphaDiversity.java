@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.community;
 
 import jebl.evolution.sequences.Sequence;
-import nzgo.toolkit.core.naming.SampleNameParser;
+import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.util.Arrays;
@@ -15,11 +15,11 @@ public class AlphaDiversity {
 
     protected int[] alphaDiversity; // only valid for given sample array
 
-    public AlphaDiversity(SampleNameParser sampleNameParser, String[] samples, OTU otu) {
-        setAlphaDiversity(sampleNameParser, samples, otu);
+    public AlphaDiversity(SiteNameParser siteNameParser, String[] samples, OTU otu) {
+        setAlphaDiversity(siteNameParser, samples, otu);
     }
 
-    public void setAlphaDiversity(SampleNameParser sampleNameParser, String[] samples, OTU otu) {
+    public void setAlphaDiversity(SiteNameParser siteNameParser, String[] samples, OTU otu) {
         if (samples == null || samples.length < 1)
             throw new IllegalArgumentException("Error: sample array was not initialized: " + samples);
 
@@ -33,7 +33,7 @@ public class AlphaDiversity {
                label = sequence.toString();
             }
 
-            String sampleLocation = sampleNameParser.getSample(label);
+            String sampleLocation = siteNameParser.getSite(label);
             int i = ArrayUtil.indexOf(sampleLocation, samples);
             if (i < 0) {
                 throw new IllegalArgumentException("Error: missing sample location : " + sampleLocation +

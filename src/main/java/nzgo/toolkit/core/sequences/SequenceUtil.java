@@ -7,10 +7,17 @@ import jebl.evolution.taxa.Taxon;
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Assembler;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
+import nzgo.toolkit.core.naming.SiteNameParser;
+import nzgo.toolkit.core.pipeline.Module;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JEBL Sequence Util
@@ -51,21 +58,24 @@ public class SequenceUtil {
     }
 
     /**
-     * split sequences into 2 fasta file by regex for labels
-     * @param inFastaFile
-     * @param outputFileNameStem
+     * split sequences into 2 fasta file by matching regex of labels
+     * @param workPathString
+     * @param inFastaFileName
      * @param regex
      * @throws IOException
      */
-    public static void splitFastaBy(File inFastaFile, String outputFileNameStem, String regex) throws IOException {
-        String workPath = inFastaFile.getParent() + File.separator;
+    public static void splitFastaTo2(String workPathString, String inFastaFileName, String regex) throws IOException {
+        Path workPath = Paths.get(workPathString);
+        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_SEQUENCES}, "original file");
+
+        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
 
         File outFastaFile1 = new File(workPath + outputFileNameStem + "-1.fasta");
         PrintStream out1 = new PrintStream(new FileOutputStream(outFastaFile1));
         File outFastaFile2 = new File(workPath + outputFileNameStem + "-2.fasta");
         PrintStream out2 = new PrintStream(new FileOutputStream(outFastaFile2));
 
-        BufferedReader reader = OTUsFileIO.getReader(inFastaFile, "the original");
+        BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 
         String line = reader.readLine();
         PrintStream out = out1;
@@ -92,6 +102,69 @@ public class SequenceUtil {
         out2.close();
     }
 
+    public static void splitFastaByLabelItem(String workPathString, String inFastaFileName) throws IOException {
+        splitFastaByLabelItem(workPathString, inFastaFileName, SiteNameParser.LABEL_SAMPLE_INDEX);
+    }
+
+    /**
+     * split sequences into n fasta files by items parsed by itemId in the label
+     * @param workPathString
+     * @param inFastaFileName
+     * @param itemId
+     * @throws IOException
+     */
+    public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemId) throws IOException {
+        Path workPath = Paths.get(workPathString);
+        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_SEQUENCES}, "original file");
+
+        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
+
+        int fileLimit = 50;
+        SiteNameParser siteNameParser = new SiteNameParser(itemId);
+        Map<String, PrintStream> outMap = new HashMap<>();
+
+        BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
+
+        int originalTotal = 0;
+        int total = 0;
+        String line = reader.readLine();
+        PrintStream out = null;
+        while (line != null) {
+            if (line.startsWith(">")) {
+                String label = line.substring(1);
+                String item = siteNameParser.getSiteFullName(label);
+
+                if (outMap.containsKey(item)) {
+                    out = outMap.get(item);
+                } else {
+                    if (outMap.size() > fileLimit)
+                        throw new IllegalStateException("Cannot split to more than " + fileLimit + " files !");
+
+                    File outFastaFile = new File(workPath + outputFileNameStem + "-" + item + ".fasta");
+                    out = new PrintStream(new FileOutputStream(outFastaFile));
+                    outMap.put(item, out);
+                }
+            }
+
+            if (out != null) {
+                out.println(line);
+                total++;
+            }
+
+            line = reader.readLine();
+            originalTotal++;
+        }
+
+        reader.close();
+
+        for (Map.Entry<String, PrintStream> entry : outMap.entrySet()) {
+            entry.getValue().flush();
+            entry.getValue().close();
+        }
+
+        MyLogger.debug("original file total lines = " + originalTotal + ", write to new files total lines = " + total);
+    }
+
     // main
     public static void main(String[] args) throws IOException{
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
@@ -99,9 +172,11 @@ public class SequenceUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        File inFastaFile = new File(workPath + "otus.fasta");
+//        File inFastaFile = new File(workPath + "otus-prep2.fasta");
 //        String regex = ".*\\|28S.*";
-        String regex = ".*prep1.*";
-        splitFastaBy(inFastaFile, "otus", regex);
+//        String regex = ".*prep1.*";
+//        splitFastaTo2(inFastaFile, "otus", regex);
+
+        splitFastaByLabelItem(workPath, "otus-prep2.fasta");
     }
 }

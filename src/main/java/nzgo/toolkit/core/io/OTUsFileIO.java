@@ -6,7 +6,7 @@ import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.community.Reference;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.naming.SampleNameParser;
+import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.uc.UCParser;
 
 import java.io.BufferedReader;
@@ -65,12 +65,12 @@ public class OTUsFileIO extends FileIO {
      * @throws IllegalArgumentException
      */
     public static TreeSet<String> importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU) throws IOException, IllegalArgumentException {
-        SampleNameParser sampleNameParser = new SampleNameParser();
-        return importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, canCreateOTU, sampleNameParser);
+        SiteNameParser siteNameParser = new SiteNameParser();
+        return importOTUsAndMappingFromUCFile(otuMappingUCFile, otus, canCreateOTU, siteNameParser);
     }
 
     /**
-     * 1st set sampleType in sampleNameParser, default to BY_PLOT
+     * 1st set siteType in siteNameParser, default to BY_PLOT
      * 2nd load reads into each OTU, and parse label to get sample array
      * 3rd set sample array, and calculate Alpha diversity for each OTU
      *
@@ -80,11 +80,11 @@ public class OTUsFileIO extends FileIO {
      * @param otuMappingUCFile
      * @param otus
      * @param canCreateOTU              if use otuMappingUCFile to create OTUs
-     * @param sampleNameParser          used only for community, if null then ignore samples
+     * @param siteNameParser          used only for community, if null then ignore samples
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static TreeSet<String> importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU, SampleNameParser sampleNameParser) throws IOException, IllegalArgumentException {
+    public static TreeSet<String> importOTUsAndMappingFromUCFile(File otuMappingUCFile, OTUs otus, boolean canCreateOTU, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
         TreeSet<String> samples = null;
 
         BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
@@ -118,15 +118,15 @@ public class OTUsFileIO extends FileIO {
                             // TODO bug to use DereplicatedSequence, may move to a new input, check if affect ER
                             otu.add(hitName);
 
-                            if (sampleNameParser != null) {
+                            if (siteNameParser != null) {
                                 if (samples == null) {
                                     samples = new TreeSet<>();
 
-                                    MyLogger.info("\nSample type: " + sampleNameParser.sampleType);
+                                    MyLogger.info("\nSample type: " + siteNameParser.siteType);
                                 }
 
                                 // if by plot, then add plot to TreeSet, otherwise add subplot
-                                String sampleLocation = sampleNameParser.getSample(hitName);
+                                String sampleLocation = siteNameParser.getSite(hitName);
                                 samples.add(sampleLocation);
                             }
                         }
@@ -242,8 +242,8 @@ public class OTUsFileIO extends FileIO {
                 Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
 
                 File otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
-                SampleNameParser sampleNameParser = new SampleNameParser();
-                Community community = new Community(sampleNameParser, otuMappingFile);
+                SiteNameParser siteNameParser = new SiteNameParser();
+                Community community = new Community(siteNameParser, otuMappingFile);
 
                 Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
                 int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
@@ -278,7 +278,7 @@ public class OTUsFileIO extends FileIO {
 //        String line = reader.readLine();
 //        while (line != null) {
 //            // 2 columns: 1st -> read id, 2nd -> otu name
-//            String[] fields = line.split(SampleNameParser.columnSeparator, -1);
+//            String[] fields = line.split(SiteNameParser.columnSeparator, -1);
 //
 //            if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 //

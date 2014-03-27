@@ -20,7 +20,7 @@ import java.nio.file.Path;
  */
 public class TreeRegex extends Module{
 
-    public static NameParser nameParser = new SampleNameParser(); //"\\|", "-"
+    public static NameParser nameParser = new SiteNameParser(); //"\\|", "-"
 
     public TreeRegex() {
         super("TreeRegex", NZGOToolkit.TOOLKIT[1]);

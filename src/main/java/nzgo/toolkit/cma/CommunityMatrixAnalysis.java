@@ -4,7 +4,7 @@ import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.SampleNameParser;
+import nzgo.toolkit.core.naming.SiteNameParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +60,7 @@ public class CommunityMatrixAnalysis {
 
         Community community;
         String outFileAndPath;
-        SampleNameParser sampleNameParser = new SampleNameParser();
+        SiteNameParser siteNameParser = new SiteNameParser();
 
         if (otusFile != null) {
             MyLogger.info("\nCreate OTUs from otu file. " + otusFile);
@@ -68,7 +68,7 @@ public class CommunityMatrixAnalysis {
             MyLogger.info("\nCreate OTUs from mapping file. " + otuMappingFile);
         }
 
-        community = new Community(sampleNameParser, otusFile, otuMappingFile, referenceMappingFile);
+        community = new Community(siteNameParser, otusFile, otuMappingFile, referenceMappingFile);
 
         if (referenceMappingFile != null) {
             outFileAndPath = workPath + File.separator + "report_ref_reads.txt";

@@ -10,7 +10,7 @@ import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.SampleNameParser;
+import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.util.XMLUtil;
 
@@ -37,7 +37,7 @@ import java.util.TreeMap;
 public class TaxonomyUtil {
 
     public static final String UNCLASSIFIED = "unclassified";
-    public static SampleNameParser sampleNameParser = new SampleNameParser();
+    public static SiteNameParser siteNameParser = new SiteNameParser();
 
     // gi|261497976|gb|GU013865.1|
     public static final int GI_INDEX = 1;
@@ -86,7 +86,7 @@ public class TaxonomyUtil {
         IterationHits hits = iteration.getIterationHits();
         for(Hit hit : hits.getHit()) {
             String hitId = hit.getHitId();
-            String[] fields = sampleNameParser.getSeparator(0).parse(hitId);
+            String[] fields = siteNameParser.getSeparator(0).parse(hitId);
             String gi = fields[GI_INDEX];
 
             MyLogger.debug("hit id: " + hitId + ", get gi = " + gi);
@@ -233,8 +233,8 @@ public class TaxonomyUtil {
         try {
 //            File otusFile = new File(workPath + "otus1.fasta");
             File otuMappingFile = new File(workPath + "map.uc");
-            SampleNameParser sampleNameParser = new SampleNameParser();
-            Community community = new Community(sampleNameParser, otuMappingFile);
+            SiteNameParser siteNameParser = new SiteNameParser();
+            Community community = new Community(siteNameParser, otuMappingFile);
 
             File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
             SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);

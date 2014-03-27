@@ -142,24 +142,24 @@ public class Module {
 
     /**
      * common method to get input file
-     * @param working
+     * @param workPath
      * @param inputFileName
      * @param inputFileNameSuffixes
      * @return
      */
-    public Path getInputFile(Path working, String inputFileName, String[] inputFileNameSuffixes) {
+    public static Path getInputFile(Path workPath, String inputFileName, String[] inputFileNameSuffixes) {
 
-        Path inputFile = validateInputFile(working, inputFileName, inputFileNameSuffixes, "input");
+        Path inputFile = validateInputFile(workPath, inputFileName, inputFileNameSuffixes, "input");
 
-        if (working != null) {
-            System.setProperty(NameSpace.HOME_DIR, working.toAbsolutePath().toString());
-            MyLogger.info("\nSet working path to " + working.toAbsolutePath());
+        if (workPath != null) {
+            System.setProperty(NameSpace.HOME_DIR, workPath.toAbsolutePath().toString());
+            MyLogger.info("\nSet workPath path to " + workPath.toAbsolutePath());
         } else if (inputFile.getParent() != null) {
-            // set working directory to the input directory as default
+            // set workPath directory to the input directory as default
             System.setProperty(NameSpace.HOME_DIR, inputFile.getParent().toAbsolutePath().toString());
-            MyLogger.info("\nSet working path to " + inputFile.getParent().toAbsolutePath());
+            MyLogger.info("\nSet workPath path to " + inputFile.getParent().toAbsolutePath());
         } else {
-            MyLogger.error("Cannot find working path : " + inputFile.getParent());
+            MyLogger.error("Cannot find workPath path : " + inputFile.getParent());
             System.exit(0);
         }
 
@@ -172,7 +172,7 @@ public class Module {
      * @param fileNameSuffixes
      * @param ioMessage
      */
-    public void validateFileName(String fileName, String[] fileNameSuffixes, String ioMessage) {
+    public static void validateFileName(String fileName, String[] fileNameSuffixes, String ioMessage) {
         if (fileName == null) {
             MyLogger.error("Invalid " + ioMessage + " file name : " + fileName);
             System.exit(0);
@@ -186,19 +186,19 @@ public class Module {
     /**
      * validate input file
      * if fileNameSuffix is null, ignore checking suffix
-     * @param working
+     * @param workPath
      * @param fileName
      * @param fileNameSuffixes
      * @param ioMessage
      * @return
      */
-    public Path validateInputFile(Path working, String fileName, String[] fileNameSuffixes, String ioMessage) {
+    public static Path validateInputFile(Path workPath, String fileName, String[] fileNameSuffixes, String ioMessage) {
         validateFileName(fileName, fileNameSuffixes, ioMessage);
 
-        if (working == null)
-            working = Paths.get("");
+        if (workPath == null)
+            workPath = Paths.get("");
         // input
-        Path file = Paths.get(working.toString(), fileName);
+        Path file = Paths.get(workPath.toString(), fileName);
         if (file == null || Files.notExists(file)) {
             MyLogger.error("Cannot find " + ioMessage + " file : " + fileName);
             System.exit(0);
