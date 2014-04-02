@@ -21,46 +21,60 @@ public class FileIO {
     }
 
     // java 1.6
-    public static BufferedReader getReader(File file, String msg) throws IOException {
+    public static BufferedReader getReader(File file, String desc) throws IOException {
 
         BufferedReader reader = new BufferedReader(new FileReader(file));
 
-        if (msg != null)
-            MyLogger.info("\nImport " + msg + " file: " + file);
+        if (desc != null)
+            MyLogger.info("\nImport " + desc + " file: " + file);
 
         return reader;
     }
 
     // java 1.7
-    public static BufferedReader getReader(Path path, String msg) throws IOException {
+    public static BufferedReader getReader(Path path, String desc) throws IOException {
 
         BufferedReader reader = Files.newBufferedReader(path, Charset.defaultCharset());
 
-        if (msg != null)
-            MyLogger.info("\nImport " + msg + " file: " + path);
+        if (desc != null)
+            MyLogger.info("\nImport " + desc + " file: " + path);
 
         return reader;
     }
 
     // java 1.7
-    public static BufferedWriter getWriter(Path path, String msg) throws IOException {
+    public static BufferedWriter getWriter(Path path, String desc) throws IOException {
 
         BufferedWriter writer = Files.newBufferedWriter(path, Charset.defaultCharset());
 
-        if (msg != null)
-            MyLogger.info("\nOutput " + msg + " file: " + path);
+        if (desc != null)
+            MyLogger.info("\nOutput " + desc + " file: " + path);
 
         return writer;
     }
 
-    public static PrintStream getPrintStream(String outFileAndPath, String msg) throws IOException {
+    public static PrintStream getPrintStream(Path outFile, String desc) throws IOException {
+        if (outFile == null) return null;
 
-        PrintStream out = new PrintStream(new FileOutputStream(outFileAndPath));
+        PrintStream out = new PrintStream(new FileOutputStream(outFile.toString()));
 
-        if (msg != null)
-            MyLogger.info("\nOutput " + msg + " file: " + outFileAndPath);
+        if (desc != null)
+            MyLogger.info("\nOutput " + desc + " file: " + outFile);
 
         return out;
     }
+
+    public static PrintStream getPrintStream(String outFile, String desc) throws IOException {
+        if (outFile == null) return null;
+
+        PrintStream out = new PrintStream(new FileOutputStream(outFile));
+
+        if (desc != null)
+            MyLogger.info("\nOutput " + desc + " file: " + outFile);
+
+        return out;
+    }
+
+
 
 }

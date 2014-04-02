@@ -4,6 +4,7 @@ import jebl.evolution.sequences.BasicSequence;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Assembler;
@@ -12,7 +13,9 @@ import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.pipeline.Module;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -66,14 +69,12 @@ public class SequenceUtil {
      */
     public static void splitFastaTo2(String workPathString, String inFastaFileName, String regex) throws IOException {
         Path workPath = Paths.get(workPathString);
-        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_SEQUENCES}, "original file");
+        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
 
         String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
 
-        File outFastaFile1 = new File(workPath + outputFileNameStem + "-1.fasta");
-        PrintStream out1 = new PrintStream(new FileOutputStream(outFastaFile1));
-        File outFastaFile2 = new File(workPath + outputFileNameStem + "-2.fasta");
-        PrintStream out2 = new PrintStream(new FileOutputStream(outFastaFile2));
+        PrintStream out1 = FileIO.getPrintStream(workPath + outputFileNameStem + "-1" + NameSpace.SUFFIX_FASTA, null);
+        PrintStream out2 = FileIO.getPrintStream(workPath + outputFileNameStem + "-2" + NameSpace.SUFFIX_FASTA, null);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 
@@ -115,7 +116,7 @@ public class SequenceUtil {
      */
     public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemId) throws IOException {
         Path workPath = Paths.get(workPathString);
-        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_SEQUENCES}, "original file");
+        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
 
         String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
 
@@ -140,8 +141,7 @@ public class SequenceUtil {
                     if (outMap.size() > fileLimit)
                         throw new IllegalStateException("Cannot split to more than " + fileLimit + " files !");
 
-                    File outFastaFile = new File(workPath + outputFileNameStem + "-" + item + ".fasta");
-                    out = new PrintStream(new FileOutputStream(outFastaFile));
+                    out = FileIO.getPrintStream(workPath + outputFileNameStem + "-" + item + NameSpace.SUFFIX_FASTA, null);
                     outMap.put(item, out);
                 }
             }

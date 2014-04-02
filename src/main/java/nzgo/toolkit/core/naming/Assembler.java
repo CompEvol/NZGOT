@@ -119,10 +119,11 @@ public class Assembler {
     }
 
     public static enum CommandType {
+        APPEND  ("append"),
         MOVE    ("move"),
         DELETE  ("delete"),
         COMBINE ("combine"),
-        ADD     ("add_map_of");
+        ADD_ITEM_MAPPED ("add_item_mapped");
 
         private String type;
 
@@ -140,7 +141,7 @@ public class Assembler {
         }
 
         public static String getExample() {
-            return MOVE + "(1,5)|" + DELETE + "(2,3,4)|" + COMBINE + "(5,6,7)|" + ADD + "(2)";
+            return MOVE + "(1,5)|" + DELETE + "(2,3,4)|" + COMBINE + "(5,6,7)|" + ADD_ITEM_MAPPED + "(2)";
         }
 
     }

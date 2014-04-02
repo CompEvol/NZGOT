@@ -156,8 +156,8 @@ public class OTUs<E> extends BioSortedSet<E> {
     public static void main(final String[] args) {
 
         String[] experiments = new String[]{"18S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
-        int[] thresholds = new int[]{99,100}; // 90,91,92,93,94,95,96,97,98,99,100
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
+        int[] thresholds = new int[]{100}; // 90,91,92,93,94,95,96,97,98,99,100
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/old/");
         String otuMappingFileName = "map.uc";
         String reportFileName = "_otus_report.tsv";
         String cmFileName = "_cm.csv";

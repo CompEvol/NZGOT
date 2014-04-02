@@ -33,8 +33,8 @@ public class Command {
         this.indexesInCommand = getIndexesInCommand(command);
         this.traitMap = traitMap;
 
-        if (commandType == Assembler.CommandType.ADD && traitMap == null)
-            throw new IllegalArgumentException("Need trait map to use \"" + Assembler.CommandType.ADD + "\" command !");
+        if (commandType == Assembler.CommandType.ADD_ITEM_MAPPED && traitMap == null)
+            throw new IllegalArgumentException("Need trait map to use \"" + Assembler.CommandType.ADD_ITEM_MAPPED + "\" command !");
 
     }
 
@@ -49,8 +49,8 @@ public class Command {
             case COMBINE:
                 combine(items, indexesInCommand[0], Arrays.copyOfRange(indexesInCommand, 1, indexesInCommand.length));
                 break;
-            case ADD:
-                add(items, indexesInCommand[0]);
+            case ADD_ITEM_MAPPED:
+                addItemMapped(items, indexesInCommand[0]);
                 break;
             default:
                 throw new IllegalArgumentException("Try to proceed an illegal command : " + commandType);
@@ -124,13 +124,13 @@ public class Command {
     }
 
     /**
-     * add the mapped trait of items.get(from) into last items
+     * add the mapped trait of items.get(indexOfKeyInMap) into last items
      * @param items
-     * @param from
+     * @param indexOfKeyInMap
      */
-    public void add(List<String> items, int from) {
-        validate(items.size(), from);
-        String item = items.get(from);
+    public void addItemMapped(List<String> items, int indexOfKeyInMap) {
+        validate(items.size(), indexOfKeyInMap);
+        String item = items.get(indexOfKeyInMap);
         String trait = traitMap.get(item);
         if (!NameUtil.isEmptyNull(trait)) {
             items.add(trait);

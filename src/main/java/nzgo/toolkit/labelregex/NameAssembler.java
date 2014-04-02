@@ -51,7 +51,7 @@ public class NameAssembler extends Module{
                 e.printStackTrace();
             }
 
-        } else if (inputFile.endsWith(NameSpace.SUFFIX_SEQUENCES)) {
+        } else if (inputFile.endsWith(NameSpace.SUFFIX_FASTA)) {
 
             List<Sequence> sequences = null;
             try {
@@ -101,7 +101,7 @@ public class NameAssembler extends Module{
                 new Arguments.StringOption("commands", "commands-string", "The string to define commands to assemble items parsed by separator. " +
                         "Multi-commands can be separated by |, e.g. " + Assembler.CommandType.getExample() +
                         "Note: the item's index may change after each command, so that every commands use the input items indexes."),
-                new Arguments.Option("traitsMap", "load traits from file, when the command " + Assembler.CommandType.ADD +
+                new Arguments.Option("traitsMap", "load traits from file, when the command " + Assembler.CommandType.ADD_ITEM_MAPPED +
                         " is used, where the 1st column is the item separated from the name, the 2nd is the mapped trait. " +
                         "If no this option, then look for the file " + NameSpace.TRAITS_MAPPING_FILE + ""),
         };
@@ -110,7 +110,7 @@ public class NameAssembler extends Module{
         Path working = module.init(arguments, args);
         // input
         String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_SEQUENCES, NameSpace.SUFFIX_NEWICK});
+        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_NEWICK});
 
         // output
         String outFileName = "new-" + inputFile.getFileName().toString();
@@ -127,7 +127,7 @@ public class NameAssembler extends Module{
 
         // traits Map
         Map<String, String> traitsMap = null;
-        if (commandsArg.contains(Assembler.CommandType.ADD.toString())) {
+        if (commandsArg.contains(Assembler.CommandType.ADD_ITEM_MAPPED.toString())) {
             String traitsMapTSVName = NameSpace.TRAITS_MAPPING_FILE;
             if (arguments.hasOption("traitsMap")) {
                 traitsMapTSVName = arguments.getStringOption("traitsMap");

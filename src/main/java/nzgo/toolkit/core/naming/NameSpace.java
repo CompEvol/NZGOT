@@ -13,8 +13,9 @@ public class NameSpace {
     public static final String PREFIX_OTU_MAPPING = "otu_map_";
     public static final String PREFIX_OTU_REFERENCE = "reference_";
 
-    public static final String SUFFIX_SEQUENCES = ".fasta";
-    public static final String SUFFIX_OTUS = SUFFIX_SEQUENCES;
+    public static final String SUFFIX_FASTQ = ".fastq";
+    public static final String SUFFIX_FASTA = ".fasta";
+    public static final String SUFFIX_OTUS = SUFFIX_FASTA;
     public static final String SUFFIX_MAPPING = ".m8";
     public static final String SUFFIX_UC = ".uc";
 

@@ -49,30 +49,8 @@ public class TaxonomyFileIO extends FileIO {
         return taxonSet;
     }
 
-    public static Map<String, String> importPreTaxaTraits (Path traitsMapTSV) throws IOException {
-        Map<String, String> preTaxaTraits = new TreeMap<>();
-        BufferedReader reader = getReader(traitsMapTSV, "pre-defined taxa traits mapping");
-
-        String line = reader.readLine();
-        while (line != null) {
-            if (hasContent(line)) { // not comments or empty
-                String[] items = lineParser.getSeparator(0).parse(line);
-                if (items.length < 2)
-                    throw new IllegalArgumentException("Invalid file format for taxa traits mapping, line : " + line);
-                if (preTaxaTraits.containsKey(items[0]))
-                    throw new IllegalArgumentException("Find duplicate name for leaf node : " + items[0]);
-
-                preTaxaTraits.put(items[0], items[1]);
-            }
-
-            line = reader.readLine();
-        }
-        reader.close();
-
-        if (preTaxaTraits.size() < 1)
-            throw new IllegalArgumentException("It needs at least one separator !");
-
-        return preTaxaTraits;
+    public static SortedMap<String, String> importPreTaxaTraits (Path traitsMapTSV) throws IOException {
+        return ConfigFileIO.importTwoColumnTSV(traitsMapTSV, "pre-defined taxa traits mapping");
     }
 
     /**

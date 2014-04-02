@@ -1,22 +1,57 @@
 package nzgo.toolkit.core.io;
 
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.Regex;
 import nzgo.toolkit.core.naming.RegexFactory;
 import nzgo.toolkit.core.naming.Separator;
+import nzgo.toolkit.core.pipeline.Module;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Config FileIO
  * @author Walter Xie
  */
 public class ConfigFileIO extends FileIO {
+
+    /**
+     * 2-column mapping file, 1st column is key, 2nd is value
+     * @param twoColumnTSV
+     * @param desc            description for 2-column mapping file
+     * @return
+     * @throws IOException
+     */
+    public static SortedMap<String, String> importTwoColumnTSV (Path twoColumnTSV, String desc) throws IOException {
+        Module.validateFileName(twoColumnTSV.getFileName().toString(), new String[]{NameSpace.SUFFIX_TSV}, "");
+
+        SortedMap<String, String> twoColumnMap = new TreeMap<>();
+        BufferedReader reader = getReader(twoColumnTSV, desc);
+
+        String line = reader.readLine();
+        while (line != null) {
+            if (hasContent(line)) { // not comments or empty
+                String[] items = lineParser.getSeparator(0).parse(line);
+                if (items.length < 2)
+                    throw new IllegalArgumentException("Invalid file format: " + desc + ", line = " + line);
+                if (twoColumnMap.containsKey(items[0]))
+                    throw new IllegalArgumentException("Find duplicate name in the 1st column : " + items[0]);
+
+                twoColumnMap.put(items[0], items[1]);
+            }
+
+            line = reader.readLine();
+        }
+        reader.close();
+
+        if (twoColumnMap.size() < 1)
+            throw new IllegalArgumentException("It needs at least one valid row in " + twoColumnTSV);
+
+        return twoColumnMap;
+    }
 
     public static List<Regex> importRegex (Path regexTSV, RegexFactory.RegexType regexType) throws IOException {
         List<Regex> regexList = new ArrayList<>();

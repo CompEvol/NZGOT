@@ -83,14 +83,14 @@ public class DNASequencesQualityControl extends Module{
         Path working = module.init(arguments, args);
         // input
         String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_SEQUENCES});
+        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_FASTA});
 
         // output
-        String outFileName = inputFile.getFileName().toString().replace(NameSpace.SUFFIX_SEQUENCES, "_translate" + NameSpace.SUFFIX_SEQUENCES);
+        String outFileName = inputFile.getFileName().toString().replace(NameSpace.SUFFIX_FASTA, "_translate" + NameSpace.SUFFIX_FASTA);
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-        Path outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_SEQUENCES}, "output", arguments.hasOption("overwrite"));
+        Path outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_FASTA}, "output", arguments.hasOption("overwrite"));
 
         // program parameters
         GeneticCode geneticCode = GeneticCode.UNIVERSAL;
