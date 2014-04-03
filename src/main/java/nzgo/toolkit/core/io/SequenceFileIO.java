@@ -6,7 +6,9 @@ import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
+import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -40,7 +42,19 @@ public class SequenceFileIO extends FileIO {
         sequenceExporter.exportSequences(sequences);
     }
 
-    public static void appendItemsToLabelsFastq (Path inFilePath, PrintStream out, String... items) throws IOException {
+    /**
+     *
+     * @param inFilePath         Fastq or Fasta format
+     * @param out
+     * @param items
+     * @throws IOException
+     */
+    public static void appendItemsToLabelsFastQA(Path inFilePath, PrintStream out, String... items) throws IOException {
+        MyLogger.info("Append " + ArrayUtil.toString(items) + " to sequences labels in " + inFilePath.getFileName());
+
+        if (!(inFilePath.toString().endsWith(NameSpace.SUFFIX_FASTQ) || inFilePath.toString().endsWith(NameSpace.SUFFIX_FASTA)))
+            throw new IllegalArgumentException("Invalid sequence file " + inFilePath);
+
         PrintStream outThis;
         if (out == null) {
             Path outFile = Paths.get(inFilePath.getParent().toString(), "New-" + inFilePath.getFileName());
@@ -48,15 +62,16 @@ public class SequenceFileIO extends FileIO {
         } else {
             outThis = out;
         }
-        MyLogger.info("\nRename sequences labels in fastq " + inFilePath);
+        MyLogger.info("\nRename sequences labels in " + inFilePath);
 
         BufferedReader reader = getReader(inFilePath, null);
         String line = reader.readLine();
         Long nLine = 0L;
         while (line != null) {
-            if (nLine%4==0) { // cannot use "@" as keyword
+            if (nLine%2==0) { // cannot use "@" or "+" or ">" as keyword
                 String label = NameUtil.appendItemsToLabel(line.substring(1), items);
-                line = "@" + label;
+                String firstCharacter = line.substring(0, 1); //"@" or "+" or ">"
+                line = firstCharacter + label;
             }
 
             outThis.println(line);
