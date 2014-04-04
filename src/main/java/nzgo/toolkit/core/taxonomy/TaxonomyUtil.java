@@ -234,7 +234,7 @@ public class TaxonomyUtil {
 //            File otusFile = new File(workPath + "otus1.fasta");
             File otuMappingFile = new File(workPath + "map.uc");
             SiteNameParser siteNameParser = new SiteNameParser();
-            Community community = new Community(siteNameParser, otuMappingFile);
+            Community community = new Community(otuMappingFile, siteNameParser);
 
             File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
             SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);

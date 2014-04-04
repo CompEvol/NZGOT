@@ -1,20 +1,21 @@
 package nzgo.toolkit.core.community;
 
-import nzgo.toolkit.core.io.CommunityFileIO;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
+import nzgo.toolkit.core.pipeline.Module;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.TreeSet;
 
 /**
- * Community Matrix
- * elementsSet contains OTU
+ * Community Matrix: elementsSet contains OTU
  * same as OTUs, but including IO inputs and sample parser
  * load all OTUs and mappings from 3 files
  * 2 compulsory files: otusFile, otuMappingFile
@@ -27,51 +28,32 @@ public class Community<E> extends OTUs<E> {
     // the final samples already parsed from label
     public String[] samples;
 
-//    protected final File otusFile;
-//    protected final File otuMappingFile;
-//    protected final File refSeqMappingFile; // optional: Sanger sequence for reference
-
     public Community(Community community, String name) {
         super(name);
-//        otusFile = null;
-//        otuMappingFile = null;
-//        refSeqMappingFile = null;
         this.siteNameParser = community.siteNameParser;
         this.samples = community.samples;
     }
 
-    public Community(SiteNameParser siteNameParser, File otuMappingFile) {
-        this(siteNameParser, null, otuMappingFile, null);
-    }
-
-    public Community(SiteNameParser siteNameParser, File otuMappingFile, File refSeqMappingFile) {
-        this(siteNameParser, null, otuMappingFile, refSeqMappingFile);
+    public Community(File otuMappingFile, SiteNameParser siteNameParser) {
+        this(otuMappingFile, null, siteNameParser);
     }
 
     /**
-     * create communit matrix from either otusFile or otuMappingFile or both
+     * create communit matrix from otuMappingFile only
      * refSeqMappingFile is optional
      * if otuMappingFile null, then no elements (sequences) in OTU
-     * @param otusFile
      * @param otuMappingFile
      * @param refSeqMappingFile
      */
-    public Community(SiteNameParser siteNameParser, File otusFile, File otuMappingFile, File refSeqMappingFile) {
-        super(otusFile != null ? NameUtil.getNameWithoutExtension(otusFile.getName()) : NameUtil.getNameWithoutExtension(otuMappingFile.getName()));
-//        this.otusFile = otusFile;
-//        this.otuMappingFile = otuMappingFile;
-//        this.refSeqMappingFile = refSeqMappingFile;
-
+    public Community(File otuMappingFile, File refSeqMappingFile, SiteNameParser siteNameParser) {
+        super(NameUtil.getNameWithoutExtension(otuMappingFile.getName()));
         this.siteNameParser = siteNameParser;
 
-        if (otusFile == null && otuMappingFile == null)
-            throw new IllegalArgumentException("Community needs either OTUs or mapping file ! ");
+        if (otuMappingFile == null)
+            throw new IllegalArgumentException("Community needs mapping file ! ");
 
         try {
-            if (otusFile != null)
-                OTUsFileIO.importOTUs(otusFile, this);
-
-            TreeSet<String> samples = OTUsFileIO.importOTUsAndMappingFromUCFile(otuMappingFile, this, otusFile == null, siteNameParser);
+            TreeSet<String> samples = OTUsFileIO.importOTUsFromMapUC(this, otuMappingFile, siteNameParser);
 
             // if samples is null, then no samples being parsed
             if (samples != null && samples.size() > 0) {
@@ -106,11 +88,45 @@ public class Community<E> extends OTUs<E> {
             }
         }
 
-        MyLogger.debug("Get classified community: total reads = " + reads + ", total OTUs = " + otus);
+        MyLogger.debug("Get classified community: total OTUs = " + otus + ", total reads = " + reads);
 
         return classifiedCommunity;
     }
 
+    /**
+     * get subset of this community whose OTU exists in otusFastaFile
+     * @param otusFastaFile
+     * @return
+     * @throws IOException
+     */
+    public Community<E> getSubCommunity(Path otusFastaFile) throws IOException {
+        Module.validateFileName(otusFastaFile.getFileName().toString(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
+
+        Community<E> subCommunity = new Community<>(this, this.getName() + "_sub");
+
+        int reads = 0;
+        int otus = 0;
+        BufferedReader reader = FileIO.getReader(otusFastaFile, "OTUs head sequences");
+        String line = reader.readLine();
+        while (line != null) {
+            if (line.startsWith(">")) {
+                String label = line.substring(1);
+                E e = this.getUniqueElement(label);
+                if (e != null) {
+                    subCommunity.add(e);
+                    OTU otu = (OTU) e;
+                    reads += otu.size();
+                    otus++;
+                }
+            }
+            line = reader.readLine();
+        }
+        reader.close();
+
+        MyLogger.debug("Get sub community: total OTUs = " + otus + ", total reads = " + reads);
+
+        return subCommunity;
+    }
 
     /**
      * E has to be OTU
@@ -139,18 +155,18 @@ public class Community<E> extends OTUs<E> {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-
-        File otusFile = new File(workPath + "reads-Arthropoda.fasta");
-        File otuMappingFile = new File(workPath + "map.uc");
-        SiteNameParser siteNameParser = new SiteNameParser();
-        Community community = new Community(siteNameParser, otusFile, otuMappingFile, null);
-
-        Path outCMFilePath = Paths.get(workPath, community.getName() + "_" + CommunityFileIO.COMMUNITY_MATRIX + ".csv");
-        try {
-            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // TODO need to correct
+//        File otusFile = new File(workPath + "reads-Arthropoda.fasta");
+//        File otuMappingFile = new File(workPath + "map.uc");
+//        SiteNameParser siteNameParser = new SiteNameParser();
+//        Community community = new Community(siteNameParser, otusFile, otuMappingFile, null);
+//
+//        Path outCMFilePath = Paths.get(workPath, community.getName() + "_" + CommunityFileIO.COMMUNITY_MATRIX + ".csv");
+//        try {
+//            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
     }

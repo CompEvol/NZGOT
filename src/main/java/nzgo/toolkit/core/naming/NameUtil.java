@@ -6,14 +6,6 @@ package nzgo.toolkit.core.naming;
  */
 public class NameUtil {
 
-    public static String appendItemsToLabel (String label, String... items) {
-        String finalLabel = label;
-        for (String item : items) {
-            finalLabel += item;
-        }
-        return finalLabel;
-    }
-
     public static String getNameWithoutExtension (String fileName) {
         if (fileName == null)
             return null;

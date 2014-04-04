@@ -1,0 +1,90 @@
+package nzgo.toolkit.core.naming;
+
+import nzgo.toolkit.core.community.OTU;
+import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.io.FileIO;
+import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.uc.UCParser;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+/**
+ * AssemblerUtil
+ * @author Walter Xie
+ */
+public class AssemblerUtil {
+
+    public static String appendItemsToLabel (String label, String... items) {
+        String finalLabel = label;
+        for (String item : items) {
+            finalLabel += item;
+        }
+        return finalLabel;
+    }
+
+    public static String appendSizeToLabel(OTU otu, boolean removeSizeAnnotation) {
+        String otuName = UCParser.getLabel(otu.getName(), removeSizeAnnotation);
+        return AssemblerUtil.appendItemsToLabel(otuName, "|" + otu.size());
+    }
+
+    /**
+     * USEARCH map.uc bug: otu head sequence does not definitely appear in Target column in map.uc
+     * @param label
+     * @param otus
+     * @return        null if above bug
+     */
+    public static String appendSizeToLabel(String label, OTUs otus) {
+        String otuName = UCParser.getLabel(label, otus.removeSizeAnnotation);
+        OTU otu = otus.getOTU(otuName);
+        if (otu == null)
+            return null;
+//            throw new IllegalArgumentException("Cannot OTU " + otuName + " in community: " + otus.getName());
+
+        return AssemblerUtil.appendSizeToLabel(otu, otus.removeSizeAnnotation);
+    }
+
+    public static void removeAnnotationAppendSizeToLabel(Path otusFastaFile, OTUs otus) throws IOException {
+        Module.validateFileName(otusFastaFile.getFileName().toString(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
+
+        Path outFile = Paths.get(otusFastaFile.getParent().toString(), "sized-" + otusFastaFile.getFileName());
+        PrintStream out = FileIO.getPrintStream(outFile, null);
+        Path errFile = Paths.get(otusFastaFile.getParent().toString(), "err-" + otusFastaFile.getFileName());
+        PrintStream outErr = FileIO.getPrintStream(errFile, null);
+
+        MyLogger.info("\nRename sequences labels from " + otusFastaFile + " to " + outFile);
+
+        BufferedReader reader = FileIO.getReader(otusFastaFile, "OTUs head sequences");
+        String line = reader.readLine();
+        boolean hasErr = false;
+        while (line != null) {
+            if (line.startsWith(">")) {
+                String label = AssemblerUtil.appendSizeToLabel(line.substring(1), otus);
+
+                if (label != null) {
+                    line = ">" + label;
+                    hasErr = false;
+                } else {
+                    outErr.println(line);
+                    line = reader.readLine();
+                    outErr.println(line);
+                    line = reader.readLine();
+                    hasErr = true;
+                }
+            }
+            if (!hasErr) {
+                out.println(line);
+                line = reader.readLine();
+            }
+        }
+        reader.close();
+
+        out.flush();
+        out.close();
+    }
+
+}

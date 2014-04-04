@@ -15,6 +15,7 @@ import java.nio.file.Paths;
  * Community Matrix Analysis
  * @author Walter Xie
  */
+@Deprecated
 public class CommunityMatrixAnalysis {
 
     //Main method
@@ -62,13 +63,9 @@ public class CommunityMatrixAnalysis {
         String outFileAndPath;
         SiteNameParser siteNameParser = new SiteNameParser();
 
-        if (otusFile != null) {
-            MyLogger.info("\nCreate OTUs from otu file. " + otusFile);
-        } else {
-            MyLogger.info("\nCreate OTUs from mapping file. " + otuMappingFile);
-        }
+        MyLogger.info("\nCreate OTUs from mapping file. " + otuMappingFile);
 
-        community = new Community(siteNameParser, otusFile, otuMappingFile, referenceMappingFile);
+        community = new Community(otuMappingFile, referenceMappingFile, siteNameParser);
 
         if (referenceMappingFile != null) {
             outFileAndPath = workPath + File.separator + "report_ref_reads.txt";

@@ -88,7 +88,7 @@ public class AutomaticEC {
 
         File file = new File(mapSeqOtu);
         OTUs otus = new OTUs(file.getName());
-        OTUsFileIO.importOTUsAndMappingFromUCFile(file, otus);
+        OTUsFileIO.importOTUsFromMapUC(otus, file);
 
         file = new File(mapOtuRef);
         OTUsFileIO.importRefSeqMappingFromUCFile(file, otus);

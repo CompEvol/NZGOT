@@ -1,0 +1,70 @@
+# Created by Walter Xie, 3rd April, 2014
+
+Folder structure:
+
+experiment (e.g. 16S)
+                  |___ deconvoluted
+                  |___ qc
+                  |___ otu$THRESHOULD (e.g. 97)
+
+The proposed pipeline is:
+
+============= Genious and NZGOT =============
+
+1. Deconvolute, Trimming end (Genious):
+Geneious "Separate Reads By Barcode" => "Trim End" => "Batch Rename" sequence label to add "|experiment" (such as |16S)
+
+2. Batch export fastq for each site (MID tag): 
+Batch export fastq files (one site each) to project "deconvoluted" directory, such as ./16S/deconvoluted/
+
+3. Better naming label and combine all fastq into one: 
+Run nzgo.toolkit.core.sequences.GeneiousSequenceUtil to add site information to sequence label according to fastq file name, 
+given mapping files (e.g. MID.tsv), such as |1-B|prep1, the last mean replicate 1, and it is optional. 
+The final label will be SequenceID|experiment|site|replicate, such as H2IEDL101DU9X4|16S|LB1-A|prep1  
+
+============= UPARSE pipeline (http://drive5.com/usearch/manual/uparse_pipeline.html) =============
+
+4. Global trimming (to 300bp):
+usearch -fastq_filter ./deconvoluted/16S.fastq -fastq_trunclen 300 -fastaout ./qc/reads.fasta
+
+5. Dereplicate sequences:
+usearch -derep_fulllength ./qc/reads.fasta -output ./qc/derep.fasta -sizeout
+
+6. Sort by abundance:
+usearch -sortbysize ./qc/derep.fasta -output ./qc/sorted.fasta -minsize 1
+
+7. OTU clustering:
+PCT=$((100-$THRESHOULD))
+usearch -cluster_otus ./qc/sorted.fasta -otu_radius_pct $PCT -otus ./otus$THRESHOULD/otus1.fasta -sizein -sizeout
+
+8. Filter chimeras by either denovo or reference (such as 16S):
+Denovo:
+usearch -uchime_denovo ./otus$THRESHOULD/otus1.fasta -uchimeout results.uchime -nonchimeras ./otus$THRESHOULD/otus.fasta
+Reference (e.g. $REF_DB = ../gold.fa)
+usearch -uchime_ref ./otus$THRESHOULD/otus1.fasta -db $REF_DB -strand plus -nonchimeras ./otus$THRESHOULD/otus.fasta
+
+9. Mapping reads to OTUs:
+usearch -usearch_global ./qc/reads.fasta -db ./otus$THRESHOULD/otus.fasta -strand plus -id 0.$THRESHOULD -uc ./otus$THRESHOULD/map.uc
+
+if out of memory when $THRESHOULD == 100, then get map.uc from sorted.fasta to generate community matrix.
+usearch -usearch_global ./qc/reads.fasta -db ./otus$THRESHOULD/sorted.fasta -strand plus -id 0.$THRESHOULD -uc ./otus$THRESHOULD/map.uc 
+
+Note: use the script to repeat from 7 to 9 by looping through {90..100}
+
+============= NZGOT and R =============
+
+10. Community matrix:
+Run nzgo.toolkit.core.community.OTUs to generate community matrix such as 16S_97_cm.csv, given OTU mapping such as ./otus97/map.uc.  
+
+11. Auto-reporting for each experiment:
+Run brew in R to generate slides
+
+12. Comparison among experiments:
+Run R script 
+
+============= BLAST =============
+13. Taxonomy:
+BLAST otus.fasta and load otus.out to MEGAN
+
+14. NZGOT taxonomy analysis tool (still in developing).
+

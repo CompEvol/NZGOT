@@ -2,6 +2,7 @@ package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.taxonomy.TaxonomyUtil;
@@ -24,57 +25,43 @@ public class OTUs<E> extends BioSortedSet<E> {
     public static final int READS_COUNTER_ID = 0;
     public static final int OTU_COUNTER_ID = 1;
 
+    public boolean removeSizeAnnotation = true;
+
     public OTUs(String name) {
         super(name);
     }
 
-    /**
-     * give a sequence name to get the OTU it belongs to
-     * or give name to get the OTU
-     * or give alias to get the OTU, if OTU has alias
-     * TODO: only suit for hard clustering currently
-     * @param name
-     * @return
-     */
-    public E getOTUByName(String name) {
-        Object sequence;
-        for(E e : this){
-            OTU otu = (OTU) e;
-            if (name.contentEquals(otu.getName()) || name.contentEquals(otu.getAlias())) {
-                return e;
-            } else {
-                sequence = otu.getUniqueElement(name);
-                if (sequence != null)
-                    return e;
-            }
-        }
+    public OTU getOTU(String name) {
+        E e = this.getUniqueElement(name);
+        if (e != null)
+            return (OTU) e;
         return null;
     }
 
     /**
-     * key -> reference sequence id, value -> number of reads
-     * sum up reads according to reference sequence
-     * E has to be OTU
+     * append |size to the end of OTU name
+     * remove size annotation, if removeSizeAnnotation = true
+     * need to update otus.fasta afterwords
      */
-    public Map<String, Integer> getRefSeqReadsCountMap() {
-        Map<String, Integer> readsCountMap = new HashMap<>();
+    public void appendSizeToLabel(OTUs<OTU> otus){
+        for(OTU otu : otus){
+            String label = AssemblerUtil.appendSizeToLabel(otu, removeSizeAnnotation);
+            otu.setName(label);
+        }
+    }
 
+    /**
+     * sizes[0] is number of OTUs, sizes[1] in number of reads
+     * @return
+     */
+    public int[] getSizes() {
+        int[] sizes = new int[2];
+        sizes[0] = this.size();
         for(E e : this){
             OTU otu = (OTU) e;
-            Reference reference = otu.getReference();
-            if (reference != null) {
-                String refSeqId = reference.toString();
-                int reads = otu.size();
-                // if refseq has count in map, then add new count to it
-                if (readsCountMap.containsKey(refSeqId)) {
-                    reads += readsCountMap.get(refSeqId);
-                    readsCountMap.put(refSeqId, reads);
-                }
-                readsCountMap.put(refSeqId, reads);
-            }
+            sizes[1] += otu.size();
         }
-
-        return readsCountMap;
+        return sizes;
     }
 
     /**
@@ -134,6 +121,56 @@ public class OTUs<E> extends BioSortedSet<E> {
     }
 
     /**
+     * give a sequence name to get the OTU it belongs to
+     * or give name to get the OTU
+     * or give alias to get the OTU, if OTU has alias
+     * TODO: only suit for hard clustering currently
+     * @param name
+     * @return
+     */
+    @Deprecated
+    public E getOTUByName(String name) {
+        Object sequence;
+        for(E e : this){
+            OTU otu = (OTU) e;
+            if (name.contentEquals(otu.getName()) || name.contentEquals(otu.getAlias())) {
+                return e;
+            } else {
+                sequence = otu.getUniqueElement(name);
+                if (sequence != null)
+                    return e;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * key -> reference sequence id, value -> number of reads
+     * sum up reads according to reference sequence
+     * E has to be OTU
+     */
+    public Map<String, Integer> getRefSeqReadsCountMap() {
+        Map<String, Integer> readsCountMap = new HashMap<>();
+
+        for(E e : this){
+            OTU otu = (OTU) e;
+            Reference reference = otu.getReference();
+            if (reference != null) {
+                String refSeqId = reference.toString();
+                int reads = otu.size();
+                // if refseq has count in map, then add new count to it
+                if (readsCountMap.containsKey(refSeqId)) {
+                    reads += readsCountMap.get(refSeqId);
+                    readsCountMap.put(refSeqId, reads);
+                }
+                readsCountMap.put(refSeqId, reads);
+            }
+        }
+
+        return readsCountMap;
+    }
+
+    /**
      * use to check if any OTU imported from otu fasta file
      * that does not exist in the mapping file
      * In this case, OTU set is empty
@@ -154,10 +191,9 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     //Main method
     public static void main(final String[] args) {
-
-        String[] experiments = new String[]{"18S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
-        int[] thresholds = new int[]{100}; // 90,91,92,93,94,95,96,97,98,99,100
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/old/");
+        String[] experiments = new String[]{"CO1-soilkit","CO1-indirect","ITS","trnL"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
+        int[] thresholds = new int[]{90,91,92,93,94,95,96,97,98,99,100}; // 90,91,92,93,94,95,96,97,98,99,100
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
         String otuMappingFileName = "map.uc";
         String reportFileName = "_otus_report.tsv";
         String cmFileName = "_cm.csv";
@@ -166,7 +202,7 @@ public class OTUs<E> extends BioSortedSet<E> {
 //        String cmFileName = "_cm_size2.csv";
 
         try {
-            OTUsFileIO.reportOTUs(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds);
+            OTUsFileIO.reportOTUs(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
         } catch (IOException e) {
             e.printStackTrace();
         }

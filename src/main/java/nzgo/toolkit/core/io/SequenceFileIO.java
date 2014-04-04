@@ -6,8 +6,8 @@ import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.io.BufferedReader;
@@ -69,7 +69,7 @@ public class SequenceFileIO extends FileIO {
         Long nLine = 0L;
         while (line != null) {
             if (nLine%2==0) { // cannot use "@" or "+" or ">" as keyword
-                String label = NameUtil.appendItemsToLabel(line.substring(1), items);
+                String label = AssemblerUtil.appendItemsToLabel(line.substring(1), items);
                 String firstCharacter = line.substring(0, 1); //"@" or "+" or ">"
                 line = firstCharacter + label;
             }
