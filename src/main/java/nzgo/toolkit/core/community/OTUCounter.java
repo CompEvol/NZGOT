@@ -4,8 +4,7 @@ import nzgo.toolkit.core.util.Counter;
 import nzgo.toolkit.core.util.Element;
 
 /**
- * Taxon
- * toString() return taxId, if it is null, return name
+ * OTUCounter to generate CM faster, not store any information of reads
  * @author Walter Xie
  */
 public class OTUCounter extends Element {

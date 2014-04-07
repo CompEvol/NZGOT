@@ -68,15 +68,15 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastaTo2(String workPathString, String inFastaFileName, String regex) throws IOException {
-        Path workPath = Paths.get(workPathString);
-        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
-
-        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
-
-        PrintStream out1 = FileIO.getPrintStream(workPath + outputFileNameStem + "-1" + NameSpace.SUFFIX_FASTA, null);
-        PrintStream out2 = FileIO.getPrintStream(workPath + outputFileNameStem + "-2" + NameSpace.SUFFIX_FASTA, null);
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
+
+        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFileName);
+        Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-1" + NameSpace.SUFFIX_FASTA);
+        PrintStream out1 = FileIO.getPrintStream(outputFilePath, "split");
+        outputFilePath = Paths.get(workPathString, outputFileNameStem + "-2" + NameSpace.SUFFIX_FASTA);
+        PrintStream out2 = FileIO.getPrintStream(outputFilePath, "split");
 
         String line = reader.readLine();
         PrintStream out = out1;
@@ -115,8 +115,7 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemId) throws IOException {
-        Path workPath = Paths.get(workPathString);
-        Path inFastaFilePath = Module.validateInputFile(workPath, inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
 
         String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
 
@@ -141,7 +140,8 @@ public class SequenceUtil {
                     if (outMap.size() > fileLimit)
                         throw new IllegalStateException("Cannot split to more than " + fileLimit + " files !");
 
-                    out = FileIO.getPrintStream(workPath + outputFileNameStem + "-" + item + NameSpace.SUFFIX_FASTA, null);
+                    Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-" + item + NameSpace.SUFFIX_FASTA);
+                    out = FileIO.getPrintStream(outputFilePath, null);
                     outMap.put(item, out);
                 }
             }
@@ -172,11 +172,11 @@ public class SequenceUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-//        File inFastaFile = new File(workPath + "otus-prep2.fasta");
+        String inFastaFile = "sorted.fasta";
 //        String regex = ".*\\|28S.*";
-//        String regex = ".*prep1.*";
-//        splitFastaTo2(inFastaFile, "otus", regex);
+        String regex = ".*prep1.*";
+        splitFastaTo2(workPath, inFastaFile, regex);
 
-        splitFastaByLabelItem(workPath, "otus-prep2.fasta");
+//        splitFastaByLabelItem(workPath, "otus-prep2.fasta");
     }
 }

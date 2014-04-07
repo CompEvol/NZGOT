@@ -44,14 +44,17 @@ usearch -uchime_ref ./otus$THRESHOULD/otus1.fasta -db $REF_DB -strand plus -nonc
 9. Mapping reads to OTUs:
 usearch -usearch_global ./qc/reads.fasta -db ./otus$THRESHOULD/otus.fasta -strand plus -id 0.$THRESHOULD -uc ./otus$THRESHOULD/map.uc
 
-if out of memory when $THRESHOULD == 100, then skip 7 to get filter chimeras from sorted.fasta as shown below
+if out of memory when $THRESHOULD == 100, then skip 7 to get filter chimeras from sorted.fasta as shown below,
 and run 9 to generate community matrix.
 16S:
 usearch -uchime_ref ./qc/sorted.fasta -db ../gold.fa -strand plus -nonchimeras ./otus100/otus.fasta
 or others:
 usearch -uchime_denovo ./qc/sorted.fasta -uchimeout results.uchime -nonchimeras ./otus100/otus.fasta
 
-Note: use the script to repeat from 7 to 9 by looping through {90..100}
+if still out of memory, try to use nzgo.toolkit.core.sequences.splitFastaTo2 to split sorted.fasta into 2 files,
+and repeat 7 and then combine two result files into one and run 9. But be careful to use this step.
+
+Note: use the script runOTUs*.sh to repeat from 7 to 9 by looping through {90..100}
 
 ============= NZGOT and R =============
 
