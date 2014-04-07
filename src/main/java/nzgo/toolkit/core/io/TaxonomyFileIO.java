@@ -166,7 +166,7 @@ public class TaxonomyFileIO extends FileIO {
             writer.write(taxonName);
             int c1 = t.getCounter(OTUs.READS_COUNTER_ID).getCount();
             writer.write("\t" + c1);
-            int c2 = t.getCounter(OTUs.OTU_COUNTER_ID).getCount();
+            int c2 = t.getCounter(OTUs.OTUS_COUNTER_ID).getCount();
             writer.write("\t" + c2);
             writer.write("\n");
 

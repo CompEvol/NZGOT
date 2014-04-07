@@ -53,14 +53,14 @@ public class AssemblerUtil {
 
         Path outFile = Paths.get(otusFastaFile.getParent().toString(), "sized-" + otusFastaFile.getFileName());
         PrintStream out = FileIO.getPrintStream(outFile, null);
-        Path errFile = Paths.get(otusFastaFile.getParent().toString(), "err-" + otusFastaFile.getFileName());
-        PrintStream outErr = FileIO.getPrintStream(errFile, null);
+        PrintStream outErr = null;
 
         MyLogger.info("\nRename sequences labels from " + otusFastaFile + " to " + outFile);
 
-        BufferedReader reader = FileIO.getReader(otusFastaFile, "OTUs head sequences");
+        BufferedReader reader = FileIO.getReader(otusFastaFile, "OTUs head sequences to add size in");
         String line = reader.readLine();
         boolean hasErr = false;
+        int err = 0;
         while (line != null) {
             if (line.startsWith(">")) {
                 String label = AssemblerUtil.appendSizeToLabel(line.substring(1), otus);
@@ -69,11 +69,16 @@ public class AssemblerUtil {
                     line = ">" + label;
                     hasErr = false;
                 } else {
+                    if (err < 1) {
+                        Path errFile = Paths.get(otusFastaFile.getParent().toString(), "err-" + otusFastaFile.getFileName());
+                        outErr = FileIO.getPrintStream(errFile, null);
+                    }
                     outErr.println(line);
                     line = reader.readLine();
                     outErr.println(line);
                     line = reader.readLine();
                     hasErr = true;
+                    err++;
                 }
             }
             if (!hasErr) {
@@ -85,6 +90,9 @@ public class AssemblerUtil {
 
         out.flush();
         out.close();
+
+        if (err > 0)
+            MyLogger.warn("\nFind " + err + " OTUs are not mapped correctly in uc file.");
     }
 
 }

@@ -63,14 +63,14 @@ public class TaxonomicAssignment {
             if (taxonSetOnRank.containsTaxon(taxonToBreak.toString())) {
                 Taxon taxonAssigned = taxonSetOnRank.getTaxon(taxonToBreak.toString());
                 taxonAssigned.getCounter(OTUs.READS_COUNTER_ID).incrementCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
-                taxonAssigned.getCounter(OTUs.OTU_COUNTER_ID).incrementCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
+                taxonAssigned.getCounter(OTUs.OTUS_COUNTER_ID).incrementCount(taxon.getCounter(OTUs.OTUS_COUNTER_ID).getCount());
             } else if (taxon.isSameAs(taxonToBreak)) {
                 taxonSetOnRank.addTaxon(taxon);
             } else {
                 if (taxonToBreak.getCountersSize() < 2)
                     taxonToBreak.addCounter(); // add 2nd counter for number of otu
                 taxonToBreak.getCounter(OTUs.READS_COUNTER_ID).setCount(taxon.getCounter(OTUs.READS_COUNTER_ID).getCount());
-                taxonToBreak.getCounter(OTUs.OTU_COUNTER_ID).setCount(taxon.getCounter(OTUs.OTU_COUNTER_ID).getCount());
+                taxonToBreak.getCounter(OTUs.OTUS_COUNTER_ID).setCount(taxon.getCounter(OTUs.OTUS_COUNTER_ID).getCount());
                 taxonSetOnRank.addTaxon(taxonToBreak);
             }
         }

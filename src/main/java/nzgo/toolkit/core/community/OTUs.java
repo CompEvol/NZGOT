@@ -23,7 +23,7 @@ import java.util.SortedMap;
 public class OTUs<E> extends BioSortedSet<E> {
 
     public static final int READS_COUNTER_ID = 0;
-    public static final int OTU_COUNTER_ID = 1;
+    public static final int OTUS_COUNTER_ID = 1;
 
     public boolean removeSizeAnnotation = true;
 
@@ -108,12 +108,12 @@ public class OTUs<E> extends BioSortedSet<E> {
             if (taxonomySet.containsTaxon(taxonLCA.toString())) {
                 Taxon taxonAssigned = taxonomySet.getTaxon(taxonLCA.toString());
                 taxonAssigned.getCounter(READS_COUNTER_ID).incrementCount(otu.size());
-                taxonAssigned.getCounter(OTU_COUNTER_ID).incrementCount(1);
+                taxonAssigned.getCounter(OTUS_COUNTER_ID).incrementCount(1);
             } else {
                 if (taxonLCA.getCountersSize() < 2)
                     taxonLCA.addCounter(); // add 2nd counter for number of otu
                 taxonLCA.getCounter(READS_COUNTER_ID).setCount(otu.size());
-                taxonLCA.getCounter(OTU_COUNTER_ID).setCount(1);
+                taxonLCA.getCounter(OTUS_COUNTER_ID).setCount(1);
                 taxonomySet.addTaxon(taxonLCA);
             }
         }
