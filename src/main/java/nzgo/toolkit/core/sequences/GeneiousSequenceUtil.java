@@ -5,7 +5,6 @@ import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -13,10 +12,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 
 /**
  * Geneious Sequence Util
@@ -84,7 +80,7 @@ public class GeneiousSequenceUtil {
             items[i] = item;
         }
 
-        MyLogger.debug("Get items " + ArrayUtil.toString(items) + ", given " + fileName);
+        MyLogger.debug("Get items " + Arrays.toString(items) + ", given " + fileName);
 
         return items;
     }

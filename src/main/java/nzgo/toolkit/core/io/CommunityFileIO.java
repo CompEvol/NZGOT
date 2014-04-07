@@ -1,19 +1,19 @@
 package nzgo.toolkit.core.io;
 
-import nzgo.toolkit.core.community.AlphaDiversity;
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.uc.UCParser;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Community Matrix FileIO
@@ -24,6 +24,92 @@ import java.util.Map;
 public class CommunityFileIO extends OTUsFileIO {
 
     public static final String COMMUNITY_MATRIX = "community_matrix";
+
+    /**
+     * 1st set siteType in siteNameParser, default to BY_PLOT
+     * 2nd load reads into each OTU, and parse label to get sample array
+     * 3rd set sample array, and calculate Alpha diversity for each OTU
+     *
+     * set hits into each OTU, if no OTU is uploaded, then create new OTUs from mapping file
+     * e.g. S	17	300	*	*	*	*	*	HA5K40001BTFNL|IndirectSoil|3-H;size=177;	*
+     * e.g. H	11	300	98.3	+	0	0	300M	G86XGG201B3O46|IndirectSoil|5-I;size=166;	G86XGG201B3YD9|IndirectSoil|5-N;size=248;
+     * @param community
+     * @param otuMappingUCFile
+     * @param siteNameParser          used only for community, if null then ignore sites
+     * @throws java.io.IOException
+     * @throws IllegalArgumentException
+     */
+    public static TreeSet<String> importCommunityFromMapUC(OTUs community, File otuMappingUCFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
+        UCParser.validateUCFile(otuMappingUCFile.getName());
+
+        TreeSet<String> sites = null;
+
+        BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
+        int total = 0;
+        String line = reader.readLine();
+        while (line != null) {
+            // 2 columns: 1st -> read id, 2nd -> otu name
+            String[] fields = lineParser.getSeparator(0).parse(line);
+
+            if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
+
+            // important: Centroid is excluded from Hit list
+            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
+                String otuName = UCParser.getLabel(fields[UCParser.Target_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid))
+                    otuName = UCParser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+
+                if (!UCParser.isNA(otuName)) {
+                    String hitName = UCParser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                    double identity = UCParser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
+                    //TODO incorrect size according to the reason on the top
+                    int sizeAnnotated = UCParser.getSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
+
+                    if (community.containsUniqueElement(otuName)) {
+                        OTU otu = community.getOTU(otuName);
+
+                        if (otu == null) {
+                            throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
+                                    ", from the mapping file which does not exist in OTUs file !");
+                        } else {
+                            // TODO bug to use DereplicatedSequence, may move to a new input, check if affect ER
+//                            DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
+
+                            otu.add(hitName);
+
+                            if (siteNameParser != null) {
+                                if (sites == null) {
+                                    sites = new TreeSet<>();
+
+                                    MyLogger.info("\nSample type: " + siteNameParser.siteType);
+                                }
+
+                                // if by plot, then add plot to TreeSet, otherwise add subplot
+                                String sampleLocation = siteNameParser.getSite(hitName);
+                                sites.add(sampleLocation);
+                            }
+                        }
+                    } else {
+                        OTU otu = new OTU(otuName);
+//                        DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
+                        otu.addElement(hitName);
+                        community.addUniqueElement(otu);
+                    }
+
+                    total++;
+                }
+            }
+
+            line = reader.readLine();
+        }
+
+        reader.close();
+
+        int[] sizes = community.getSizes();
+        MyLogger.debug("Total valid lines = " + total + ", get OTUs = " + sizes[0] + ", reads = " + sizes[1]);
+
+        return sites;
+    }
 
     /**
      * write community matrix
@@ -41,7 +127,7 @@ public class CommunityFileIO extends OTUsFileIO {
 
         BufferedWriter writer = getWriter(outCMFilePath, "community matrix");
 
-        for (String sample : community.getSamples()) {
+        for (String sample : community.getSites()) {
             writer.write("," + sample);
         }
         writer.write("\n");
@@ -51,22 +137,18 @@ public class CommunityFileIO extends OTUsFileIO {
         int otu2Reads = 0;
         for(Object o : community){
             OTU otu = (OTU) o;
-
             writer.write(otu.getName());
 
-            // print AlphaDiversity column
-            AlphaDiversity alphaDiversity = otu.getAlphaDiversity();
-            if (alphaDiversity != null) {
-//                throw new IllegalArgumentException("Error: cannot AlphaDiversity report for OTU : " + otu);
-
-                for (int a : alphaDiversity.getAlphaDiversity()) {
-                    writer.write("," + a);
+            // print readsPerSite column
+            if (otu.readsPerSite != null) {
+                for (int reads : otu.readsPerSite) {
+                    writer.write("," + reads);
                 }
             }
 
-//            print Taxon column
+            // print Taxon column
             if (printTaxonomy && otu.hasTaxon()) {
-                Taxon taxonLCA = otu.getTaxonLCA();
+                Taxon taxonLCA = otu.taxonLCA;
                 writer.write("," + taxonLCA.getScientificName());
                 if (taxonLCA != null && ranks != null) {
                     for (Rank rank : ranks) {
@@ -93,9 +175,9 @@ public class CommunityFileIO extends OTUsFileIO {
 
         MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences, " +
                 otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads, " +
-                community.getSamples().length + " samples = " + community.getSamples());
+                community.getSites().length + " sites = " + Arrays.toString(community.getSites()));
 
-        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSamples().length};
+        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSites().length};
     }
 
     public static int[] writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {

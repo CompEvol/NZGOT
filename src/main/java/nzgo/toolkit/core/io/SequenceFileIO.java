@@ -8,7 +8,6 @@ import jebl.evolution.sequences.SequenceType;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,7 +50,7 @@ public class SequenceFileIO extends FileIO {
      * @throws IOException
      */
     public static void appendItemsToLabelsFastQA(Path inFilePath, PrintStream out, String... items) throws IOException {
-        MyLogger.info("Append " + ArrayUtil.toString(items) + " to sequences labels in " + inFilePath.getFileName());
+        MyLogger.info("Append " + Arrays.toString(items) + " to sequences labels in " + inFilePath.getFileName());
 
         if (!(inFilePath.toString().endsWith(NameSpace.SUFFIX_FASTQ) || inFilePath.toString().endsWith(NameSpace.SUFFIX_FASTA)))
             throw new IllegalArgumentException("Invalid sequence file " + inFilePath);

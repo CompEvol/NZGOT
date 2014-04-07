@@ -78,10 +78,10 @@ public class OTUs<E> extends BioSortedSet<E> {
             OTU otu = (OTU) e;
             Taxon taxon = otuTaxaMap.get(otu.getName());
             if (taxon != null) {
-                otu.setTaxonLCA(taxon);
+                otu.taxonLCA = taxon;
                 cla ++;
             } else {
-                otu.setTaxonLCA(unclassified);
+                otu.taxonLCA = unclassified;
                 uncla ++;
             }
         }
@@ -98,7 +98,7 @@ public class OTUs<E> extends BioSortedSet<E> {
 
         for(E e : this){
             OTU otu = (OTU) e;
-            Taxon taxonLCA = otu.getTaxonLCA();
+            Taxon taxonLCA = otu.taxonLCA;
 
             if (taxonLCA == null)
                 throw new IllegalArgumentException("OTU " + otu + " does not have taxonomic identification !");

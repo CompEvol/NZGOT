@@ -6,6 +6,7 @@ package nzgo.toolkit.core.community;
  * http://www.drive5.com/usearch/manual/dereplication.html
  * @author Walter Xie
  */
+// TODO bug to compare Hit
 public class DereplicatedSequence extends Hit{
 
     // size = duplicated sequences removed + itself

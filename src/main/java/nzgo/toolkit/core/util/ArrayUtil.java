@@ -61,17 +61,4 @@ public class ArrayUtil {
 
         return numbers;
     }
-
-    public static String toString(Object[] array) {
-        if (array == null)
-            return "null";
-        String arrayString = "[";
-        for (Object o : array) {
-            arrayString += o.toString() + ", ";
-        }
-        if (arrayString.endsWith(", ")) {
-            arrayString = arrayString.substring(0, arrayString.lastIndexOf(", "));
-        }
-        return arrayString + "]";
-    }
 }

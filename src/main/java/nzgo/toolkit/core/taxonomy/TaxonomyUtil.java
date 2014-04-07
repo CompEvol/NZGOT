@@ -139,7 +139,7 @@ public class TaxonomyUtil {
             } else if (taxon == null) {
                 MyLogger.error("Error: cannot find taxonomy " + taxon + " from OTU " + otu.getName());
             } else {
-                otu.setTaxonLCA(taxon);
+                otu.taxonLCA = taxon;
             }
         }
 

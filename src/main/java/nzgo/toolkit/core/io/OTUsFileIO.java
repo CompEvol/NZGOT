@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.TreeSet;
 
 /**
  * OTUs FileIO: OTUs are fasta file, and both OTU mapping and reference mapping files are uc format
@@ -30,95 +29,16 @@ import java.util.TreeSet;
  */
 public class OTUsFileIO extends FileIO {
 
-    // default to create OTUs from mapping file
-    public static TreeSet<String> importOTUsFromMapUC(OTUs otus, File otuMappingUCFile) throws IOException, IllegalArgumentException {
-        SiteNameParser siteNameParser = new SiteNameParser();
-        return importOTUsFromMapUC(otus, otuMappingUCFile, siteNameParser);
-    }
 
     /**
-     * 1st set siteType in siteNameParser, default to BY_PLOT
-     * 2nd load reads into each OTU, and parse label to get sample array
-     * 3rd set sample array, and calculate Alpha diversity for each OTU
-     *
-     * set hits into each OTU, if no OTU is uploaded, then create new OTUs from mapping file
-     * e.g. S	17	300	*	*	*	*	*	HA5K40001BTFNL|IndirectSoil|3-H;size=177;	*
-     * e.g. H	11	300	98.3	+	0	0	300M	G86XGG201B3O46|IndirectSoil|5-I;size=166;	G86XGG201B3YD9|IndirectSoil|5-N;size=248;
+     * no site information
      * @param otus
      * @param otuMappingUCFile
-     * @param siteNameParser          used only for community, if null then ignore samples
-     * @throws java.io.IOException
+     * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static TreeSet<String> importOTUsFromMapUC(OTUs otus, File otuMappingUCFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
-        UCParser.validateUCFile(otuMappingUCFile.getName());
-
-        TreeSet<String> samples = null;
-
-        BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
-        int total = 0;
-        String line = reader.readLine();
-        while (line != null) {
-            // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = lineParser.getSeparator(0).parse(line);
-
-            if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
-
-            // important: Centroid is excluded from Hit list
-            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
-                String otuName = UCParser.getLabel(fields[UCParser.Target_Sequence_COLUMN_ID], otus.removeSizeAnnotation);
-                if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid))
-                    otuName = UCParser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], otus.removeSizeAnnotation);
-
-                if (!UCParser.isNA(otuName)) {
-                    String hitName = UCParser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], otus.removeSizeAnnotation);
-                    double identity = UCParser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
-                    //TODO incorrect size according to the reason on the top
-                    int sizeAnnotated = UCParser.getSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
-
-                    if (otus.containsUniqueElement(otuName)) {
-                        OTU otu = otus.getOTU(otuName);
-
-                        if (otu == null) {
-                            throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
-                                    ", from the mapping file which does not exist in OTUs file !");
-                        } else {
-//                            DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
-                            // TODO bug to use DereplicatedSequence, may move to a new input, check if affect ER
-                            otu.add(hitName);
-
-                            if (siteNameParser != null) {
-                                if (samples == null) {
-                                    samples = new TreeSet<>();
-
-                                    MyLogger.info("\nSample type: " + siteNameParser.siteType);
-                                }
-
-                                // if by plot, then add plot to TreeSet, otherwise add subplot
-                                String sampleLocation = siteNameParser.getSite(hitName);
-                                samples.add(sampleLocation);
-                            }
-                        }
-                    } else {
-                        OTU otu = new OTU(otuName);
-//                        DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
-                        otu.addElement(hitName);
-                        otus.addUniqueElement(otu);
-                    }
-
-                    total++;
-                }
-            }
-
-            line = reader.readLine();
-        }
-
-        reader.close();
-
-        int[] sizes = otus.getSizes();
-        MyLogger.debug("Total valid lines = " + total + ", get OTUs = " + sizes[0] + ", reads = " + sizes[1]);
-
-        return samples;
+    public static void importOTUsFromMapUC(OTUs otus, File otuMappingUCFile) throws IOException, IllegalArgumentException {
+        CommunityFileIO.importCommunityFromMapUC(otus, otuMappingUCFile, null);
     }
 
     /**
@@ -130,7 +50,7 @@ public class OTUsFileIO extends FileIO {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static void importRefSeqMappingFromUCFile(File refSeqMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
+    public static void importRefSeqFromMapUCAndMapToOTUs(File refSeqMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
         UCParser.validateUCFile(refSeqMappingUCFile.getName());
 
         BufferedReader reader = getReader(refSeqMappingUCFile, "reference sequence mapping (to OTU) from");

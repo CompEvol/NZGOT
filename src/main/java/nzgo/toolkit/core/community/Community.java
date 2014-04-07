@@ -1,5 +1,6 @@
 package nzgo.toolkit.core.community;
 
+import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
@@ -16,7 +17,7 @@ import java.util.TreeSet;
 
 /**
  * Community Matrix: elementsSet contains OTU
- * same as OTUs, but including IO inputs and sample parser
+ * same as OTUs, but including IO inputs and site parser
  * load all OTUs and mappings from 3 files
  * 2 compulsory files: otusFile, otuMappingFile
  * 1 optional file: refSeqMappingFile
@@ -25,13 +26,13 @@ import java.util.TreeSet;
 public class Community<E> extends OTUs<E> {
 
     public final SiteNameParser siteNameParser;
-    // the final samples already parsed from label
-    public String[] samples;
+    // the final sites already parsed from label
+    public final String[] sites;
 
     public Community(Community community, String name) {
         super(name);
         this.siteNameParser = community.siteNameParser;
-        this.samples = community.samples;
+        this.sites = community.sites;
     }
 
     public Community(File otuMappingFile, SiteNameParser siteNameParser) {
@@ -52,18 +53,23 @@ public class Community<E> extends OTUs<E> {
         if (otuMappingFile == null)
             throw new IllegalArgumentException("Community needs mapping file ! ");
 
+        TreeSet<String> sitesTS = null;
         try {
-            TreeSet<String> samples = OTUsFileIO.importOTUsFromMapUC(this, otuMappingFile, siteNameParser);
+            sitesTS = CommunityFileIO.importCommunityFromMapUC(this, otuMappingFile, siteNameParser);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            // if samples is null, then no samples being parsed
-            if (samples != null && samples.size() > 0) {
-                this.samples = samples.toArray(new String[samples.size()]);
-                setSamplesAndDiversities(siteNameParser);
-            }
+        if (sitesTS != null) {
+            this.sites = sitesTS.toArray(new String[sitesTS.size()]);
+            countReads(siteNameParser);
+        } else {
+            this.sites = null;
+        }
 
+        try {
             if (refSeqMappingFile != null)
-                OTUsFileIO.importRefSeqMappingFromUCFile(refSeqMappingFile, this);
-
+                OTUsFileIO.importRefSeqFromMapUCAndMapToOTUs(refSeqMappingFile, this);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -132,16 +138,20 @@ public class Community<E> extends OTUs<E> {
      * E has to be OTU
      * @param siteNameParser
      */
-    public void setSamplesAndDiversities(SiteNameParser siteNameParser) {
+    public void countReads(SiteNameParser siteNameParser) {
+        if (sites == null || sites.length < 1)
+            throw new IllegalArgumentException("Error: sample array was not initialized: " + sites);
+
         for (E e : this) {
             OTU otu = (OTU) e;
-            AlphaDiversity alphaDiversity = new AlphaDiversity(siteNameParser, samples, otu);
-            otu.setAlphaDiversity(alphaDiversity);
+            otu.countReadsPerSite(siteNameParser, sites);
+//            AlphaDiversity alphaDiversity = new AlphaDiversity(siteNameParser, sites, otu);
+//            otu.setAlphaDiversity(alphaDiversity);
         }
     }
 
-    public String[] getSamples() {
-        return (samples == null) ? new String[0] : samples;
+    public String[] getSites() {
+        return (sites == null) ? new String[0] : sites;
     }
 
 //    public File getRefSeqMappingFile() {
