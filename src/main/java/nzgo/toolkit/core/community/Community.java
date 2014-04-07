@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.TreeSet;
 
 /**
@@ -36,17 +37,16 @@ public class Community<E> extends OTUs<E> {
     }
 
     public Community(File otuMappingFile, SiteNameParser siteNameParser) {
-        this(otuMappingFile, null, siteNameParser);
+        this(otuMappingFile, siteNameParser, false);
     }
 
     /**
-     * create communit matrix from otuMappingFile only
-     * refSeqMappingFile is optional
-     * if otuMappingFile null, then no elements (sequences) in OTU
+     * create community matrix from otuMappingFile only
      * @param otuMappingFile
-     * @param refSeqMappingFile
+     * @param siteNameParser
+     * @param simple                 if true, then clear elementsSet
      */
-    public Community(File otuMappingFile, File refSeqMappingFile, SiteNameParser siteNameParser) {
+    public Community(File otuMappingFile, SiteNameParser siteNameParser, boolean simple) {
         super(NameUtil.getNameWithoutExtension(otuMappingFile.getName()));
         this.siteNameParser = siteNameParser;
 
@@ -62,10 +62,14 @@ public class Community<E> extends OTUs<E> {
 
         if (sitesTS != null) {
             this.sites = sitesTS.toArray(new String[sitesTS.size()]);
-            countReads(siteNameParser);
+            countReads(siteNameParser, simple);
         } else {
             this.sites = null;
         }
+    }
+
+    public Community(File otuMappingFile, File refSeqMappingFile, SiteNameParser siteNameParser) {
+        this(otuMappingFile, siteNameParser, false);
 
         try {
             if (refSeqMappingFile != null)
@@ -138,12 +142,13 @@ public class Community<E> extends OTUs<E> {
      * E has to be OTU
      * @param siteNameParser
      */
-    public void countReads(SiteNameParser siteNameParser) {
+    public void countReads(SiteNameParser siteNameParser, boolean simple) {
         if (sites == null || sites.length < 1)
             throw new IllegalArgumentException("Error: sample array was not initialized: " + sites);
 
         for (E e : this) {
             OTU otu = (OTU) e;
+            otu.simple = simple;
             otu.countReadsPerSite(siteNameParser, sites);
 //            AlphaDiversity alphaDiversity = new AlphaDiversity(siteNameParser, sites, otu);
 //            otu.setAlphaDiversity(alphaDiversity);
@@ -165,18 +170,16 @@ public class Community<E> extends OTUs<E> {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        // TODO need to correct
-//        File otusFile = new File(workPath + "reads-Arthropoda.fasta");
-//        File otuMappingFile = new File(workPath + "map.uc");
-//        SiteNameParser siteNameParser = new SiteNameParser();
-//        Community community = new Community(siteNameParser, otusFile, otuMappingFile, null);
-//
-//        Path outCMFilePath = Paths.get(workPath, community.getName() + "_" + CommunityFileIO.COMMUNITY_MATRIX + ".csv");
-//        try {
-//            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        File otuMappingFile = new File(workPath + "map.uc");
+        SiteNameParser siteNameParser = new SiteNameParser();
+        Community community = new Community(otuMappingFile, siteNameParser, true);
+
+        Path outCMFilePath = Paths.get(workPath, community.getName() + "_" + CommunityFileIO.COMMUNITY_MATRIX + ".csv");
+        try {
+            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
     }

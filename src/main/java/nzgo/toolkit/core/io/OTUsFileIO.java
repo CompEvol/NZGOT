@@ -1,21 +1,14 @@
 package nzgo.toolkit.core.io;
 
-import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.community.Reference;
-import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.uc.UCParser;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * OTUs FileIO: OTUs are fasta file, and both OTU mapping and reference mapping files are uc format
@@ -28,7 +21,6 @@ import java.nio.file.Paths;
  * @author Walter Xie
  */
 public class OTUsFileIO extends FileIO {
-
 
     /**
      * no site information
@@ -110,53 +102,6 @@ public class OTUsFileIO extends FileIO {
         }
 
         reader.close();
-    }
-
-    /**
-     * this method only works for specific directory structure described in WalterPipeline.txt
-     * @param workDir
-     * @param otuMappingFileName
-     * @param reportFileName
-     * @param cmFileName
-     * @param experiments
-     * @param thresholds
-     * @param thresholdWhoseOTUsToAppendSize
-     * @throws IOException
-     */
-    public static void reportOTUs(Path workDir, String otuMappingFileName, String reportFileName, String cmFileName,
-                                  String[] experiments, int[] thresholds, int thresholdWhoseOTUsToAppendSize) throws IOException {
-
-        UCParser.validateUCFile(otuMappingFileName);
-
-        for (String experiment : experiments) {
-            // go into each gene folder
-            Path workPath = Paths.get(workDir.toString(), experiment);
-            MyLogger.info("\nWorking path = " + workPath);
-
-            Path outFile = Paths.get(workPath.toString(), experiment + reportFileName);
-            BufferedWriter writer = FileIO.getWriter(outFile, "OTUs summary report at " + experiment);
-
-            writer.write("Threshold\tOTUs\tReads\tOTUs1Read\tOTUs2Reads\n");
-
-            for (int thre : thresholds) {
-                Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
-
-                File otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
-                SiteNameParser siteNameParser = new SiteNameParser();
-                Community community = new Community(otuMappingFile, siteNameParser);
-
-                Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
-                int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
-                writer.write(thre + "\t" + report[0] + "\t" + report[1] + "\t" + report[2] + "\t" + report[3] + "\n");
-
-                if (thresholdWhoseOTUsToAppendSize == thre) { // 97
-                    Path otusFile = Paths.get(otusPath.toString(), "otus.fasta");
-                    AssemblerUtil.removeAnnotationAppendSizeToLabel(otusFile, community);
-                }
-            }
-
-            writer.close();
-        }
     }
 
     @Deprecated

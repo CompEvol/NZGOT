@@ -1,6 +1,6 @@
 package nzgo.toolkit.core.community;
 
-import nzgo.toolkit.core.io.OTUsFileIO;
+import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.taxonomy.Taxon;
@@ -202,7 +202,7 @@ public class OTUs<E> extends BioSortedSet<E> {
 //        String cmFileName = "_cm_size2.csv";
 
         try {
-            OTUsFileIO.reportOTUs(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
+            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
         } catch (IOException e) {
             e.printStackTrace();
         }
