@@ -1,5 +1,7 @@
-package nzgo.toolkit.core.community;
+package nzgo.toolkit.core.sequences;
 
+
+import nzgo.toolkit.core.uc.Hit;
 
 /**
  * Dereplication is the removal of duplicated sequences
@@ -7,7 +9,7 @@ package nzgo.toolkit.core.community;
  * @author Walter Xie
  */
 // TODO bug to compare Hit
-public class DereplicatedSequence extends Hit{
+public class DereplicatedSequence extends Hit {
 
     // size = duplicated sequences removed + itself
     protected int derepSize = 0;

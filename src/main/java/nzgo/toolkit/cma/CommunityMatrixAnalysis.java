@@ -25,7 +25,8 @@ public class CommunityMatrixAnalysis {
 //        String cmFileName = "_cm_size2.csv";
 
         try {
-            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
+            // -1 not add size to otus.fasta
+            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, -1);
         } catch (IOException e) {
             e.printStackTrace();
         }

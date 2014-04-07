@@ -48,6 +48,7 @@ public class AssemblerUtil {
         return AssemblerUtil.appendSizeToLabel(otu, otus.removeSizeAnnotation);
     }
 
+    // TODO why slow?
     public static void removeAnnotationAppendSizeToLabel(Path otusFastaFile, OTUs otus) throws IOException {
         Module.validateFileName(otusFastaFile.getFileName().toString(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
 

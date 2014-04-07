@@ -70,6 +70,8 @@ Run R script
 ============= BLAST =============
 13. Taxonomy:
 BLAST otus.fasta and load otus.out to MEGAN
+Note: because 16S is huge, its otus.fasta could be separated into few fasta files to reduce the time of BLAST,
+using nzgo.toolkit.core.sequences.SequenceUtil.splitFastaBySites().
 
 14. NZGOT taxonomy analysis tool (still in developing).
 

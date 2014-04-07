@@ -103,24 +103,24 @@ public class SequenceUtil {
         out2.close();
     }
 
-    public static void splitFastaByLabelItem(String workPathString, String inFastaFileName) throws IOException {
+    public static void splitFastaBySites(String workPathString, String inFastaFileName) throws IOException {
         splitFastaByLabelItem(workPathString, inFastaFileName, SiteNameParser.LABEL_SAMPLE_INDEX);
     }
 
     /**
-     * split sequences into n fasta files by items parsed by itemId in the label
+     * split sequences into n fasta files by items parsed by itemIndex in the label
      * @param workPathString
      * @param inFastaFileName
-     * @param itemId
+     * @param itemIndex
      * @throws IOException
      */
-    public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemId) throws IOException {
+    public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemIndex) throws IOException {
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
 
         String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
 
         int fileLimit = 50;
-        SiteNameParser siteNameParser = new SiteNameParser(itemId);
+        SiteNameParser siteNameParser = new SiteNameParser(itemIndex);
         Map<String, PrintStream> outMap = new HashMap<>();
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
@@ -175,8 +175,8 @@ public class SequenceUtil {
         String inFastaFile = "sorted.fasta";
 //        String regex = ".*\\|28S.*";
         String regex = ".*prep1.*";
-        splitFastaTo2(workPath, inFastaFile, regex);
+//        splitFastaTo2(workPath, inFastaFile, regex);
 
-//        splitFastaByLabelItem(workPath, "otus-prep2.fasta");
+        splitFastaBySites(workPath, "otus.fasta");
     }
 }

@@ -1,5 +1,6 @@
 package nzgo.toolkit.core.community;
 
+import nzgo.toolkit.core.uc.Hit;
 import nzgo.toolkit.core.util.BioSortedSet;
 
 /**
