@@ -1,8 +1,5 @@
 package nzgo.toolkit.core.taxonomy;
 
-import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.util.Element;
-
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,10 +10,9 @@ import java.util.List;
  * toString() return taxId, if it is null, return name
  * @author Walter Xie
  */
-public class Taxon extends Element {
+public class Taxon extends TaxonNoID {
 
     protected String taxId;
-    protected Rank rank;
     protected String parentTaxId;
 //    protected Taxon parentTaxon; //TODO Taxon or String?
 
@@ -24,13 +20,8 @@ public class Taxon extends Element {
         super();
     }
 
-    // name
-    public Taxon(String scientificName) {
-        super(scientificName);
-    }
-
     public Taxon(String scientificName, String taxId) {
-        this(scientificName);
+        super(scientificName);
         setTaxId(taxId);
     }
 
@@ -44,18 +35,13 @@ public class Taxon extends Element {
      * start from "cellular organisms", whose parent is root
      * @return
      */
-    public List<Taxon> getLineage () {
+    public List<Taxon> getLineage() {
         List<Taxon> lineage = new ArrayList<>();
-        try {
-            getParentLineage(lineage, this);
-        } catch (IOException | XMLStreamException e) {
-            MyLogger.error("Cannot get taxonomy lineage of " + this);
-            e.printStackTrace();
-        }
+        getParentLineage(lineage, this);
         return lineage;
     }
 
-    protected void getParentLineage(List<Taxon> lineage, Taxon taxon) throws IOException, XMLStreamException {
+    protected void getParentLineage(List<Taxon> lineage, Taxon taxon) {
         if (!TaxonomyUtil.isRoot(taxon.getTaxId()) && taxon.getParentTaxon() != null) {
             getParentLineage(lineage, taxon.getParentTaxon());
             // add "cellular organisms" first, which is the first in xml
@@ -77,7 +63,7 @@ public class Taxon extends Element {
 
         List<Taxon> lineage = getLineage();
         for(int i = lineage.size() - 1; i >= 0; i--){
-            if (lineage.get(i).getTaxId().equalsIgnoreCase(bioClassification.getTaxId()))
+            if (lineage.get(i).isSameAs(bioClassification))
                 return true;
         }
         return false;
@@ -127,14 +113,6 @@ public class Taxon extends Element {
         return !(isSameAs(TaxonomyUtil.getUnclassified()) || getScientificName().equalsIgnoreCase(DEFAULT_NAME));
     }
 
-    public String getScientificName() {
-        return getName();
-    }
-
-    public void setScientificName(String scientificName) {
-        setName(scientificName);
-    }
-
     public String getTaxId() {
         if (taxId == null)
             throw new IllegalArgumentException("Taxon " + this + " requires a unique id ! ");
@@ -145,7 +123,6 @@ public class Taxon extends Element {
         this.taxId = taxId;
     }
 
-
     public String getParentTaxId() {
         return parentTaxId;
     }
@@ -154,34 +131,28 @@ public class Taxon extends Element {
         this.parentTaxId = parentTaxId;
     }
 
-    public Taxon getParentTaxon() throws IOException, XMLStreamException {
-        return (parentTaxId != null) ? TaxonomyPool.getAndAddTaxIdByMemory(parentTaxId) : null;
+    public Taxon getParentTaxon() {
+        try {
+            return (parentTaxId != null) ? TaxonomyPool.getAndAddTaxIdByMemory(parentTaxId) : null;
+        } catch (IOException | XMLStreamException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 //    public void setParentTaxon(Taxon parentTaxon) {
 //        this.parentTaxon = parentTaxon;
 //    }
 
-    public Rank getRank() {
-        return rank;
-    }
-
-    public void setRank(Rank rank) {
-        this.rank = rank;
-    }
-
     public boolean isSameAs(Taxon taxon) {
-        if (taxId != null) {
-            return this.getTaxId().contentEquals(taxon.getTaxId());
-        } else {
-            // TODO
-            return this.getScientificName().equalsIgnoreCase(taxon.getScientificName());
-        }
+        return this.getTaxId().contentEquals(taxon.getTaxId());
+    }
+
+    public boolean isSameAs(String taxId) {
+        return this.getTaxId().contentEquals(taxId);
     }
 
     public String toString() {
-        if (taxId == null)
-            return getName();
         return getTaxId();
     }
 

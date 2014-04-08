@@ -28,8 +28,6 @@ public class TaxonNCBI extends Taxon {
         setTaxId(taxId);
     }
 
-
-
     public int getGi() {
         return gi;
     }
