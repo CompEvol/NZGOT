@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 
 /**
@@ -66,4 +67,11 @@ public class SystemUtil {
         return appDir;
     }
 
+    public static void printSysEnvVars() {
+        Map<String, String> env = System.getenv();
+        MyLogger.debug("Print all system environment variables : ");
+        for (Map.Entry<String, String> entry : env.entrySet()) {
+            MyLogger.debug(entry.getKey() + " = " + entry.getValue());
+        }
+    }
 }

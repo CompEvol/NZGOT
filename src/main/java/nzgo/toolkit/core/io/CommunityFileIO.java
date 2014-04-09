@@ -82,8 +82,7 @@ public class CommunityFileIO extends OTUsFileIO {
                             if (siteNameParser != null) {
                                 if (sites == null) {
                                     sites = new TreeSet<>();
-
-                                    MyLogger.info("\nSample type: " + siteNameParser.siteType);
+                                    MyLogger.info("Site type: " + siteNameParser.siteType);
                                 }
 
                                 // if by plot, then add plot to TreeSet, otherwise add subplot
