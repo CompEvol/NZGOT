@@ -3,7 +3,7 @@ Folder structure:
 experiment (e.g. 16S)
                   |___ deconvoluted
                   |___ qc
-                  |___ otu$THRESHOULD (e.g. 97)
+                  |___ otu$THRESHOLD (e.g. 97)
 
 The proposed pipeline is:
 
@@ -32,14 +32,14 @@ usearch -derep_fulllength ./qc/reads.fasta -output ./qc/derep.fasta -sizeout
 usearch -sortbysize ./qc/derep.fasta -output ./qc/sorted.fasta -minsize 1
 
 7. OTU clustering:
-PCT=$((100-$THRESHOULD))
-usearch -cluster_otus ./qc/sorted.fasta -otu_radius_pct $PCT -otus ./otus$THRESHOULD/otus1.fasta -sizein -sizeout
+PCT=$((100-$THRESHOLD))
+usearch -cluster_otus ./qc/sorted.fasta -otu_radius_pct $PCT -otus ./otus$THRESHOLD/otus1.fasta -sizein -sizeout
 
 8. Filter chimeras by either denovo or reference (such as 16S):
 Denovo:
-usearch -uchime_denovo ./otus$THRESHOULD/otus1.fasta -uchimeout results.uchime -nonchimeras ./otus$THRESHOULD/otus.fasta
+usearch -uchime_denovo ./otus$THRESHOLD/otus1.fasta -uchimeout results.uchime -nonchimeras ./otus$THRESHOLD/otus.fasta
 Reference (e.g. $REF_DB = ../gold.fa)
-usearch -uchime_ref ./otus$THRESHOULD/otus1.fasta -db $REF_DB -strand plus -nonchimeras ./otus$THRESHOULD/otus.fasta
+usearch -uchime_ref ./otus$THRESHOLD/otus1.fasta -db $REF_DB -strand plus -nonchimeras ./otus$THRESHOLD/otus.fasta
 
 9. Mapping reads to OTUs:
 if [ "100" -gt "$THRESHOLD" ]; then
@@ -47,9 +47,9 @@ if [ "100" -gt "$THRESHOLD" ]; then
 else
    PER=1.0
 fi
-usearch -usearch_global ./qc/reads.fasta -db ./otus$THRESHOULD/otus.fasta -strand plus -id $PER -uc ./otus$THRESHOULD/map.uc
+usearch -usearch_global ./qc/reads.fasta -db ./otus$THRESHOLD/otus.fasta -strand plus -id $PER -uc ./otus$THRESHOLD/map.uc
 
-Tips: if out of memory when $THRESHOULD == 100, then skip 7 to get filter chimeras from sorted.fasta as shown below,
+Tips: if out of memory when $THRESHOLD == 100, then skip 7 to get filter chimeras from sorted.fasta as shown below,
 and run 9 to generate community matrix.
 16S:
 usearch -uchime_ref ./qc/sorted.fasta -db ../gold.fa -strand plus -nonchimeras ./otus100/otus.fasta
