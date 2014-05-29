@@ -63,26 +63,28 @@ public class SequenceUtil {
     /**
      * split sequences into 2 fasta file by matching regex of labels
      * @param workPathString
-     * @param inFastaFileName
+     * @param inFileName
      * @param regex
      * @throws IOException
      */
-    public static void splitFastaTo2(String workPathString, String inFastaFileName, String regex) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
+    public static void splitFastAOrQTo2(String workPathString, String inFileName, String regex) throws IOException {
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+                new String[]{NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ}, "original file");
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 
-        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFileName);
-        Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-1" + NameSpace.SUFFIX_FASTA);
+        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFileName);
+        String suffix = NameUtil.getSuffix(inFileName);
+        Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-1" + suffix);
         PrintStream out1 = FileIO.getPrintStream(outputFilePath, "split");
-        outputFilePath = Paths.get(workPathString, outputFileNameStem + "-2" + NameSpace.SUFFIX_FASTA);
+        outputFilePath = Paths.get(workPathString, outputFileNameStem + "-2" + suffix);
         PrintStream out2 = FileIO.getPrintStream(outputFilePath, "split");
 
         String line = reader.readLine();
         PrintStream out = out1;
         while (line != null) {
 
-            if (line.startsWith(">")) {
+            if (line.startsWith(">") || line.startsWith("@")) {
                 String label = line.substring(1);
 
                 if (label.matches(regex)) {
@@ -172,11 +174,12 @@ public class SequenceUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        String inFastaFile = "sorted.fasta";
-//        String regex = ".*\\|28S.*";
-        String regex = ".*prep1.*";
-//        splitFastaTo2(workPath, inFastaFile, regex);
+        String inFastaFile = "18S-guess.fastq";//"sorted.fasta";
+        String regex = ".*\\|MID-.*";  //".*\\|28S.*";
+//        String regex = ".*prep1.*";
+        splitFastAOrQTo2(workPath, inFastaFile, regex);
+//        splitFastaByLabelItem(workPath, inFastaFile, 3);
 
-        splitFastaBySites(workPath, "otus.fasta");
+//        splitFastaBySites(workPath, "otus.fasta");
     }
 }
