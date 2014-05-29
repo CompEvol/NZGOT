@@ -80,12 +80,13 @@ public class SequenceUtil {
         outputFilePath = Paths.get(workPathString, outputFileNameStem + "-2" + suffix);
         PrintStream out2 = FileIO.getPrintStream(outputFilePath, "split");
 
+        int l = 0;
         String line = reader.readLine();
         PrintStream out = out1;
         while (line != null) {
 
             if ( (suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
-                    suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTA) && line.startsWith("@") ) {
+                    (suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTQ) &&  l % 4 == 0) ) {
                 String label = line.substring(1);
 
                 if (label.matches(regex)) {
@@ -97,6 +98,7 @@ public class SequenceUtil {
 
             out.println(line);
             line = reader.readLine();
+            l++;
         }
 
         reader.close();
