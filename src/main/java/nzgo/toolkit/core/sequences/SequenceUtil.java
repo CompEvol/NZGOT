@@ -84,7 +84,8 @@ public class SequenceUtil {
         PrintStream out = out1;
         while (line != null) {
 
-            if (line.startsWith(">") || line.startsWith("@")) {
+            if ( (suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
+                    suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTA) && line.startsWith("@") ) {
                 String label = line.substring(1);
 
                 if (label.matches(regex)) {
