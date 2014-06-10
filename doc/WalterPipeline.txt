@@ -42,12 +42,8 @@ Reference (e.g. $REF_DB = ../gold.fa)
 usearch -uchime_ref ./otus$THRESHOLD/otus1.fasta -db $REF_DB -strand plus -nonchimeras ./otus$THRESHOLD/otus.fasta
 
 9. Mapping reads to OTUs:
-if [ "100" -gt "$THRESHOLD" ]; then
-   PER=0.$THRESHOLD
-else
-   PER=1.0
-fi
-usearch -usearch_global ./qc/reads.fasta -db ./otus$THRESHOLD/otus.fasta -strand plus -id $PER -uc ./otus$THRESHOLD/map.uc
+usearch -usearch_global ./qc/reads.fasta -db ./otus$THRESHOLD/otus.fasta -strand plus -id 0.97 -uc ./otus$THRESHOLD/map.uc
+Note: -id 0.97 is the minimum identity required for most commands that use global alignments, not the OTU clustering threshold
 
 Tips: if out of memory when $THRESHOLD == 100, then skip 7 to get filter chimeras from sorted.fasta as shown below,
 and run 9 to generate community matrix.

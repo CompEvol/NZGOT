@@ -3,11 +3,13 @@ package nzgo.toolkit.core.community;
 import nzgo.toolkit.core.io.CommunityFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
+import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.taxonomy.TaxonomyUtil;
 import nzgo.toolkit.core.util.BioSortedSet;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -191,18 +193,33 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     //Main method
     public static void main(final String[] args) {
-        String[] experiments = new String[]{"CO1-soilkit","CO1-indirect","ITS","trnL"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
-        int[] thresholds = new int[]{90,91,92,93,94,95,96,97,98,99,100}; // 90,91,92,93,94,95,96,97,98,99,100
+        String[] experiments = new String[]{"CO1-indirect"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
+        int[] thresholds = new int[]{90}; // 90,91,92,93,94,95,96,97,98,99,100
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
-        String otuMappingFileName = "map.uc";
+        String otuMappingFileName = "map2.uc";
         String reportFileName = "_otus_report.tsv";
-        String cmFileName = "_cm.csv";
+        String cmFileName = "_cm2.csv";
 //        String otuMappingFileName = "map_size2.uc";
 //        String reportFileName = "_otus_size2_report.tsv";
 //        String cmFileName = "_cm_size2.csv";
 
         try {
-            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
+//            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
+            for (String experiment : experiments) {
+                // go into each gene folder
+                Path workPath = Paths.get(workDir.toString(), experiment);
+                MyLogger.info("\nWorking path = " + workPath);
+                for (int thre : thresholds) {
+                    Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
+
+                    File otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
+                    SiteNameParser siteNameParser = new SiteNameParser();
+                    Community community = new Community(otuMappingFile, siteNameParser);
+
+                    Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
+                    int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
