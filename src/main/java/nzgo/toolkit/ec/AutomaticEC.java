@@ -91,7 +91,7 @@ public class AutomaticEC {
         OTUsFileIO.importOTUsFromMapUC(otus, file);
 
         file = new File(mapOtuRef);
-        OTUsFileIO.importRefSeqFromMapUCAndMapToOTUs(file, otus);
+        OTUsFileIO.importRefSeqFromMapUCAndMapToOTUs(otus, file);
 
         double count = 0;
         double size = sequences.size();

@@ -1,6 +1,7 @@
 package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.io.CommunityFileIO;
+import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
@@ -188,6 +189,19 @@ public class OTUs<E> extends BioSortedSet<E> {
             }
         }
         return isValid;
+    }
+
+
+    public static void validateOTUsMapping(File otusFile, File otuMappingUCFile) throws IOException {
+        OTUs otus = new OTUs(otusFile.getName());
+        OTUsFileIO.importOTUsFromFasta(otus, otusFile, false);
+
+        OTUs otusMap = new OTUs(otuMappingUCFile.getName());
+        OTUsFileIO.importOTUsFromMapUC(otusMap, otuMappingUCFile);
+
+        BioSortedSet diff = otus.symmetricDiff(otusMap);
+
+        MyLogger.info("\nOTUs size = " + otus.size() + ", mapping file OTUs size = " + otusMap.size() + ", symmetric diff = " + diff.elementsToString());
     }
 
 

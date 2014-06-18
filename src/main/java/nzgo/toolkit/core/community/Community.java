@@ -73,7 +73,7 @@ public class Community<E> extends OTUs<E> {
 
         try {
             if (refSeqMappingFile != null)
-                OTUsFileIO.importRefSeqFromMapUCAndMapToOTUs(refSeqMappingFile, this);
+                OTUsFileIO.importRefSeqFromMapUCAndMapToOTUs(this, refSeqMappingFile);
         } catch (IOException e) {
             e.printStackTrace();
         }

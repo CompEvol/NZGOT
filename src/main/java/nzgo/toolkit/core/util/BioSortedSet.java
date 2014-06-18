@@ -34,6 +34,21 @@ public class BioSortedSet<E> extends TreeSet<E> implements Comparable<E>{
     }
 
     /**
+     * symmetric difference between this set and secondSet
+     * @param secondSet
+     * @return
+     */
+    public BioSortedSet<E> symmetricDiff(final BioSortedSet<E> secondSet) {
+        BioSortedSet<E> symmetricDiff = new BioSortedSet<E>();
+        symmetricDiff.addAll(this);
+        symmetricDiff.addAll(secondSet);
+        BioSortedSet<E> tmp = new BioSortedSet<E>(this);
+        tmp.retainAll(secondSet);
+        symmetricDiff.removeAll(tmp);
+        return symmetricDiff;
+    }
+
+    /**
      * no exception to find duplication, but log warning
      * use add no warning no exception
      * @param e

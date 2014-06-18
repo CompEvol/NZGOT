@@ -3,12 +3,16 @@ package nzgo.toolkit.core.io;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.community.Reference;
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.uc.UCParser;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * OTUs FileIO: OTUs are fasta file, and both OTU mapping and reference mapping files are uc format
@@ -37,12 +41,12 @@ public class OTUsFileIO extends FileIO {
      * the fast way to create reference instance between OTUs and reference sequences
      * from reference sequence mapping file
      * e.g. H	24428	300	82.7	+	0	0	D155MI144M357I	HCHCI1P01B1RDE|IndirectSoil|LBI-E;size=742;	1194713|Arthropoda|Insecta|Lepidoptera|Lepidoptera|BOLD:AAH9129
-     * @param refSeqMappingUCFile
      * @param otus
+     * @param refSeqMappingUCFile
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static void importRefSeqFromMapUCAndMapToOTUs(File refSeqMappingUCFile, OTUs otus) throws IOException, IllegalArgumentException {
+    public static void importRefSeqFromMapUCAndMapToOTUs(OTUs otus, File refSeqMappingUCFile) throws IOException, IllegalArgumentException {
         UCParser.validateUCFile(refSeqMappingUCFile.getName());
 
         BufferedReader reader = getReader(refSeqMappingUCFile, "reference sequence mapping (to OTU) from");
@@ -65,6 +69,33 @@ public class OTUsFileIO extends FileIO {
                     Reference<OTU, String> refSeq = new Reference<>(otu, fields[UCParser.Target_Sequence_COLUMN_ID]);
                     otu.setReference(refSeq);
                 }
+            }
+
+            line = reader.readLine();
+        }
+
+        reader.close();
+    }
+
+    // only use to validate UPARSE pipeline OTUs map
+    public static void importOTUsFromFasta (OTUs otus, File otusFile, boolean hasSequence) throws IOException, IllegalArgumentException {
+        Module.validateFileName(otusFile.getName(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
+
+        BufferedReader reader = getReader(otusFile, "OTUs from");
+
+        OTU otu = null;
+        String line = reader.readLine();
+        while (line != null) {
+            if (line.startsWith(">")) {
+//                line.replaceAll("size=", "");
+                // the current label only contains otu name
+                String otuName = line.substring(1);
+                otu = new OTU(otuName);
+
+                otus.addElement(otu);
+
+            } else {
+                // TODO add sequence
             }
 
             line = reader.readLine();
@@ -117,6 +148,32 @@ public class OTUsFileIO extends FileIO {
         return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && UCParser.isUCFile(fileName);
     }
 
+    //Main method
+    public static void main(final String[] args) {
+        String[] experiments = new String[]{"CO1-indirect","CO1-soilkit","ITS","trnL","18S","16S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
+        int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
+        String otuFileName = "otus.fasta";
+        String otuMappingFileName = "map.uc";
+
+        try {
+            for (String experiment : experiments) {
+                // go into each gene folder
+                Path workPath = Paths.get(workDir.toString(), experiment);
+                MyLogger.info("\nWorking path = " + workPath);
+                for (int thre : thresholds) {
+                    Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
+
+                    File otuFile = Paths.get(otusPath.toString(), otuFileName).toFile();
+                    File otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
+
+                    OTUs.validateOTUsMapping(otuFile, otuMappingFile);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     // TODO is this efficient?
 //    public static void importOTUsAndMapping(File otuMappingFile, OTUs otus, List<Sequence> sequences) throws IOException, IllegalArgumentException {

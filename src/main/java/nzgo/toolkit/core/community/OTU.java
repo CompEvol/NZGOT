@@ -30,8 +30,6 @@ public class OTU<E> extends BioSortedSet<E> {
         super(name);
     }
 
-
-
     public int size() {
         if (super.size() < 1 && readsPerSite != null) {
             int size = 0;
