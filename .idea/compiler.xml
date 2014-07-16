@@ -23,8 +23,12 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="nzgot" />
+        <module name="NZGOT" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="NZGOT" target="1.7" />
+    </bytecodeTargetLevel>
   </component>
 </project>
 
