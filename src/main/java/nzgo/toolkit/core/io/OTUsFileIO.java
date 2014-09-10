@@ -83,16 +83,20 @@ public class OTUsFileIO extends FileIO {
 
         BufferedReader reader = getReader(otusFile, "OTUs from");
 
+        int totalAnnotatedSize = 0;
         OTU otu = null;
         String line = reader.readLine();
         while (line != null) {
             if (line.startsWith(">")) {
-//                line.replaceAll("size=", "");
-                // the current label only contains otu name
-                String otuName = line.substring(1);
-                otu = new OTU(otuName);
+                String label = line.substring(1);
+                int annotatedSize = UCParser.getAnnotatedSize(label);
 
+                String otuName = UCParser.getLabelNoSizeAnnotation(label);
+                otu = new OTU(otuName);
+                otu.setAnnotatedSize(annotatedSize);
                 otus.addElement(otu);
+
+                totalAnnotatedSize+=annotatedSize;
 
             } else {
                 // TODO add sequence
@@ -102,6 +106,9 @@ public class OTUsFileIO extends FileIO {
         }
 
         reader.close();
+
+        MyLogger.info("\nImport " + otus.size() + " OTUs, ");
+        if (totalAnnotatedSize > 0) MyLogger.info("Total annotated size = " + totalAnnotatedSize);
     }
 
     //TODO developing: replace OTU to Target
@@ -150,24 +157,29 @@ public class OTUsFileIO extends FileIO {
 
     //Main method
     public static void main(final String[] args) {
-        String[] experiments = new String[]{"CO1-indirect","CO1-soilkit","ITS","trnL","18S","16S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
+        String[] experiments = new String[]{"18S-test"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
         int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
         String otuFileName = "otus.fasta";
-        String otuMappingFileName = "map.uc";
+        String otuMappingFileName = "mapOTUchimeras.uc";
+        String reportFileName = "_otus_report.tsv";
+        String cmFileName = "_cm.csv";
+//        String otuMappingFileName = "map_size2.uc";
+//        String reportFileName = "_otus_size2_report.tsv";
+//        String cmFileName = "_cm_size2.csv";
 
+        OTUs otus = new OTUs("OTUs");
         try {
             for (String experiment : experiments) {
                 // go into each gene folder
                 Path workPath = Paths.get(workDir.toString(), experiment);
                 MyLogger.info("\nWorking path = " + workPath);
+
                 for (int thre : thresholds) {
                     Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
+                    File otusFile = Paths.get(otusPath.toString(), otuFileName).toFile();
 
-                    File otuFile = Paths.get(otusPath.toString(), otuFileName).toFile();
-                    File otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
-
-                    OTUs.validateOTUsMapping(otuFile, otuMappingFile);
+                    importOTUsFromFasta (otus, otusFile, false);
                 }
             }
         } catch (IOException e) {

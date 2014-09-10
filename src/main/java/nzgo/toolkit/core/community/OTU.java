@@ -21,6 +21,8 @@ public class OTU<E> extends BioSortedSet<E> {
     public int[] readsPerSite;
     public Taxon taxonLCA;
 
+    protected int annotatedSize = 0;
+
     @Deprecated
     protected Reference reference;
     @Deprecated
@@ -76,6 +78,15 @@ public class OTU<E> extends BioSortedSet<E> {
 //    public void setTaxonLCA(Taxon taxonLCA) {
 //        this.taxonLCA = taxonLCA;
 //    }
+
+
+    public int getAnnotatedSize() {
+        return annotatedSize;
+    }
+
+    public void setAnnotatedSize(int annotatedSize) {
+        this.annotatedSize = annotatedSize;
+    }
 
     @Deprecated
     public String getAlias() {

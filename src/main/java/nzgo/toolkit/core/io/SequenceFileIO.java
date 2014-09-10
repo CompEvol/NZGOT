@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,25 @@ public class SequenceFileIO extends FileIO {
         return sequenceImporter.importSequences();
     }
 
+    public static List<String> importFastaLabelOnly (Path sequenceFile) throws IOException {
+        List<String> labels = new ArrayList<>();
+
+        BufferedReader reader = OTUsFileIO.getReader(sequenceFile, "fasta file");
+
+        String line = reader.readLine();
+        while (line != null) {
+            if (line.startsWith(">")) {
+                String label = line.substring(1);
+
+                labels.add(label);
+            }
+
+            line = reader.readLine();
+        }
+
+        reader.close();
+        return labels;
+    }
 
     public static void writeFasta (Path sequenceFile, List<Sequence> sequences) throws IOException {
         MyLogger.info("\nCreating fasta ..." + sequenceFile);

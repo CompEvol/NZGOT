@@ -64,8 +64,8 @@ public class CommunityFileIO extends OTUsFileIO {
                 if (!UCParser.isNA(otuName)) {
                     String hitName = UCParser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
                     double identity = UCParser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
-                    //TODO incorrect size according to the reason on the top
-                    int sizeAnnotated = UCParser.getSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    // annotated size from dereplication
+                    int annotatedSize = UCParser.getAnnotatedSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
                     if (community.containsUniqueElement(otuName)) {
                         OTU otu = community.getOTU(otuName);
@@ -78,6 +78,7 @@ public class CommunityFileIO extends OTUsFileIO {
 //                            DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
 
                             otu.add(hitName);
+                            otu.setAnnotatedSize(annotatedSize);
 
                             if (siteNameParser != null) {
                                 if (sites == null) {
@@ -94,6 +95,7 @@ public class CommunityFileIO extends OTUsFileIO {
                         OTU otu = new OTU(otuName);
 //                        DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
                         otu.addElement(hitName);
+                        otu.setAnnotatedSize(annotatedSize);
                         community.addUniqueElement(otu);
                     }
 
@@ -136,6 +138,7 @@ public class CommunityFileIO extends OTUsFileIO {
         int total = 0;
         int otu1Read = 0;
         int otu2Reads = 0;
+        int totalAnnotatedSize = 0;
         for(Object o : community){
             OTU otu = (OTU) o;
             writer.write(otu.getName());
@@ -162,6 +165,7 @@ public class CommunityFileIO extends OTUsFileIO {
 
             writer.write("\n");
 
+            // real size
             int size = otu.size();
             total += size;
             if (size == 1) {
@@ -169,6 +173,10 @@ public class CommunityFileIO extends OTUsFileIO {
             } else if (size == 2) {
                 otu2Reads ++;
             }
+
+            // annotated size
+            size = otu.getAnnotatedSize();
+            totalAnnotatedSize+=size;
         }
 
         writer.flush();
@@ -176,9 +184,9 @@ public class CommunityFileIO extends OTUsFileIO {
 
         MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences, " +
                 otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads, " +
-                community.getSites().length + " sites = " + Arrays.toString(community.getSites()));
+                community.getSites().length + ", total annotated size = " + totalAnnotatedSize + ", sites = " + Arrays.toString(community.getSites()));
 
-        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSites().length};
+        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSites().length, totalAnnotatedSize};
     }
 
     public static int[] writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {

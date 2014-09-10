@@ -6,6 +6,7 @@ import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.OTUsFileIO;
+import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Assembler;
 import nzgo.toolkit.core.naming.NameSpace;
@@ -43,8 +44,9 @@ public class SequenceUtil {
 
     /**
      * get sequence string from a list of sequences given the sequence label
+     *
      * @param sequenceLabel Label of query sequence
-     * @param sequenceList Sequence list
+     * @param sequenceList  Sequence list
      * @return amino acid sequence found from the list or null
      */
     public static String getSequenceStringFrom(String sequenceLabel, List<Sequence> sequenceList) {
@@ -62,6 +64,7 @@ public class SequenceUtil {
 
     /**
      * split sequences into 2 fasta file by matching regex of labels
+     *
      * @param workPathString
      * @param inFileName
      * @param regex
@@ -85,8 +88,8 @@ public class SequenceUtil {
         PrintStream out = out1;
         while (line != null) {
 
-            if ( (suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
-                    (suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTQ) &&  l % 4 == 0) ) {
+            if ((suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
+                    (suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTQ) && l % 4 == 0)) {
                 String label = line.substring(1);
 
                 if (label.matches(regex)) {
@@ -114,6 +117,7 @@ public class SequenceUtil {
 
     /**
      * split sequences into n fasta files by items parsed by itemIndex in the label
+     *
      * @param workPathString
      * @param inFastaFileName
      * @param itemIndex
@@ -170,19 +174,69 @@ public class SequenceUtil {
         MyLogger.debug("original file total lines = " + originalTotal + ", write to new files total lines = " + total);
     }
 
-    // main
+    /**
+     * export difference from file1 to file2, not include difference from file2 to file1 yet.
+     * @param workPathString
+     * @param fileName1
+     * @param fileName2
+     * @throws IOException
+     */
+    public static void diffFastAFrom(String workPathString, String fileName1, String fileName2) throws IOException {
+        Path file1 = Module.validateInputFile(Paths.get(workPathString), fileName1,
+                new String[]{NameSpace.SUFFIX_FASTA}, "original file");
+        Path file2 = Module.validateInputFile(Paths.get(workPathString), fileName2,
+                new String[]{NameSpace.SUFFIX_FASTA}, "original file");
+
+        BufferedReader reader1 = OTUsFileIO.getReader(file1, "file 1");
+        List<String> labels = SequenceFileIO.importFastaLabelOnly(file2);
+
+        Path outputFilePath = Paths.get(workPathString, "diff" + NameSpace.SUFFIX_FASTA);
+        PrintStream out = FileIO.getPrintStream(outputFilePath, "difference");
+
+        int l = 0;
+        boolean hasDiff = false;
+        String line = reader1.readLine();
+        while (line != null) {
+            if (line.startsWith(">")) {
+                hasDiff = false;
+                String label = line.substring(1);
+                if (!labels.contains(label)) {
+                    hasDiff = true;
+                    out.println(line);
+                    l++;
+                }
+            } else if (hasDiff) {
+                out.println(line);
+                l++;
+            }
+
+            line = reader1.readLine();
+        }
+
+        reader1.close();
+        out.flush();
+        out.close();
+
+        MyLogger.debug("export different lines = " + l);
+
+    }
+
+        // main
     public static void main(String[] args) throws IOException{
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        String inFastaFile = "18S-guess.fastq";//"sorted.fasta";
-        String regex = ".*\\|MID-.*";  //".*\\|28S.*";
-//        String regex = ".*prep1.*";
+        String inFastaFile = "otus2.fasta";//"sorted.fasta";
+//        String regex = ".*\\|MID-.*";  //".*\\|28S.*";
+        String regex = ".*up=chimera.*";
         splitFastAOrQTo2(workPath, inFastaFile, regex);
 //        splitFastaByLabelItem(workPath, inFastaFile, 3);
 
 //        splitFastaBySites(workPath, "otus.fasta");
+
+//        diffFastAFrom(workPath, "otus1.fasta", "otus.fasta");
     }
+
 }

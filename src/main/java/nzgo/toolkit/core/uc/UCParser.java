@@ -40,12 +40,12 @@ public class UCParser {
         return field.trim().contentEquals(NA);
     }
 
-    public static String getLabelNoSizeAnnotation(String name) {
-        return name.replaceAll(REGEX_SIZE_ANNOTATION, "");
+    public static String getLabelNoSizeAnnotation(String label) {
+        return label.replaceAll(REGEX_SIZE_ANNOTATION, "");
     }
 
-    public static String getLabel(String name, boolean removeSizeAnnotation) {
-        return removeSizeAnnotation ? getLabelNoSizeAnnotation(name) : name;
+    public static String getLabel(String label, boolean removeSizeAnnotation) {
+        return removeSizeAnnotation ? getLabelNoSizeAnnotation(label) : label;
     }
 
     public static double getIdentity(String identity) {
@@ -60,7 +60,7 @@ public class UCParser {
      * @param name
      * @return
      */
-    public static int getSize(String name) {
+    public static int getAnnotatedSize(String name) {
         String size = name.replaceFirst(REGEX_SIZE, "$1");
 
         if (size != null && size.length() != name.length())

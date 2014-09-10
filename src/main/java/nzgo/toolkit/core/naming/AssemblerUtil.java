@@ -58,7 +58,7 @@ public class AssemblerUtil {
 
         MyLogger.info("\nRename sequences labels from " + otusFastaFile + " to " + outFile);
 
-        BufferedReader reader = FileIO.getReader(otusFastaFile, "OTUs head sequences to add size in");
+        BufferedReader reader = FileIO.getReader(otusFastaFile, "OTUs representative sequences to add size in");
         String line = reader.readLine();
         boolean hasErr = false;
         int err = 0;
