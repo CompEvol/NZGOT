@@ -8,6 +8,9 @@ import jebl.evolution.sequences.SequenceType;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.sequences.SimpleSequence;
+import nzgo.toolkit.core.uc.DereplicatedSequence;
+import nzgo.toolkit.core.uc.UCParser;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -32,7 +35,7 @@ public class SequenceFileIO extends FileIO {
         return sequenceImporter.importSequences();
     }
 
-    public static List<String> importFastaLabelOnly (Path sequenceFile) throws IOException {
+    public static List<String> importFastaLabelOnly (Path sequenceFile, boolean removeAnnotationSize) throws IOException {
         List<String> labels = new ArrayList<>();
 
         BufferedReader reader = OTUsFileIO.getReader(sequenceFile, "fasta file");
@@ -41,7 +44,8 @@ public class SequenceFileIO extends FileIO {
         while (line != null) {
             if (line.startsWith(">")) {
                 String label = line.substring(1);
-
+                if (removeAnnotationSize)
+                    label = UCParser.getLabelNoSizeAnnotation(label);
                 labels.add(label);
             }
 
@@ -49,10 +53,50 @@ public class SequenceFileIO extends FileIO {
         }
 
         reader.close();
+        MyLogger.debug("\nimport " + labels.size() + " sequences");
         return labels;
     }
 
-    public static void writeFasta (Path sequenceFile, List<Sequence> sequences) throws IOException {
+    public static List<SimpleSequence> importSimpleSequences (Path sequenceFile, boolean isDereplicatedSequence) throws IOException {
+        List<SimpleSequence> simpleSequences = new ArrayList<>();
+
+        BufferedReader reader = OTUsFileIO.getReader(sequenceFile, "fasta file");
+
+        SimpleSequence ss = null;
+        String seq = "";
+
+        String line = reader.readLine();
+        while (line != null) {
+            if (line.startsWith(">")) {
+                // set sequence when find >
+                if (ss != null && seq.length() > 0) ss.setSequence(seq);
+
+                String label = line.substring(1);
+                if (isDereplicatedSequence) {
+                    ss = new DereplicatedSequence(label);
+                } else {
+                    ss = new DereplicatedSequence(label);
+                }
+
+                simpleSequences.add(ss);
+                seq = ""; // init seq
+            } else {
+                if (ss == null || ss.getSequence() != null)
+                    throw new IllegalArgumentException("Cannot find the sequence in file : " + ss + ",\n at line : " + line);
+                seq += line.trim(); // cannot set sequence here, because it could be multi-line
+            }
+
+            line = reader.readLine();
+        }
+        // set last sequence
+        if (ss != null && seq.length() > 0) ss.setSequence(seq);
+        reader.close();
+
+        MyLogger.debug("\nimport " + simpleSequences.size() + " sequences");
+        return simpleSequences;
+    }
+
+    public static void writeToFasta(Path sequenceFile, List<Sequence> sequences) throws IOException {
         MyLogger.info("\nCreating fasta ..." + sequenceFile);
 
         BufferedWriter writer = getWriter(sequenceFile, "fasta");
@@ -60,6 +104,27 @@ public class SequenceFileIO extends FileIO {
         FastaExporter sequenceExporter = new FastaExporter(writer);
 
         sequenceExporter.exportSequences(sequences);
+
+        MyLogger.debug("\nexport " + sequences.size() + " sequences");
+    }
+
+    public static void writeSimpleSequenceToFasta(Path sequenceFile, List<SimpleSequence> sequences) throws IOException {
+        MyLogger.info("\nCreating fasta ..." + sequenceFile);
+
+        BufferedWriter writer = getWriter(sequenceFile, "fasta");
+
+        for (SimpleSequence ss : sequences) {
+            writer.write(">");
+            writer.write(ss.getName());
+            writer.write("\n");
+            writer.write(ss.getSequence());
+            writer.write("\n");
+        }
+
+        writer.flush();
+        writer.close();
+
+        MyLogger.debug("\nexport " + sequences.size() + " sequences");
     }
 
     /**

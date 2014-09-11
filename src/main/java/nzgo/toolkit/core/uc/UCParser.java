@@ -2,6 +2,7 @@ package nzgo.toolkit.core.uc;
 
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.Separator;
+import nzgo.toolkit.core.util.StringUtil;
 
 /**
  * USEARCH cluster format (UC) is a tab-separated text file
@@ -41,7 +42,7 @@ public class UCParser {
     }
 
     public static String getLabelNoSizeAnnotation(String label) {
-        return label.replaceAll(REGEX_SIZE_ANNOTATION, "");
+        return StringUtil.getStringExclude(label, REGEX_SIZE_ANNOTATION);
     }
 
     public static String getLabel(String label, boolean removeSizeAnnotation) {

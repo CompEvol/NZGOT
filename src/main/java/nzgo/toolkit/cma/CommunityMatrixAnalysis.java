@@ -14,10 +14,10 @@ public class CommunityMatrixAnalysis {
 
     //Main method
     public static void main(final String[] args) throws IOException {
-        String[] experiments = new String[]{"ITS","trnL","18S","16S"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
-        int[] thresholds = new int[]{90,91,92,93,94,95,96,97,98,99,100}; // 90,91,92,93,94,95,96,97,98,99,100
+        String[] experiments = new String[]{"18S-test"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
+        int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
-        String otuMappingFileName = "map.uc";
+        String otuMappingFileName = "mapchimeras.uc";
         String reportFileName = "_otus_report.tsv";
         String cmFileName = "_cm.csv";
 //        String otuMappingFileName = "map_size2.uc";

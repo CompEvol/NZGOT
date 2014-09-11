@@ -63,7 +63,7 @@ public class NameAssembler extends Module{
             SequenceUtil.assembleSequenceLabels(sequences, assembler);
 
             try {
-                SequenceFileIO.writeFasta(outFile, sequences);
+                SequenceFileIO.writeToFasta(outFile, sequences);
             } catch (IOException e) {
                 e.printStackTrace();
             }

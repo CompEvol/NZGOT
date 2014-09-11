@@ -78,7 +78,7 @@ public class OTUsFileIO extends FileIO {
     }
 
     // only use to validate UPARSE pipeline OTUs map
-    public static void importOTUsFromFasta (OTUs otus, File otusFile, boolean hasSequence) throws IOException, IllegalArgumentException {
+    public static void importOTUsFromFasta (OTUs otus, File otusFile, boolean importSequence) throws IOException, IllegalArgumentException {
         Module.validateFileName(otusFile.getName(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
 
         BufferedReader reader = getReader(otusFile, "OTUs from");
@@ -98,7 +98,7 @@ public class OTUsFileIO extends FileIO {
 
                 totalAnnotatedSize+=annotatedSize;
 
-            } else {
+            } else if (importSequence) {
                 // TODO add sequence
             }
 
@@ -161,7 +161,7 @@ public class OTUsFileIO extends FileIO {
         int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
         String otuFileName = "otus.fasta";
-        String otuMappingFileName = "mapOTUchimeras.uc";
+        String otuMappingFileName = "mapchimeras.uc";
         String reportFileName = "_otus_report.tsv";
         String cmFileName = "_cm.csv";
 //        String otuMappingFileName = "map_size2.uc";
@@ -177,9 +177,12 @@ public class OTUsFileIO extends FileIO {
 
                 for (int thre : thresholds) {
                     Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
-                    File otusFile = Paths.get(otusPath.toString(), otuFileName).toFile();
 
-                    importOTUsFromFasta (otus, otusFile, false);
+//                    File otusFile = Paths.get(otusPath.toString(), otuFileName).toFile();
+//                    importOTUsFromFasta(otus, otusFile, false);
+
+                    File ucFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
+                    importOTUsFromMapUC(otus, ucFile);
                 }
             }
         } catch (IOException e) {

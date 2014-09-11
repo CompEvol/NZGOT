@@ -175,7 +175,8 @@ public class SequenceUtil {
     }
 
     /**
-     * export difference from file1 to file2, not include difference from file2 to file1 yet.
+     * export difference from file1 to file2 (exist in file1 but not file2), not include difference from file2 to file1 yet.
+     * such as file1 > file2
      * @param workPathString
      * @param fileName1
      * @param fileName2
@@ -188,9 +189,10 @@ public class SequenceUtil {
                 new String[]{NameSpace.SUFFIX_FASTA}, "original file");
 
         BufferedReader reader1 = OTUsFileIO.getReader(file1, "file 1");
-        List<String> labels = SequenceFileIO.importFastaLabelOnly(file2);
+        List<String> labels = SequenceFileIO.importFastaLabelOnly(file2, true);
 
-        Path outputFilePath = Paths.get(workPathString, "diff" + NameSpace.SUFFIX_FASTA);
+        Path outputFilePath = Paths.get(workPathString, "diff-" + NameUtil.getNameWithoutExtension(fileName1) +
+                "-" + NameUtil.getNameWithoutExtension(fileName2) + NameSpace.SUFFIX_FASTA);
         PrintStream out = FileIO.getPrintStream(outputFilePath, "difference");
 
         int l = 0;
@@ -221,22 +223,22 @@ public class SequenceUtil {
 
     }
 
-        // main
+    // main
     public static void main(String[] args) throws IOException{
         if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        String inFastaFile = "otus2.fasta";//"sorted.fasta";
+//        String inFastaFile = "otus2.fasta";//"sorted.fasta";
 //        String regex = ".*\\|MID-.*";  //".*\\|28S.*";
-        String regex = ".*up=chimera.*";
-        splitFastAOrQTo2(workPath, inFastaFile, regex);
+//        String regex = ".*up=chimera.*";
+//        splitFastAOrQTo2(workPath, inFastaFile, regex);
 //        splitFastaByLabelItem(workPath, inFastaFile, 3);
 
 //        splitFastaBySites(workPath, "otus.fasta");
 
-//        diffFastAFrom(workPath, "otus1.fasta", "otus.fasta");
+        diffFastAFrom(workPath, "reads.fasta", "map.fasta");
     }
 
 }
