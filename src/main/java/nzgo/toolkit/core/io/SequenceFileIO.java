@@ -8,9 +8,10 @@ import jebl.evolution.sequences.SequenceType;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.sequences.SimpleSequence;
 import nzgo.toolkit.core.uparse.DereplicatedSequence;
-import nzgo.toolkit.core.uparse.UCParser;
+import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 
 import java.io.BufferedReader;
@@ -46,7 +47,7 @@ public class SequenceFileIO extends FileIO {
             if (line.startsWith(">")) {
                 String label = line.substring(1);
                 if (removeAnnotationSize)
-                    label = UCParser.getLabelNoSizeAnnotation(label);
+                    label = Parser.getLabelNoSizeAnnotation(label);
                 labels.add(label);
             }
 
@@ -138,7 +139,7 @@ public class SequenceFileIO extends FileIO {
     public static void appendItemsToLabelsFastQA(Path inFilePath, PrintStream out, String... items) throws IOException {
         MyLogger.info("Append " + Arrays.toString(items) + " to sequences labels in " + inFilePath.getFileName());
 
-        if (!(inFilePath.toString().endsWith(NameSpace.SUFFIX_FASTQ) || inFilePath.toString().endsWith(NameSpace.SUFFIX_FASTA)))
+        if (!NameUtil.hasFileExtension(inFilePath.toString(), NameSpace.SUFFIX_FASTQ, NameSpace.SUFFIX_FASTA))
             throw new IllegalArgumentException("Invalid sequence file " + inFilePath);
 
         PrintStream outThis;

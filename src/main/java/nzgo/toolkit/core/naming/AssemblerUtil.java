@@ -5,7 +5,7 @@ import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.pipeline.Module;
-import nzgo.toolkit.core.uparse.UCParser;
+import nzgo.toolkit.core.uparse.Parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class AssemblerUtil {
     }
 
     public static String appendSizeToLabel(OTU otu, boolean removeSizeAnnotation) {
-        String otuName = UCParser.getLabel(otu.getName(), removeSizeAnnotation);
+        String otuName = Parser.getLabel(otu.getName(), removeSizeAnnotation);
         return AssemblerUtil.appendItemsToLabel(otuName, "|" + otu.size());
     }
 
@@ -39,7 +39,7 @@ public class AssemblerUtil {
      * @return        null if above bug
      */
     public static String appendSizeToLabel(String label, OTUs otus) {
-        String otuName = UCParser.getLabel(label, otus.removeSizeAnnotation);
+        String otuName = Parser.getLabel(label, otus.removeSizeAnnotation);
         OTU otu = otus.getOTU(otuName);
         if (otu == null)
             return null;
@@ -50,7 +50,7 @@ public class AssemblerUtil {
 
     // TODO why slow?
     public static void removeAnnotationAppendSizeToLabel(Path otusFastaFile, OTUs otus) throws IOException {
-        Module.validateFileName(otusFastaFile.getFileName().toString(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
+        Module.validateFileName(otusFastaFile.getFileName().toString(), "OTUs", NameSpace.SUFFIX_FASTA);
 
         Path outFile = Paths.get(otusFastaFile.getParent().toString(), "sized-" + otusFastaFile.getFileName());
         PrintStream out = FileIO.getPrintStream(outFile, null);

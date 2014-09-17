@@ -122,7 +122,7 @@ public class TreeRegex extends Module{
         RegexFactory.RegexType regexType = null;
         if (arguments.hasOption("regex_type")) {
             regexType = RegexFactory.RegexType.valueOf(arguments.getStringOption("regex_type"));
-            Path separatorsTSV = module.validateInputFile(working, NameSpace.SEPARATORS_FILE, new String[]{NameSpace.SUFFIX_TSV}, "customized separators");
+            Path separatorsTSV = module.validateInputFile(working, NameSpace.SEPARATORS_FILE, "customized separators", NameSpace.SUFFIX_TSV);
             nameParser = new NameParser(separatorsTSV, regexType);
         }
 
@@ -150,7 +150,7 @@ public class TreeRegex extends Module{
         // input
         String firstArg = module.getFirstArg(arguments);
         if (firstArg.endsWith(NameSpace.SUFFIX_NEWICK)) {
-            Path inputFile = module.getInputFile(working, firstArg, new String[]{NameSpace.SUFFIX_NEWICK});
+            Path inputFile = module.getInputFile(working, firstArg, NameSpace.SUFFIX_NEWICK);
             try {
                 newickTree = TreeFileIO.importNewickTree(inputFile);
             } catch (IOException e) {
@@ -166,7 +166,7 @@ public class TreeRegex extends Module{
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-        Path outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_NEX}, "output", arguments.hasOption("overwrite"));
+        Path outFile = module.validateOutputFile(outFileName, "output", arguments.hasOption("overwrite"), NameSpace.SUFFIX_NEX);
 
         // program parameters
         String dirtyInput = arguments.getStringOption("dirty_input");
@@ -180,10 +180,10 @@ public class TreeRegex extends Module{
         Path traitsMapTSV = null;
         int traitsIO = 0; // input = 1, output = 2, both = 3
         if (arguments.hasOption("traitsMapOut")) {
-            traitsMapTSV = module.validateOutputFile(NameSpace.TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping", true);
+            traitsMapTSV = module.validateOutputFile(NameSpace.TRAITS_MAPPING_FILE, "traits mapping", true, NameSpace.SUFFIX_TSV);
             traitsIO += 2;
         } else if (arguments.hasOption("traitsMapIn")) {
-            traitsMapTSV = module.validateInputFile(working, NameSpace.TRAITS_MAPPING_FILE, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping");
+            traitsMapTSV = module.validateInputFile(working, NameSpace.TRAITS_MAPPING_FILE, "traits mapping", NameSpace.SUFFIX_TSV);
             traitsIO += 1;
         }
 

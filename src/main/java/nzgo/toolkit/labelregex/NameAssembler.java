@@ -110,14 +110,14 @@ public class NameAssembler extends Module{
         Path working = module.init(arguments, args);
         // input
         String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_NEWICK});
+        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_NEWICK);
 
         // output
         String outFileName = "new-" + inputFile.getFileName().toString();
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-        Path outFile = module.validateOutputFile(outFileName, null, "output", arguments.hasOption("overwrite"));
+        Path outFile = module.validateOutputFile(outFileName, "output", arguments.hasOption("overwrite"), null);
 
         // program parameters
         String dirtyInput = arguments.getStringOption("dirty_input");
@@ -132,7 +132,7 @@ public class NameAssembler extends Module{
             if (arguments.hasOption("traitsMap")) {
                 traitsMapTSVName = arguments.getStringOption("traitsMap");
             }
-            Path traitsMapTSV = module.validateInputFile(working, traitsMapTSVName, new String[]{NameSpace.SUFFIX_TSV}, "traits mapping");
+            Path traitsMapTSV = module.validateInputFile(working, traitsMapTSVName, "traits mapping", NameSpace.SUFFIX_TSV);
             try {
                 traitsMap = TaxonomyFileIO.importPreTaxaTraits(traitsMapTSV);
             } catch (IOException e) {

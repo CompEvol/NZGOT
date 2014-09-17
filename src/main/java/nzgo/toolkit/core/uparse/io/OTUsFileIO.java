@@ -6,7 +6,9 @@ import nzgo.toolkit.core.community.Reference;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.UCParser;
 
 import java.io.BufferedReader;
@@ -35,7 +37,7 @@ public class OTUsFileIO extends FileIO {
      * @throws IllegalArgumentException
      */
     public static void importOTUsFromMapUC(OTUs otus, File otuMappingUCFile) throws IOException, IllegalArgumentException {
-        CommunityFileIO.importCommunityFromMapUC(otus, otuMappingUCFile, null);
+        CommunityFileIO.importCommunityFromUCFile(otus, otuMappingUCFile, null);
     }
 
     /**
@@ -48,7 +50,7 @@ public class OTUsFileIO extends FileIO {
      * @throws IllegalArgumentException
      */
     public static void importRefSeqFromMapUCAndMapToOTUs(OTUs otus, File refSeqMappingUCFile) throws IOException, IllegalArgumentException {
-        UCParser.validateUCFile(refSeqMappingUCFile.getName());
+        NameUtil.validateFileExtension(refSeqMappingUCFile.getName(), NameSpace.SUFFIX_UC);
 
         BufferedReader reader = getReader(refSeqMappingUCFile, "reference sequence mapping (to OTU) from");
 
@@ -61,7 +63,7 @@ public class OTUsFileIO extends FileIO {
 
             // important: only Hit or N in this mapping file
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
-                String otuName = UCParser.getLabelNoSizeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                String otuName = Parser.getLabelNoSizeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
                 OTU otu = (OTU) otus.getUniqueElement(otuName);
                 if (otu == null) {
                     throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
@@ -80,7 +82,7 @@ public class OTUsFileIO extends FileIO {
 
     // only use to validate UPARSE pipeline OTUs map
     public static void importOTUsFromFasta (OTUs otus, File otusFile, boolean importSequence) throws IOException, IllegalArgumentException {
-        Module.validateFileName(otusFile.getName(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
+        Module.validateFileName(otusFile.getName(), "OTUs", NameSpace.SUFFIX_FASTA);
 
         BufferedReader reader = getReader(otusFile, "OTUs from");
 
@@ -90,9 +92,9 @@ public class OTUsFileIO extends FileIO {
         while (line != null) {
             if (line.startsWith(">")) {
                 String label = line.substring(1);
-                int annotatedSize = UCParser.getAnnotatedSize(label);
+                int annotatedSize = Parser.getAnnotatedSize(label);
 
-                String otuName = UCParser.getLabelNoSizeAnnotation(label);
+                String otuName = Parser.getLabelNoSizeAnnotation(label);
                 otu = new OTU(otuName);
                 otu.setAnnotatedSize(annotatedSize);
                 otus.addElement(otu);
@@ -126,7 +128,7 @@ public class OTUsFileIO extends FileIO {
 
             // important: only Hit or N in this mapping file
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT)) {
-                String otuName = UCParser.getLabelNoSizeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                String otuName = Parser.getLabelNoSizeAnnotation(fields[UCParser.Query_Sequence_COLUMN_ID]);
                 OTU otu = (OTU) otus.getUniqueElement(otuName);
                 if (otu == null) {
                     throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
@@ -149,11 +151,11 @@ public class OTUsFileIO extends FileIO {
     }
     @Deprecated
     public static boolean isOTUMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_MAPPING) && UCParser.isUCFile(fileName);
+        return fileName.startsWith(NameSpace.PREFIX_OTU_MAPPING) && NameUtil.hasFileExtension(fileName, NameSpace.SUFFIX_UC);
     }
     @Deprecated
     public static boolean isReferenceMappingFile(String fileName) {
-        return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && UCParser.isUCFile(fileName);
+        return fileName.startsWith(NameSpace.PREFIX_OTU_REFERENCE) && NameUtil.hasFileExtension(fileName, NameSpace.SUFFIX_UC);
     }
 
     //Main method

@@ -65,14 +65,14 @@ public class OTUAnalyzer extends Module{
         if (arguments.hasOption("in")) {
             inputFileName = arguments.getStringOption("in");
         }
-        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_UC});
+        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.SUFFIX_UC);
 
         // output
         String outFileName = MIXED_OTUS_FILE;
         if (arguments.hasOption("out")) {
             outFileName = arguments.getStringOption("out");
         }
-        Path outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_TSV}, "output", arguments.hasOption("overwrite"));
+        Path outFile = module.validateOutputFile(outFileName, "output", arguments.hasOption("overwrite"), NameSpace.SUFFIX_TSV);
 
         new OTUAnalyzer(inputFile, outFile, regex);
     }

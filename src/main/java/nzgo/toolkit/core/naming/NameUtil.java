@@ -6,7 +6,26 @@ package nzgo.toolkit.core.naming;
  */
 public class NameUtil {
 
-    public static String getNameWithoutExtension (String fileName) {
+    /**
+     *
+     * @param fileName
+     * @param fileNameExtension   contain dot, such as ".fasta" or ".csv" in nzgo.toolkit.core.naming.NameSpace
+     * @return
+     */
+    public static boolean hasFileExtension(String fileName, String... fileNameExtension) {
+        for (String fnex : fileNameExtension) {
+            if (fileName.endsWith(fnex))
+                return true;
+        }
+        return false;
+    }
+
+    public static void validateFileExtension(String fileName, String... fileNameExtension) {
+        if (!NameUtil.hasFileExtension(fileName, fileNameExtension))
+            throw new IllegalArgumentException("Invalid file name extension : " + fileName);
+    }
+
+    public static String getNameNoExtension(String fileName) {
         if (fileName == null)
             return null;
 
@@ -53,11 +72,4 @@ public class NameUtil {
         return name.replaceAll("\\W", "");
     }
 
-    public static boolean endsWith(String name, String[] suffixes) {
-        for (String suffix : suffixes) {
-            if (name.endsWith(suffix))
-                return true;
-        }
-        return false;
-    }
 }

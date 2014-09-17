@@ -72,11 +72,11 @@ public class SequenceUtil {
      */
     public static void splitFastAOrQTo2(String workPathString, String inFileName, String regex) throws IOException {
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
-                new String[]{NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ}, "original file");
+                "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 
-        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFileName);
+        String outputFileNameStem = NameUtil.getNameNoExtension(inFileName);
         String suffix = NameUtil.getSuffix(inFileName);
         Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-1" + suffix);
         PrintStream out1 = FileIO.getPrintStream(outputFilePath, "split");
@@ -88,8 +88,8 @@ public class SequenceUtil {
         PrintStream out = out1;
         while (line != null) {
 
-            if ((suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
-                    (suffix.equalsIgnoreCase(NameSpace.SUFFIX_FASTQ) && l % 4 == 0)) {
+            if ( (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
+                    (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTQ) && l % 4 == 0)) {
                 String label = line.substring(1);
 
                 if (label.matches(regex)) {
@@ -124,9 +124,9 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemIndex) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, new String[]{NameSpace.SUFFIX_FASTA}, "original file");
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "original file", NameSpace.SUFFIX_FASTA);
 
-        String outputFileNameStem = NameUtil.getNameWithoutExtension(inFastaFilePath.toFile().getName());
+        String outputFileNameStem = NameUtil.getNameNoExtension(inFastaFilePath.toFile().getName());
 
         int fileLimit = 50;
         SiteNameParser siteNameParser = new SiteNameParser(itemIndex);
@@ -184,15 +184,15 @@ public class SequenceUtil {
      */
     public static void diffFastAFrom(String workPathString, String fileName1, String fileName2) throws IOException {
         Path file1 = Module.validateInputFile(Paths.get(workPathString), fileName1,
-                new String[]{NameSpace.SUFFIX_FASTA}, "original file");
+                "original file", NameSpace.SUFFIX_FASTA);
         Path file2 = Module.validateInputFile(Paths.get(workPathString), fileName2,
-                new String[]{NameSpace.SUFFIX_FASTA}, "original file");
+                "original file", NameSpace.SUFFIX_FASTA);
 
         BufferedReader reader1 = OTUsFileIO.getReader(file1, "file 1");
         List<String> labels = SequenceFileIO.importFastaLabelOnly(file2, true);
 
-        Path outputFilePath = Paths.get(workPathString, "diff-" + NameUtil.getNameWithoutExtension(fileName1) +
-                "-" + NameUtil.getNameWithoutExtension(fileName2) + NameSpace.SUFFIX_FASTA);
+        Path outputFilePath = Paths.get(workPathString, "diff-" + NameUtil.getNameNoExtension(fileName1) +
+                "-" + NameUtil.getNameNoExtension(fileName2) + NameSpace.SUFFIX_FASTA);
         PrintStream out = FileIO.getPrintStream(outputFilePath, "difference");
 
         int l = 0;

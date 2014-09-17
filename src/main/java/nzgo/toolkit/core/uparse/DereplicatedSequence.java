@@ -16,9 +16,9 @@ public class DereplicatedSequence extends SimpleSequence {
 
     public DereplicatedSequence(String name) {
         super(name);
-        int annotatedSize = UCParser.getAnnotatedSize(name);
+        int annotatedSize = Parser.getAnnotatedSize(name);
         if (annotatedSize > 0) {
-            setName(UCParser.getLabelNoSizeAnnotation(name));
+            setName(Parser.getLabelNoSizeAnnotation(name));
             setAnnotatedSize(annotatedSize);
         }
     }

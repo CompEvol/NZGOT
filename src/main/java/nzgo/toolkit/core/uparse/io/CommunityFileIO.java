@@ -4,17 +4,22 @@ import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.io.FileIO;
+import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
+import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.UCParser;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -37,17 +42,17 @@ public class CommunityFileIO extends OTUsFileIO {
      * e.g. S	17	300	*	*	*	*	*	HA5K40001BTFNL|IndirectSoil|3-H;size=177;	*
      * e.g. H	11	300	98.3	+	0	0	300M	G86XGG201B3O46|IndirectSoil|5-I;size=166;	G86XGG201B3YD9|IndirectSoil|5-N;size=248;
      * @param community
-     * @param otuMappingUCFile
+     * @param ucMappingFile
      * @param siteNameParser          used only for community, if null then ignore sites
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static TreeSet<String> importCommunityFromMapUC(OTUs community, File otuMappingUCFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
-        UCParser.validateUCFile(otuMappingUCFile.getName());
+    public static TreeSet<String> importCommunityFromUCFile(OTUs community, File ucMappingFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
+        NameUtil.validateFileExtension(ucMappingFile.getName(), NameSpace.SUFFIX_UC);
 
         TreeSet<String> sites = null;
 
-        BufferedReader reader = FileIO.getReader(otuMappingUCFile, "OTUs and OTU mapping from");
+        BufferedReader reader = FileIO.getReader(ucMappingFile, "OTUs and OTU mapping from");
         int total = 0;
         String line = reader.readLine();
         while (line != null) {
@@ -58,15 +63,115 @@ public class CommunityFileIO extends OTUsFileIO {
 
             // important: Centroid is excluded from Hit list
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
-                String otuName = UCParser.getLabel(fields[UCParser.Target_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                String otuName = Parser.getLabel(fields[UCParser.Target_Sequence_COLUMN_ID], community.removeSizeAnnotation);
                 if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid))
-                    otuName = UCParser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                    otuName = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
 
-                if (!UCParser.isNA(otuName)) {
-                    String hitName = UCParser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
-                    double identity = UCParser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
+                if (!Parser.isNA(otuName)) {
+                    String hitName = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                    double identity = Parser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
                     // annotated size from dereplication
-                    int annotatedSize = UCParser.getAnnotatedSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    int annotatedSize = Parser.getAnnotatedSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
+
+                    if (community.containsUniqueElement(otuName)) {
+                        OTU otu = community.getOTU(otuName);
+
+                        if (otu == null) {
+                            throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
+                                    ", from the mapping file which does not exist in OTUs file !");
+                        } else {
+                            // TODO bug to use DereplicatedSequence, may move to a new input, check if affect ER
+//                            DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
+
+                            otu.add(hitName);
+                            otu.setAnnotatedSize(annotatedSize);
+
+                            if (siteNameParser != null) {
+                                if (sites == null) {
+                                    sites = new TreeSet<>();
+                                    MyLogger.info("Site type: " + siteNameParser.siteType);
+                                }
+
+                                // if by plot, then add plot to TreeSet, otherwise add subplot
+                                String sampleLocation = siteNameParser.getSite(hitName);
+                                sites.add(sampleLocation);
+                            }
+                        }
+                    } else {
+                        OTU otu = new OTU(otuName);
+//                        DereplicatedSequence hit = new DereplicatedSequence(hitName, identity, sizeAnnotated);
+                        otu.addElement(hitName);
+                        otu.setAnnotatedSize(annotatedSize);
+                        community.addUniqueElement(otu);
+                    }
+
+                    total++;
+                }
+            }
+
+            line = reader.readLine();
+        }
+
+        reader.close();
+
+        int[] sizes = community.getSizes();
+        MyLogger.debug("Total valid lines = " + total + ", get OTUs = " + sizes[0] + ", reads = " + sizes[1]);
+
+        return sites;
+    }
+
+    /**
+     * take the annotated size from the unique sequence label to count in OTU
+     *
+     * 1st set siteType in siteNameParser, default to BY_PLOT
+     * 2nd load reads into each OTU, and parse label to get sample array
+     * 3rd set sample array, and calculate Alpha diversity for each OTU
+     *
+     * e.g.
+     * IPCL6BO02G2MEU|18S-combined|5-I|18S-FLX;size=23;	otu	*	*	*
+     * IPCL6BO02F6OAL|18S-combined|5-I|18S-FLX;size=23;	match	99.3	*	IPCL6BO02H63PX|18S-combined|4-N|18S-FLX
+     * IPCL6BO02FK1D5|18S-combined|CM30C30-N|18S-FLX;size=23;	chimera	96.3	97.7	IPCL6BO02G7N0M|18S-combined|CM30C30-L|18S-FLX(1-68)+IPCL6BO02IQUGN|18S-combined|3-N|18S-FLX(69-300)
+     *
+     * @param community
+     * @param upMappingFile
+     * @param siteNameParser          used only for community, if null then ignore sites
+     * @throws java.io.IOException
+     * @throws IllegalArgumentException
+     */
+    public static TreeSet<String> importCommunityFromUPFile(OTUs community, Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
+        NameUtil.validateFileExtension(upMappingFile.getFileName().toString(), NameSpace.SUFFIX_UP);
+
+        List<String> chimeras = null;
+        if (chimerasFile != null) {
+            NameUtil.validateFileExtension(chimerasFile.getFileName().toString(), NameSpace.SUFFIX_FASTA);
+
+            // load chimeras from label that includes size annotation
+            chimeras = SequenceFileIO.importFastaLabelOnly(chimerasFile, false);
+        }
+
+        TreeSet<String> sites = null;
+
+        BufferedReader reader = FileIO.getReader(upMappingFile, "OTUs and OTU mapping from");
+        int total = 0;
+        String line = reader.readLine();
+        while (line != null) {
+            // 5 columns: 1st -> query, 2nd -> classification
+            String[] fields = FileIO.lineParser.getSeparator(0).parse(line);
+
+            if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
+
+            if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
+
+
+                String otuName = Parser.getLabel(fields[UCParser.Target_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid))
+                    otuName = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+
+                if (!Parser.isNA(otuName)) {
+                    String hitName = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                    double identity = Parser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
+                    // annotated size from dereplication
+                    int annotatedSize = Parser.getAnnotatedSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
                     if (community.containsUniqueElement(otuName)) {
                         OTU otu = community.getOTU(otuName);
@@ -225,7 +330,7 @@ public class CommunityFileIO extends OTUsFileIO {
     /**
      * this method only works for specific directory structure described in WalterPipeline.txt
      * @param workDir
-     * @param otuMappingFileName
+     * @param ucMappingFileName
      * @param reportFileName
      * @param cmFileName
      * @param experiments
@@ -233,10 +338,10 @@ public class CommunityFileIO extends OTUsFileIO {
      * @param thresholdWhoseOTUsToAppendSize    add size to sequence label to combine with BLAST taxonomy
      * @throws java.io.IOException
      */
-    public static void reportCommunityByOTUThreshold(Path workDir, String otuMappingFileName, String reportFileName, String cmFileName,
+    public static void reportCommunityByOTUThreshold(Path workDir, String ucMappingFileName, String reportFileName, String cmFileName,
                                                      String[] experiments, int[] thresholds, int thresholdWhoseOTUsToAppendSize) throws IOException {
 
-        UCParser.validateUCFile(otuMappingFileName);
+        NameUtil.validateFileExtension(ucMappingFileName, NameSpace.SUFFIX_UC);
 
         for (String experiment : experiments) {
             // go into each gene folder
@@ -251,7 +356,7 @@ public class CommunityFileIO extends OTUsFileIO {
             for (int thre : thresholds) {
                 Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
 
-                File otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
+                File otuMappingFile = Paths.get(otusPath.toString(), ucMappingFileName).toFile();
                 SiteNameParser siteNameParser = new SiteNameParser();
                 Community community = new Community(otuMappingFile, siteNameParser);
 

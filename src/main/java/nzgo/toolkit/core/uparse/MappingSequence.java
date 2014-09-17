@@ -47,13 +47,13 @@ public class MappingSequence {
 
         String inFastaFileName = "chimeras.fasta";
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName,
-                new String[]{NameSpace.SUFFIX_FASTA}, "dereplicated sequences file");
+                "dereplicated sequences file", NameSpace.SUFFIX_FASTA);
 
         List<SimpleSequence> dereplicatedSequences = SequenceFileIO.importSimpleSequences(inFastaFilePath, true);
 
         inFastaFileName = "reads.fasta";
         inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName,
-                new String[]{NameSpace.SUFFIX_FASTA}, "all sequences file");
+                "all sequences file", NameSpace.SUFFIX_FASTA);
 
         List<SimpleSequence> allSequences = SequenceFileIO.importSimpleSequences(inFastaFilePath, false);
 

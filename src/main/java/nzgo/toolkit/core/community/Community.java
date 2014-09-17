@@ -47,7 +47,7 @@ public class Community<E> extends OTUs<E> {
      * @param simple                 if true, then clear elementsSet
      */
     public Community(File otuMappingFile, SiteNameParser siteNameParser, boolean simple) {
-        super(NameUtil.getNameWithoutExtension(otuMappingFile.getName()));
+        super(NameUtil.getNameNoExtension(otuMappingFile.getName()));
         this.siteNameParser = siteNameParser;
 
         if (otuMappingFile == null)
@@ -55,7 +55,7 @@ public class Community<E> extends OTUs<E> {
 
         TreeSet<String> sitesTS = null;
         try {
-            sitesTS = CommunityFileIO.importCommunityFromMapUC(this, otuMappingFile, siteNameParser);
+            sitesTS = CommunityFileIO.importCommunityFromUCFile(this, otuMappingFile, siteNameParser);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,7 +110,7 @@ public class Community<E> extends OTUs<E> {
      * @throws IOException
      */
     public Community<E> getSubCommunity(Path otusFastaFile) throws IOException {
-        Module.validateFileName(otusFastaFile.getFileName().toString(), new String[]{NameSpace.SUFFIX_FASTA}, "OTUs");
+        Module.validateFileName(otusFastaFile.getFileName().toString(), "OTUs", NameSpace.SUFFIX_FASTA);
 
         Community<E> subCommunity = new Community<>(this, this.getName() + "_sub");
 

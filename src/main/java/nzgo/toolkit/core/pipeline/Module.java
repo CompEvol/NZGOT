@@ -144,12 +144,12 @@ public class Module {
      * common method to get input file
      * @param workPath
      * @param inputFileName
-     * @param inputFileNameSuffixes
+     * @param inputfileNameExtension
      * @return
      */
-    public static Path getInputFile(Path workPath, String inputFileName, String[] inputFileNameSuffixes) {
+    public static Path getInputFile(Path workPath, String inputFileName, String... inputfileNameExtension) {
 
-        Path inputFile = validateInputFile(workPath, inputFileName, inputFileNameSuffixes, "input");
+        Path inputFile = validateInputFile(workPath, inputFileName, "input", inputfileNameExtension);
 
         if (workPath != null) {
             System.setProperty(NameSpace.HOME_DIR, workPath.toAbsolutePath().toString());
@@ -169,16 +169,16 @@ public class Module {
     /**
      * validate file name
      * @param fileName
-     * @param fileNameSuffixes
      * @param ioMessage
+     * @param fileNameExtension
      */
-    public static void validateFileName(String fileName, String[] fileNameSuffixes, String ioMessage) {
+    public static void validateFileName(String fileName, String ioMessage, String... fileNameExtension) {
         if (fileName == null) {
             MyLogger.error("Invalid " + ioMessage + " file name : " + fileName);
             System.exit(0);
-        } else if (fileNameSuffixes != null && !NameUtil.endsWith(fileName, fileNameSuffixes)) {
+        } else if (fileNameExtension != null && !NameUtil.hasFileExtension(fileName, fileNameExtension)) {
             MyLogger.error("Invalid " + ioMessage + " file format : " + fileName +
-                    ", where " + fileNameSuffixes + " is required");
+                    ", where " + fileNameExtension + " is required");
             System.exit(0);
         }
     }
@@ -188,12 +188,12 @@ public class Module {
      * if fileNameSuffix is null, ignore checking suffix
      * @param workPath
      * @param fileName
-     * @param fileNameSuffixes
+     * @param fileNameExtension
      * @param ioMessage
      * @return
      */
-    public static Path validateInputFile(Path workPath, String fileName, String[] fileNameSuffixes, String ioMessage) {
-        validateFileName(fileName, fileNameSuffixes, ioMessage);
+    public static Path validateInputFile(Path workPath, String fileName, String ioMessage, String... fileNameExtension) {
+        validateFileName(fileName, ioMessage, fileNameExtension);
 
         if (workPath == null)
             workPath = Paths.get("");
@@ -213,13 +213,13 @@ public class Module {
      * if overwrite is false, check if outFile exists
      *
      * @param fileName
-     * @param fileNameSuffixes
+     * @param fileNameExtension
      * @param ioMessage
      * @param overwrite
      * @return
      */
-    public Path validateOutputFile(String fileName, String[] fileNameSuffixes, String ioMessage, boolean overwrite) {
-        validateFileName(fileName, fileNameSuffixes, ioMessage);
+    public Path validateOutputFile(String fileName, String ioMessage, boolean overwrite, String... fileNameExtension) {
+        validateFileName(fileName, ioMessage, fileNameExtension);
 
         Path outFile = FileSystems.getDefault().getPath("", fileName);
         if (!overwrite && Files.exists(outFile)) {

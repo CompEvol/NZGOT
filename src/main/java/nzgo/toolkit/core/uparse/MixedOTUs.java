@@ -3,6 +3,8 @@ package nzgo.toolkit.core.uparse;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Matcher;
+import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.NameUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -124,7 +126,7 @@ public class MixedOTUs extends UCParser{
             File file = listOfFiles[i];
             if (file.isFile()) {
                 String fileName = file.getName();
-                if (isUCFile(fileName)) {
+                if (NameUtil.hasFileExtension(fileName, NameSpace.SUFFIX_UC)) {
                     MixedOTUs mixedOTUs = new MixedOTUs(file.toPath(), ".*NZAC.*");
                     mixedOTUs.reportMixedOTUs();
                 } else {

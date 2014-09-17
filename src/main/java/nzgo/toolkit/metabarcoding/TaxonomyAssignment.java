@@ -105,22 +105,22 @@ public class TaxonomyAssignment extends Module{
         Path working = module.init(arguments, args);
         // input
         String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(working, inputFileName, new String[]{NameSpace.SUFFIX_TSV});
+        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.SUFFIX_TSV);
 
         // output
         String outFileName = arguments.getStringOption("out");
         Path outFile;
         if (outFileName == null) {
-            outFile = module.validateOutputFile(inputFileName, new String[]{NameSpace.SUFFIX_TSV}, "output", arguments.hasOption("overwrite"));
+            outFile = module.validateOutputFile(inputFileName, "output", arguments.hasOption("overwrite"), NameSpace.SUFFIX_TSV);
         } else {
-            outFile = module.validateOutputFile(outFileName, new String[]{NameSpace.SUFFIX_TSV}, "output", arguments.hasOption("overwrite"));
+            outFile = module.validateOutputFile(outFileName, "output", arguments.hasOption("overwrite"), NameSpace.SUFFIX_TSV);
         }
 
         // error list output
         String out_error = arguments.getStringOption("out_error");
         Path errorOutFile = null;
         if (out_error != null) {
-            errorOutFile = module.validateOutputFile(out_error, new String[]{NameSpace.SUFFIX_TSV}, "output error", arguments.hasOption("overwrite"));
+            errorOutFile = module.validateOutputFile(out_error, "output error", arguments.hasOption("overwrite"), NameSpace.SUFFIX_TSV);
         }
 
         // program parameters
