@@ -1,14 +1,15 @@
-package nzgo.toolkit.core.io;
+package nzgo.toolkit.core.uparse.io;
 
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxon;
-import nzgo.toolkit.core.uc.UCParser;
+import nzgo.toolkit.core.uparse.UCParser;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -46,12 +47,12 @@ public class CommunityFileIO extends OTUsFileIO {
 
         TreeSet<String> sites = null;
 
-        BufferedReader reader = getReader(otuMappingUCFile, "OTUs and OTU mapping from");
+        BufferedReader reader = FileIO.getReader(otuMappingUCFile, "OTUs and OTU mapping from");
         int total = 0;
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
-            String[] fields = lineParser.getSeparator(0).parse(line);
+            String[] fields = FileIO.lineParser.getSeparator(0).parse(line);
 
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
@@ -128,7 +129,7 @@ public class CommunityFileIO extends OTUsFileIO {
     //TODO tidy up my strange code
     public static int[] writeCommunityMatrix(Path outCMFilePath, Community community, boolean printTaxonomy, Rank... ranks) throws IOException, IllegalArgumentException {
 
-        BufferedWriter writer = getWriter(outCMFilePath, "community matrix");
+        BufferedWriter writer = FileIO.getWriter(outCMFilePath, "community matrix");
 
         for (String sample : community.getSites()) {
             writer.write("," + sample);

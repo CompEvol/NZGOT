@@ -5,7 +5,6 @@ import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
 import nzgo.toolkit.core.io.FileIO;
-import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Assembler;
@@ -13,6 +12,7 @@ import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -116,7 +116,7 @@ public class SequenceUtil {
     }
 
     /**
-     * split sequences into n fasta files by items parsed by itemIndex in the label
+     * split sequences into n fasta files by items parsed by itemIndex in the label, files are limited to 50
      *
      * @param workPathString
      * @param inFastaFileName

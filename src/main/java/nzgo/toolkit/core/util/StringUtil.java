@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.util;
 
 /**
- * ArrayUtil
+ * StringUtil
  * @author Walter Xie
  */
 public class StringUtil {

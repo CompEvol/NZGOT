@@ -1,13 +1,13 @@
 package nzgo.toolkit.core.community;
 
-import nzgo.toolkit.core.io.CommunityFileIO;
-import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.taxonomy.TaxonomyUtil;
+import nzgo.toolkit.core.uparse.io.CommunityFileIO;
+import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 import nzgo.toolkit.core.util.BioSortedSet;
 
 import java.io.File;

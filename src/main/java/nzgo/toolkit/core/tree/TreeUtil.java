@@ -14,7 +14,7 @@ import nzgo.toolkit.core.taxonomy.Rank;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.taxonomy.TaxonSet;
 import nzgo.toolkit.core.taxonomy.TaxonomicAssignment;
-import nzgo.toolkit.core.uc.MixedOTUs;
+import nzgo.toolkit.core.uparse.MixedOTUs;
 import nzgo.toolkit.core.util.BioSortedSet;
 import nzgo.toolkit.core.util.Element;
 

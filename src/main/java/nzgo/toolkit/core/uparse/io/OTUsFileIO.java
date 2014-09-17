@@ -1,12 +1,13 @@
-package nzgo.toolkit.core.io;
+package nzgo.toolkit.core.uparse.io;
 
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.community.Reference;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
-import nzgo.toolkit.core.uc.UCParser;
+import nzgo.toolkit.core.uparse.UCParser;
 
 import java.io.BufferedReader;
 import java.io.File;

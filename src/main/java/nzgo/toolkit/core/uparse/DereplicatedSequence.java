@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.uc;
+package nzgo.toolkit.core.uparse;
 
 
 import nzgo.toolkit.core.sequences.SimpleSequence;

@@ -1,6 +1,6 @@
 package nzgo.toolkit.cma;
 
-import nzgo.toolkit.core.io.CommunityFileIO;
+import nzgo.toolkit.core.uparse.io.CommunityFileIO;
 
 import java.io.IOException;
 import java.nio.file.Path;

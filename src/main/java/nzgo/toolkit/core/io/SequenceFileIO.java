@@ -9,8 +9,9 @@ import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.sequences.SimpleSequence;
-import nzgo.toolkit.core.uc.DereplicatedSequence;
-import nzgo.toolkit.core.uc.UCParser;
+import nzgo.toolkit.core.uparse.DereplicatedSequence;
+import nzgo.toolkit.core.uparse.UCParser;
+import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

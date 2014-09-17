@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.uc;
+package nzgo.toolkit.core.uparse;
 
 /**
  * Hit: Represents a query-target alignment.

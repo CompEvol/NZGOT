@@ -4,7 +4,7 @@ import nzgo.toolkit.NZGOToolkit;
 import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
-import nzgo.toolkit.core.uc.MixedOTUs;
+import nzgo.toolkit.core.uparse.MixedOTUs;
 
 import java.io.IOException;
 import java.nio.file.Path;

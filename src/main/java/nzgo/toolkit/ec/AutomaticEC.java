@@ -11,9 +11,9 @@ import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
-import nzgo.toolkit.core.io.OTUsFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.sequences.SequenceUtil;
+import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 
 import java.io.*;
 import java.util.ArrayList;
