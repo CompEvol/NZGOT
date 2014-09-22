@@ -5,6 +5,7 @@ import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.Taxon;
 import nzgo.toolkit.core.util.ArrayUtil;
 import nzgo.toolkit.core.util.BioSortedSet;
+import nzgo.toolkit.core.util.Element;
 
 import java.util.Arrays;
 
@@ -13,15 +14,14 @@ import java.util.Arrays;
  * 1) E could be String or jebl.evolution.sequences.Sequence
  * Assuming 1 sequence only can be assigned to 1 OTU
  * 2) use readsPerSite to fast counts
+ *
  * @author Walter Xie
  */
 public class OTU<E> extends BioSortedSet<E> {
 
-    public boolean simple = false;
+    public boolean removeElements = false; // if true, remove elements in Set, use readsPerSite to keep the numbers
     public int[] readsPerSite;
     public Taxon taxonLCA;
-
-    protected int annotatedSize = 0;
 
     @Deprecated
     protected Reference reference;
@@ -32,6 +32,7 @@ public class OTU<E> extends BioSortedSet<E> {
         super(name);
     }
 
+    //TODO is it real faster to use readsPerSite to store number ?
     public int size() {
         if (super.size() < 1 && readsPerSite != null) {
             int size = 0;
@@ -43,10 +44,27 @@ public class OTU<E> extends BioSortedSet<E> {
         return super.size();
     }
 
+    /**
+     * get total annotated size from Reads in this OTU
+     * for normal size use this.size();
+     * @return
+     */
+    public int getTotalAnnotatedSize() {
+        int size = 0;
+        for (E read : this) {
+            if (!(read instanceof Element))
+                throw new IllegalArgumentException("Read " + read + " needs to be countable, such as Element.");
+
+            int sizeAnnotated = ((Element) read).getCounter().getCount();
+            size += sizeAnnotated;
+        }
+        return size;
+    }
+
     public void countReadsPerSite(SiteNameParser siteNameParser, String[] sites) {
         readsPerSite = new int[sites.length];
 
-        for (Object read: this) {
+        for (Object read : this) {
             String label;
             if (read instanceof Sequence) {
                 label = ((Sequence) read).getTaxon().getName();
@@ -64,7 +82,7 @@ public class OTU<E> extends BioSortedSet<E> {
             }
         }
 
-        if (simple) this.clear(); // be careful
+        if (removeElements) this.clear(); // be careful
     }
 
     public boolean hasTaxon() {
@@ -79,28 +97,22 @@ public class OTU<E> extends BioSortedSet<E> {
 //        this.taxonLCA = taxonLCA;
 //    }
 
-
-    public int getAnnotatedSize() {
-        return annotatedSize;
-    }
-
-    public void setAnnotatedSize(int annotatedSize) {
-        this.annotatedSize = annotatedSize;
-    }
-
     @Deprecated
     public String getAlias() {
         if (alias == null) return getName();
         return alias;
     }
+
     @Deprecated
     public void setAlias(String alias) {
         this.alias = alias;
     }
+
     @Deprecated
     public Reference getReference() {
         return reference;
     }
+
     @Deprecated
     public void setReference(Reference reference) {
         this.reference = reference;

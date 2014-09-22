@@ -8,6 +8,7 @@ import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.uparse.DereplicatedSequence;
 import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.UCParser;
 
@@ -81,13 +82,14 @@ public class OTUsFileIO extends FileIO {
     }
 
     // only use to validate UPARSE pipeline OTUs map
-    public static void importOTUsFromFasta (OTUs otus, File otusFile, boolean importSequence) throws IOException, IllegalArgumentException {
+    public static void importOTUsFromFasta (OTUs otus, File otusFile, boolean importSequence, boolean countSizeAnnotation) throws IOException, IllegalArgumentException {
         Module.validateFileName(otusFile.getName(), "OTUs", NameSpace.SUFFIX_FASTA);
 
         BufferedReader reader = getReader(otusFile, "OTUs from");
 
+        otus.setCountSizeAnnotation(countSizeAnnotation);
+
         int totalAnnotatedSize = 0;
-        OTU otu = null;
         String line = reader.readLine();
         while (line != null) {
             if (line.startsWith(">")) {
@@ -95,9 +97,10 @@ public class OTUsFileIO extends FileIO {
                 int annotatedSize = Parser.getAnnotatedSize(label);
 
                 String otuName = Parser.getLabelNoSizeAnnotation(label);
-                otu = new OTU(otuName);
-                otu.setAnnotatedSize(annotatedSize);
-                otus.addElement(otu);
+                DereplicatedSequence representative = new DereplicatedSequence(otuName);
+                if (countSizeAnnotation)
+                    representative.setAnnotatedSize(annotatedSize);
+                otus.addElement(representative);
 
                 totalAnnotatedSize+=annotatedSize;
 

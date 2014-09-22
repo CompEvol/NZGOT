@@ -30,8 +30,23 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     public boolean removeSizeAnnotation = true;
 
+    protected boolean countSizeAnnotation = false;
+
     public OTUs(String name) {
         super(name);
+    }
+
+    public OTUs(String name, boolean countSizeAnnotation) {
+        this(name);
+        setCountSizeAnnotation(countSizeAnnotation);
+    }
+
+    public boolean isCountSizeAnnotation() {
+        return countSizeAnnotation;
+    }
+
+    public void setCountSizeAnnotation(boolean countSizeAnnotation) {
+        this.countSizeAnnotation = countSizeAnnotation;
     }
 
     public OTU getOTU(String name) {
@@ -55,6 +70,7 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     /**
      * sizes[0] is number of OTUs, sizes[1] in number of reads
+     * if countSizeAnnotation = true, sizes[1] is the total of annotated size
      * @return
      */
     public int[] getSizes() {
@@ -194,7 +210,7 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     public static void validateOTUsMapping(File otusFile, File otuMappingUCFile) throws IOException {
         OTUs otus = new OTUs(otusFile.getName());
-        OTUsFileIO.importOTUsFromFasta(otus, otusFile, false);
+        OTUsFileIO.importOTUsFromFasta(otus, otusFile, false, true);
 
         OTUs otusMap = new OTUs(otuMappingUCFile.getName());
         OTUsFileIO.importOTUsFromMapUC(otusMap, otuMappingUCFile);
@@ -207,9 +223,9 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     //Main method
     public static void main(final String[] args) {
-        String[] experiments = new String[]{"CO1-indirect"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
-        int[] thresholds = new int[]{90}; // 90,91,92,93,94,95,96,97,98,99,100
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
+        String[] experiments = new String[]{"18S-test"}; //"COI","COI-spun","ITS","trnL","16S","18S"
+        int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/PipelineUPARSE/");
         String otuMappingFileName = "map2.uc";
         String reportFileName = "_otus_report.tsv";
         String cmFileName = "_cm2.csv";

@@ -41,21 +41,21 @@ public class Community<E> extends OTUs<E> {
     }
 
     /**
-     * create community matrix from otuMappingFile only
-     * @param otuMappingFile
+     * create community matrix from ucMappingFile only
+     * @param ucMappingFile
      * @param siteNameParser
      * @param simple                 if true, then clear elementsSet
      */
-    public Community(File otuMappingFile, SiteNameParser siteNameParser, boolean simple) {
-        super(NameUtil.getNameNoExtension(otuMappingFile.getName()));
+    public Community(File ucMappingFile, SiteNameParser siteNameParser, boolean simple) {
+        super(NameUtil.getNameNoExtension(ucMappingFile.getName()));
         this.siteNameParser = siteNameParser;
 
-        if (otuMappingFile == null)
+        if (ucMappingFile == null)
             throw new IllegalArgumentException("Community needs mapping file ! ");
 
         TreeSet<String> sitesTS = null;
         try {
-            sitesTS = CommunityFileIO.importCommunityFromUCFile(this, otuMappingFile, siteNameParser);
+            sitesTS = CommunityFileIO.importCommunityFromUCFile(this, ucMappingFile, siteNameParser);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,6 +78,37 @@ public class Community<E> extends OTUs<E> {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * create community matrix from upMappingFile generated in OTU clustering,
+     * and remove chimeras discovered in denovo chimeras filtering.
+     *
+     * @param upMappingFile
+     * @param chimerasFile      if null, no chimeras filtering
+     * @param siteNameParser
+     * @param simple
+     */
+    public Community(Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser, boolean simple) {
+        super(NameUtil.getNameNoExtension(upMappingFile.getFileName().toString()));
+        this.siteNameParser = siteNameParser;
+
+        if (upMappingFile == null)
+            throw new IllegalArgumentException("Community needs mapping file ! ");
+
+        TreeSet<String> sitesTS = null;
+        try {
+            sitesTS = CommunityFileIO.importCommunityFromUPFile(this, upMappingFile, chimerasFile, siteNameParser);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (sitesTS != null) {
+            this.sites = sitesTS.toArray(new String[sitesTS.size()]);
+            countReads(siteNameParser, simple);
+        } else {
+            this.sites = null;
+        }
     }
 
     /**
@@ -148,7 +179,7 @@ public class Community<E> extends OTUs<E> {
 
         for (E e : this) {
             OTU otu = (OTU) e;
-            otu.simple = simple;
+            otu.removeElements = simple;
             otu.countReadsPerSite(siteNameParser, sites);
 //            AlphaDiversity alphaDiversity = new AlphaDiversity(siteNameParser, sites, otu);
 //            otu.setAlphaDiversity(alphaDiversity);
@@ -165,22 +196,34 @@ public class Community<E> extends OTUs<E> {
 
     //Main method
     public static void main(final String[] args) {
-        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
+        String[] experiments = new String[]{"18S-test"}; //"COI","COI-spun","ITS","trnL","16S","18S"
+        int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/PipelineUPARSE/");
+        String otuMappingFileName = "out.up";
+        String chimerasFileName = "chimeras.fasta";
+        String reportFileName = "_otus_report.tsv";
+        String cmFileName = "_cm.csv";
 
-        String workPath = args[0];
-        MyLogger.info("\nWorking path = " + workPath);
-
-        File otuMappingFile = new File(workPath + "map.uc");
-        SiteNameParser siteNameParser = new SiteNameParser();
-        Community community = new Community(otuMappingFile, siteNameParser, true);
-
-        Path outCMFilePath = Paths.get(workPath, community.getName() + "_" + CommunityFileIO.COMMUNITY_MATRIX + ".csv");
         try {
-            CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+//            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
+            for (String experiment : experiments) {
+                // go into each gene folder
+                Path workPath = Paths.get(workDir.toString(), experiment);
+                MyLogger.info("\nWorking path = " + workPath);
+                for (int thre : thresholds) {
+                    Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
+
+                    Path otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName);
+                    Path chimerasFile = Paths.get(otusPath.toString(), chimerasFileName);
+                    SiteNameParser siteNameParser = new SiteNameParser();
+                    Community community = new Community(otuMappingFile, chimerasFile, siteNameParser, false);
+
+                    Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
+                    int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 }

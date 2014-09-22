@@ -16,5 +16,4 @@ public class UPParser extends Parser {
     public static final int Identity_COLUMN_ID = 2;
     public static final int OTU_COLUMN_ID = 4;
 
-
 }
