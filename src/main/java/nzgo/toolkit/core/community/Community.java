@@ -22,6 +22,11 @@ import java.util.TreeSet;
  * load all OTUs and mappings from 3 files
  * 2 compulsory files: otusFile, otuMappingFile
  * 1 optional file: refSeqMappingFile
+ *
+ * Note: countReadsPerSite() count annotated size if isCountSizeAnnotation() is true,
+ * CommunityFileIO.importCommunityFrom*File cannot count annotated size,
+ * use countReadsPerSite() after it to count annotated size
+ *
  * @author Walter Xie
  */
 public class Community<E> extends OTUs<E> {

@@ -4,7 +4,6 @@ import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
-import nzgo.toolkit.core.sequences.SimpleSequence;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -23,12 +22,12 @@ public class MappingSequence {
      * @param allSequences
      * @return
      */
-    public static List<SimpleSequence> getDuplicateSequences(List<SimpleSequence> dereplicatedSequences, List<SimpleSequence> allSequences) {
-        List<SimpleSequence> duplicateSequences = new ArrayList<>();
-        for (SimpleSequence ds : dereplicatedSequences) {
-            for (SimpleSequence ss : allSequences) {
-                if (ds.isIdenticalSequence(ss)) {
-                    duplicateSequences.add(ss);
+    public static List<DereplicatedSequence> getDuplicateSequences(List<DereplicatedSequence> dereplicatedSequences, List<DereplicatedSequence> allSequences) {
+        List<DereplicatedSequence> duplicateSequences = new ArrayList<>();
+        for (DereplicatedSequence ds : dereplicatedSequences) {
+            for (DereplicatedSequence as : allSequences) {
+                if (ds.isIdenticalSequence(as)) {
+                    duplicateSequences.add(as);
                     break;
                 }
             }
@@ -49,18 +48,18 @@ public class MappingSequence {
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName,
                 "dereplicated sequences file", NameSpace.SUFFIX_FASTA);
 
-        List<SimpleSequence> dereplicatedSequences = SequenceFileIO.importSimpleSequences(inFastaFilePath, true);
+        List<DereplicatedSequence> dereplicatedSequences = SequenceFileIO.importDereplicatedSequences(inFastaFilePath, true, false);
 
         inFastaFileName = "reads.fasta";
         inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName,
                 "all sequences file", NameSpace.SUFFIX_FASTA);
 
-        List<SimpleSequence> allSequences = SequenceFileIO.importSimpleSequences(inFastaFilePath, false);
+        List<DereplicatedSequence> allSequences = SequenceFileIO.importDereplicatedSequences(inFastaFilePath, false, false);
 
-        List<SimpleSequence> duplicateSequences = getDuplicateSequences(dereplicatedSequences, allSequences);
+        List<DereplicatedSequence> duplicateSequences = getDuplicateSequences(dereplicatedSequences, allSequences);
 
         Path otusPath = Paths.get(workPathString, "duplicateChimeras.fasta"); //
-        SequenceFileIO.writeSimpleSequenceToFasta(otusPath, duplicateSequences);
+        SequenceFileIO.writeDereplicatedSequenceToFasta(otusPath, duplicateSequences);
     }
 
 }

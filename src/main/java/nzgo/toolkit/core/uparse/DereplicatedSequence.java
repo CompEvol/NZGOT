@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.uparse;
 
 
-import nzgo.toolkit.core.sequences.SimpleSequence;
+import nzgo.toolkit.core.util.Element;
 
 /**
  * Dereplication is the removal of duplicated sequences
@@ -9,10 +9,9 @@ import nzgo.toolkit.core.sequences.SimpleSequence;
  * @author Walter Xie
  */
 // TODO add Hit ?
-public class DereplicatedSequence extends SimpleSequence {
+public class DereplicatedSequence extends Element {
 
-    // size = duplicated sequences removed + itself
-    // use counter0 as annotatedSize
+    protected String sequence = null;
 
     public DereplicatedSequence(String name) {
         super(name);
@@ -29,6 +28,19 @@ public class DereplicatedSequence extends SimpleSequence {
 
     public void setAnnotatedSize(int annotatedSize) {
         super.getCounter().setCount(annotatedSize);
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
+
+    public boolean isIdenticalSequence(DereplicatedSequence ss) {
+        // UPARSE change letter case somehow
+        return this.getSequence().equalsIgnoreCase(ss.getSequence());
     }
 
 }

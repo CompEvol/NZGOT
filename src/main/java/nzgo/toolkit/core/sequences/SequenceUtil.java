@@ -189,7 +189,7 @@ public class SequenceUtil {
                 "original file", NameSpace.SUFFIX_FASTA);
 
         BufferedReader reader1 = OTUsFileIO.getReader(file1, "file 1");
-        List<String> labels = SequenceFileIO.importFastaLabelOnly(file2, true);
+        List<String> labels = SequenceFileIO.importFastaLabelOnly(file2);
 
         Path outputFilePath = Paths.get(workPathString, "diff-" + NameUtil.getNameNoExtension(fileName1) +
                 "-" + NameUtil.getNameNoExtension(fileName2) + NameSpace.SUFFIX_FASTA);

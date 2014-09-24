@@ -9,7 +9,6 @@ import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
-import nzgo.toolkit.core.sequences.SimpleSequence;
 import nzgo.toolkit.core.uparse.DereplicatedSequence;
 import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
@@ -37,7 +36,18 @@ public class SequenceFileIO extends FileIO {
         return sequenceImporter.importSequences();
     }
 
-    public static List<String> importFastaLabelOnly (Path sequenceFile, boolean removeAnnotationSize) throws IOException {
+    public static List<String> importFastaLabelOnly (Path sequenceFile) throws IOException {
+        return importFastaLabelOnly(sequenceFile, true);
+    }
+
+    /**
+     * get the list of label only from fasta
+     * @param sequenceFile
+     * @param removeSizeAnnotation       true, to remove size annotation from label
+     * @return
+     * @throws IOException
+     */
+    public static List<String> importFastaLabelOnly (Path sequenceFile, boolean removeSizeAnnotation) throws IOException {
         List<String> labels = new ArrayList<>();
 
         BufferedReader reader = OTUsFileIO.getReader(sequenceFile, "fasta file");
@@ -46,8 +56,7 @@ public class SequenceFileIO extends FileIO {
         while (line != null) {
             if (line.startsWith(">")) {
                 String label = line.substring(1);
-                if (removeAnnotationSize)
-                    label = Parser.getLabelNoSizeAnnotation(label);
+                label = Parser.getLabel(label, removeSizeAnnotation);
                 labels.add(label);
             }
 
@@ -59,43 +68,64 @@ public class SequenceFileIO extends FileIO {
         return labels;
     }
 
-    public static List<SimpleSequence> importSimpleSequences (Path sequenceFile, boolean isDereplicatedSequence) throws IOException {
-        List<SimpleSequence> simpleSequences = new ArrayList<>();
+    public static List<DereplicatedSequence> importDereplicatedSequences (Path sequenceFile) throws IOException {
+        return importDereplicatedSequences(sequenceFile, false, true);
+    }
+
+    /**
+     * get the list of DereplicatedSequence from fasta
+     * DereplicatedSequence has the count of annotated size
+     * @param sequenceFile
+     * @param importSequence              true, to import the DNA sequence
+     * @param removeSizeAnnotation        true, to remove size annotation from label
+     * @return
+     * @throws IOException
+     */
+    public static List<DereplicatedSequence> importDereplicatedSequences (Path sequenceFile, boolean importSequence,
+                               boolean removeSizeAnnotation) throws IOException {
+
+        List<DereplicatedSequence> dereplicatedSequences = new ArrayList<>();
 
         BufferedReader reader = OTUsFileIO.getReader(sequenceFile, "fasta file");
 
-        SimpleSequence ss = null;
+        DereplicatedSequence ds = null;
         String seq = "";
 
+        int size = 0;
         String line = reader.readLine();
         while (line != null) {
             if (line.startsWith(">")) {
                 // set sequence when find >
-                if (ss != null && seq.length() > 0) ss.setSequence(seq);
+                if (importSequence && ds != null && seq.length() > 0)
+                    ds.setSequence(seq);
 
                 String label = line.substring(1);
-                if (isDereplicatedSequence) {
-                    ss = new DereplicatedSequence(label);
-                } else {
-                    ss = new DereplicatedSequence(label);
-                }
+                // get annotated size before remove it from label
+                int annotatedSize = Parser.getAnnotatedSize(label);
+                label = Parser.getLabel(label, removeSizeAnnotation);
 
-                simpleSequences.add(ss);
+                ds = new DereplicatedSequence(label);
+                ds.setAnnotatedSize(annotatedSize);
+                size += annotatedSize;
+
+                dereplicatedSequences.add(ds);
                 seq = ""; // init seq
-            } else {
-                if (ss == null || ss.getSequence() != null)
-                    throw new IllegalArgumentException("Cannot find the sequence in file : " + ss + ",\n at line : " + line);
-                seq += line.trim(); // cannot set sequence here, because it could be multi-line
+
+            } else if (importSequence) {
+                if (ds == null || ds.getSequence() != null)
+                    throw new IllegalArgumentException("Cannot find the sequence in file : " + ds + ",\n at line : " + line);
+                // cannot set sequence here, because it could be multi-line in fasta
+                seq += line.trim();
             }
 
             line = reader.readLine();
         }
         // set last sequence
-        if (ss != null && seq.length() > 0) ss.setSequence(seq);
+        if (importSequence && ds != null && seq.length() > 0) ds.setSequence(seq);
         reader.close();
 
-        MyLogger.debug("\nimport " + simpleSequences.size() + " sequences");
-        return simpleSequences;
+        MyLogger.debug("\nimport " + dereplicatedSequences.size() + " dereplicated sequences, where total annotated size = " + size);
+        return dereplicatedSequences;
     }
 
     public static void writeToFasta(Path sequenceFile, List<Sequence> sequences) throws IOException {
@@ -110,16 +140,16 @@ public class SequenceFileIO extends FileIO {
         MyLogger.debug("\nexport " + sequences.size() + " sequences");
     }
 
-    public static void writeSimpleSequenceToFasta(Path sequenceFile, List<SimpleSequence> sequences) throws IOException {
+    public static void writeDereplicatedSequenceToFasta(Path sequenceFile, List<DereplicatedSequence> sequences) throws IOException {
         MyLogger.info("\nCreating fasta ..." + sequenceFile);
 
         BufferedWriter writer = getWriter(sequenceFile, "fasta");
 
-        for (SimpleSequence ss : sequences) {
+        for (DereplicatedSequence dereplicatedSequence : sequences) {
             writer.write(">");
-            writer.write(ss.getName());
+            writer.write(dereplicatedSequence.getName());
             writer.write("\n");
-            writer.write(ss.getSequence());
+            writer.write(dereplicatedSequence.getSequence());
             writer.write("\n");
         }
 
