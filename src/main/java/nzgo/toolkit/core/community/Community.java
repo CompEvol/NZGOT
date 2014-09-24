@@ -28,7 +28,7 @@ public class Community<E> extends OTUs<E> {
 
     public final SiteNameParser siteNameParser;
     // the final sites already parsed from label
-    public final String[] sites;
+    protected final String[] sites;
 
     public Community(Community community, String name) {
         super(name);
@@ -37,16 +37,17 @@ public class Community<E> extends OTUs<E> {
     }
 
     public Community(File otuMappingFile, SiteNameParser siteNameParser) {
-        this(otuMappingFile, siteNameParser, false);
+        this(otuMappingFile, siteNameParser, false, false);
     }
 
     /**
      * create community matrix from ucMappingFile only
      * @param ucMappingFile
      * @param siteNameParser
-     * @param simple                 if true, then clear elementsSet
+     * @param countSizeAnnotation
+     * @param removeElements                 if true, then clear elementsSet
      */
-    public Community(File ucMappingFile, SiteNameParser siteNameParser, boolean simple) {
+    public Community(File ucMappingFile, SiteNameParser siteNameParser, boolean countSizeAnnotation, final boolean removeElements) {
         super(NameUtil.getNameNoExtension(ucMappingFile.getName()));
         this.siteNameParser = siteNameParser;
 
@@ -55,6 +56,7 @@ public class Community<E> extends OTUs<E> {
 
         TreeSet<String> sitesTS = null;
         try {
+            this.setCountSizeAnnotation(countSizeAnnotation);
             sitesTS = CommunityFileIO.importCommunityFromUCFile(this, ucMappingFile, siteNameParser);
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,14 +64,14 @@ public class Community<E> extends OTUs<E> {
 
         if (sitesTS != null) {
             this.sites = sitesTS.toArray(new String[sitesTS.size()]);
-            countReads(siteNameParser, simple);
+            countReadsPerSite();
         } else {
             this.sites = null;
         }
     }
 
     public Community(File otuMappingFile, File refSeqMappingFile, SiteNameParser siteNameParser) {
-        this(otuMappingFile, siteNameParser, false);
+        this(otuMappingFile, siteNameParser, false, false);
 
         try {
             if (refSeqMappingFile != null)
@@ -83,13 +85,13 @@ public class Community<E> extends OTUs<E> {
     /**
      * create community matrix from upMappingFile generated in OTU clustering,
      * and remove chimeras discovered in denovo chimeras filtering.
-     *
-     * @param upMappingFile
+     *  @param upMappingFile
      * @param chimerasFile      if null, no chimeras filtering
      * @param siteNameParser
-     * @param simple
+     * @param countSizeAnnotation
+     * @param removeElements
      */
-    public Community(Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser, boolean simple) {
+    public Community(Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser, boolean countSizeAnnotation, final boolean removeElements) {
         super(NameUtil.getNameNoExtension(upMappingFile.getFileName().toString()));
         this.siteNameParser = siteNameParser;
 
@@ -98,6 +100,7 @@ public class Community<E> extends OTUs<E> {
 
         TreeSet<String> sitesTS = null;
         try {
+            this.setCountSizeAnnotation(countSizeAnnotation);
             sitesTS = CommunityFileIO.importCommunityFromUPFile(this, upMappingFile, chimerasFile, siteNameParser);
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,7 +108,7 @@ public class Community<E> extends OTUs<E> {
 
         if (sitesTS != null) {
             this.sites = sitesTS.toArray(new String[sitesTS.size()]);
-            countReads(siteNameParser, simple);
+            countReadsPerSite();
         } else {
             this.sites = null;
         }
@@ -169,18 +172,13 @@ public class Community<E> extends OTUs<E> {
         return subCommunity;
     }
 
-    /**
-     * E has to be OTU
-     * @param siteNameParser
-     */
-    public void countReads(SiteNameParser siteNameParser, boolean simple) {
-        if (sites == null || sites.length < 1)
-            throw new IllegalArgumentException("Error: sample array was not initialized: " + sites);
+    public void countReadsPerSite() {
+        if (siteNameParser == null || sites == null || sites.length < 1)
+            throw new IllegalArgumentException("Error: sample array was not initialized ! ");
 
         for (E e : this) {
             OTU otu = (OTU) e;
-            otu.removeElements = simple;
-            otu.countReadsPerSite(siteNameParser, sites);
+            otu.setReadsPerSite(siteNameParser, sites, countSizeAnnotation, removeElements);
 //            AlphaDiversity alphaDiversity = new AlphaDiversity(siteNameParser, sites, otu);
 //            otu.setAlphaDiversity(alphaDiversity);
         }
@@ -204,6 +202,9 @@ public class Community<E> extends OTUs<E> {
         String reportFileName = "_otus_report.tsv";
         String cmFileName = "_cm.csv";
 
+        boolean countSizeAnnotation = true;
+        boolean removeElements = false;
+
         try {
 //            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
             for (String experiment : experiments) {
@@ -216,7 +217,7 @@ public class Community<E> extends OTUs<E> {
                     Path otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName);
                     Path chimerasFile = Paths.get(otusPath.toString(), chimerasFileName);
                     SiteNameParser siteNameParser = new SiteNameParser();
-                    Community community = new Community(otuMappingFile, chimerasFile, siteNameParser, false);
+                    Community community = new Community(otuMappingFile, chimerasFile, siteNameParser, countSizeAnnotation, removeElements);
 
                     Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
                     int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);

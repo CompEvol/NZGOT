@@ -30,15 +30,22 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     public boolean removeSizeAnnotation = true;
 
-    protected boolean countSizeAnnotation = false;
+    protected final boolean removeElements; // if true, remove elements in Set, use readsPerSite to keep the numbers
+
+    protected boolean countSizeAnnotation;
 
     public OTUs(String name) {
-        super(name);
+        this(name, false, false);
     }
 
     public OTUs(String name, boolean countSizeAnnotation) {
-        this(name);
+        this(name, countSizeAnnotation, false);
+    }
+
+    public OTUs(String name, boolean countSizeAnnotation, boolean removeElements) {
+        super(name);
         setCountSizeAnnotation(countSizeAnnotation);
+        this.removeElements = removeElements;
     }
 
     public boolean isCountSizeAnnotation() {
@@ -47,6 +54,10 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     public void setCountSizeAnnotation(boolean countSizeAnnotation) {
         this.countSizeAnnotation = countSizeAnnotation;
+    }
+
+    public boolean isRemoveElements() {
+        return removeElements;
     }
 
     public OTU getOTU(String name) {
@@ -70,7 +81,8 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     /**
      * sizes[0] is number of OTUs, sizes[1] in number of reads
-     * if countSizeAnnotation = true, sizes[1] is the total of annotated size
+     * if countSizeAnnotation = true, sizes[1] is the total of annotated size,
+     * but it has to run countReadsPerSite(); to update sizes[1] to annotated size
      * @return
      */
     public int[] getSizes() {

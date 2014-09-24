@@ -152,8 +152,10 @@ public class CommunityFileIO extends OTUsFileIO {
         }
 
         TreeSet<String> sites = null;
-
         BufferedReader reader = FileIO.getReader(upMappingFile, "OTUs and OTU mapping from");
+
+        MyLogger.info(community.isCountSizeAnnotation() ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
+
         int total = 0;
         int chimerasFromOTUs = 0;
         String line = reader.readLine();
@@ -207,7 +209,11 @@ public class CommunityFileIO extends OTUsFileIO {
                     break;
 
                 case UPParser.CHIMERA:
-                    chimerasFromOTUs += annotatedSize;
+                    if (community.isCountSizeAnnotation()) {
+                        chimerasFromOTUs += annotatedSize;
+                    } else {
+                        chimerasFromOTUs ++;
+                    }
                     break;
 
                 default:
@@ -225,7 +231,8 @@ public class CommunityFileIO extends OTUsFileIO {
         community.setCountSizeAnnotation(true);
 
         int[] sizes = community.getSizes();
-        MyLogger.debug("Total valid lines = " + total + ", get OTUs = " + sizes[0] + ", reads = " + sizes[1] +
+        // need to run countReadsPerSite(); to update sizes[1] to annotated size
+        MyLogger.debug("Total valid lines = " + total + ", get OTUs = " + sizes[0] + ", elements = " + sizes[1] +
                 ", chimeras from OTUs = " + chimerasFromOTUs);
 
         return sites;
@@ -254,15 +261,16 @@ public class CommunityFileIO extends OTUsFileIO {
         int total = 0;
         int otu1Read = 0;
         int otu2Reads = 0;
-        int totalAnnotatedSize = 0;
         for(Object o : community){
             OTU otu = (OTU) o;
             writer.write(otu.getName());
 
             // print readsPerSite column
-            if (otu.readsPerSite != null) {
-                for (int reads : otu.readsPerSite) {
+            int rowsum = 0;
+            if (otu.getReadsPerSite() != null) {
+                for (int reads : otu.getReadsPerSite()) {
                     writer.write("," + reads);
+                    rowsum += reads;
                 }
             }
 
@@ -281,8 +289,16 @@ public class CommunityFileIO extends OTUsFileIO {
 
             writer.write("\n");
 
-            // real size
-            int size = otu.size();
+            int size;
+            if (community.isCountSizeAnnotation()) {
+                size = otu.getTotalAnnotatedSize(); // annotated size
+            } else {
+                size = otu.size(); // real size
+            }
+
+            if (size != rowsum)
+                throw new RuntimeException("OTU " + otu + " size " + size + " not equal community matrix row sum " + rowsum);
+
             total += size;
             if (size == 1) {
                 otu1Read ++;
@@ -290,20 +306,17 @@ public class CommunityFileIO extends OTUsFileIO {
                 otu2Reads ++;
             }
 
-            // annotated size
-            if (community.isCountSizeAnnotation())
-                totalAnnotatedSize+=otu.getTotalAnnotatedSize();
         }
 
         writer.flush();
         writer.close();
 
-        MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences, " +
+        MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences " +
+                (community.isCountSizeAnnotation() ? "from size annotation, " : ", ") +
                 otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads, " +
-                community.getSites().length + ", total annotated size = " + totalAnnotatedSize + ", sites = " +
-                Arrays.toString(community.getSites()));
+                community.getSites().length + " sites = " + Arrays.toString(community.getSites()));
 
-        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSites().length, totalAnnotatedSize};
+        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSites().length};
     }
 
     public static int[] writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {

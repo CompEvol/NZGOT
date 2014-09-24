@@ -19,10 +19,9 @@ import java.util.Arrays;
  */
 public class OTU<E> extends BioSortedSet<E> {
 
-    public boolean removeElements = false; // if true, remove elements in Set, use readsPerSite to keep the numbers
-    public int[] readsPerSite;
     public Taxon taxonLCA;
 
+    protected int[] readsPerSite;
     @Deprecated
     protected Reference reference;
     @Deprecated
@@ -32,7 +31,7 @@ public class OTU<E> extends BioSortedSet<E> {
         super(name);
     }
 
-    //TODO is it real faster to use readsPerSite to store number ?
+    //TODO: is it real faster to use readsPerSite to store number ? it may just save memory.
     public int size() {
         if (super.size() < 1 && readsPerSite != null) {
             int size = 0;
@@ -61,10 +60,14 @@ public class OTU<E> extends BioSortedSet<E> {
         return size;
     }
 
-    public void countReadsPerSite(SiteNameParser siteNameParser, String[] sites) {
+    public int[] getReadsPerSite() {
+        return readsPerSite;
+    }
+
+    public void setReadsPerSite(SiteNameParser siteNameParser, String[] sites, final boolean countSizeAnnotation, final boolean removeElements) {
         readsPerSite = new int[sites.length];
 
-        for (Object read : this) {
+        for (E read : this) {
             String label;
             if (read instanceof Sequence) {
                 label = ((Sequence) read).getTaxon().getName();
@@ -78,7 +81,15 @@ public class OTU<E> extends BioSortedSet<E> {
                 throw new IllegalArgumentException("Error: incorrect site location : " + sampleLocation +
                         " from sites array : " + Arrays.asList(sites));
             } else {
-                readsPerSite[i]++;
+                if (countSizeAnnotation) {
+                    if (!(read instanceof Element))
+                        throw new IllegalArgumentException("Read " + read + " needs to be countable, such as Element.");
+
+                    int sizeAnnotated = ((Element) read).getCounter().getCount();
+                    readsPerSite[i]+= sizeAnnotated;
+                } else {
+                    readsPerSite[i]++;
+                }
             }
         }
 
