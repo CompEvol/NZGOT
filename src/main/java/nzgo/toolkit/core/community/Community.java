@@ -6,14 +6,17 @@ import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.uparse.DereplicatedSequence;
 import nzgo.toolkit.core.uparse.io.CommunityFileIO;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 
+import javax.activation.UnsupportedDataTypeException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.TreeSet;
 
 /**
@@ -193,6 +196,23 @@ public class Community<E> extends OTUs<E> {
         return (sites == null) ? new String[0] : sites;
     }
 
+    public int filterChimeras(List<E> chimeras) throws UnsupportedDataTypeException {
+        int sizeRemoved = 0;
+        for (E chimera : chimeras) {
+            if (chimera instanceof DereplicatedSequence) {
+                if (this.contains(chimera)) {
+                    int annotatedSize = ((DereplicatedSequence) chimera).getAnnotatedSize();
+                    sizeRemoved += annotatedSize;
+                    this.remove(chimera);
+                    MyLogger.debug("remove chimera " + chimera + ", annotated size = " + annotatedSize);
+                }
+            } else {
+                throw new UnsupportedDataTypeException("Unsupported Sequence Type : " + chimera);
+            }
+        }
+        return sizeRemoved;
+    }
+
 //    public File getRefSeqMappingFile() {
 //        return refSeqMappingFile;
 //    }
@@ -232,4 +252,5 @@ public class Community<E> extends OTUs<E> {
             e.printStackTrace();
         }
     }
+
 }

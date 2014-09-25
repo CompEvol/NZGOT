@@ -43,6 +43,10 @@ public class OTU<E> extends BioSortedSet<E> {
         return super.size();
     }
 
+    public int getUniqueSize() {
+        return super.size();
+    }
+
     /**
      * get total annotated size from Reads in this OTU
      * for normal size use this.size();

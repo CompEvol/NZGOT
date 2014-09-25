@@ -15,8 +15,6 @@ import nzgo.toolkit.core.uparse.UCParser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * OTUs FileIO: OTUs are fasta file, and both OTU mapping and reference mapping files are uc format
@@ -163,37 +161,7 @@ public class OTUsFileIO extends FileIO {
 
     //Main method
     public static void main(final String[] args) {
-        String[] experiments = new String[]{"18S-test"}; //"CO1-soilkit","CO1-indirect","ITS","trnL","16S","18S"
-        int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/WalterPipeline/");
-        String otuFileName = "otus.fasta";
-        String otuMappingFileName = "mapchimeras.uc";
-        String reportFileName = "_otus_report.tsv";
-        String cmFileName = "_cm.csv";
-//        String otuMappingFileName = "map_size2.uc";
-//        String reportFileName = "_otus_size2_report.tsv";
-//        String cmFileName = "_cm_size2.csv";
 
-        OTUs otus = new OTUs("OTUs");
-        try {
-            for (String experiment : experiments) {
-                // go into each gene folder
-                Path workPath = Paths.get(workDir.toString(), experiment);
-                MyLogger.info("\nWorking path = " + workPath);
-
-                for (int thre : thresholds) {
-                    Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
-
-//                    File otusFile = Paths.get(otusPath.toString(), otuFileName).toFile();
-//                    importOTUsFromFasta(otus, otusFile, false);
-
-                    File ucFile = Paths.get(otusPath.toString(), otuMappingFileName).toFile();
-                    importOTUsFromMapUC(otus, ucFile);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     // TODO is this efficient?

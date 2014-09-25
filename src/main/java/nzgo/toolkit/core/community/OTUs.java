@@ -80,17 +80,19 @@ public class OTUs<E> extends BioSortedSet<E> {
     }
 
     /**
-     * sizes[0] is number of OTUs, sizes[1] in number of reads
-     * if countSizeAnnotation = true, sizes[1] is the total of annotated size,
-     * but it has to run countReadsPerSite(); to update sizes[1] to annotated size
+     * sizes[0] is number of OTUs, sizes[1] in number of reads,
+     * if countSizeAnnotation = true, sizes[1] is unique sequences, sizes[2] is the total of annotated size.
      * @return
      */
+    //TODO merge with countReadsPerSite()
     public int[] getSizes() {
-        int[] sizes = new int[2];
+        int[] sizes = new int[3];
         sizes[0] = this.size();
         for(E e : this){
             OTU otu = (OTU) e;
-            sizes[1] += otu.size();
+            sizes[1] += otu.getUniqueSize();
+            if (isCountSizeAnnotation())
+                sizes[2] += otu.getTotalAnnotatedSize();
         }
         return sizes;
     }

@@ -43,19 +43,25 @@ public class CommunityFileIO extends OTUsFileIO {
      * set hits into each OTU, if no OTU is uploaded, then create new OTUs from mapping file
      * e.g. S	17	300	*	*	*	*	*	HA5K40001BTFNL|IndirectSoil|3-H;size=177;	*
      * e.g. H	11	300	98.3	+	0	0	300M	G86XGG201B3O46|IndirectSoil|5-I;size=166;	G86XGG201B3YD9|IndirectSoil|5-N;size=248;
-     * @param community
+     * @param initCommunity
      * @param ucMappingFile
-     * @param siteNameParser          used only for community, if null then ignore sites
+     * @param siteNameParser          used only for initCommunity, if null then ignore sites
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static TreeSet<String> importCommunityFromUCFile(OTUs community, File ucMappingFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
+    public static TreeSet<String> importCommunityFromUCFile(OTUs initCommunity, File ucMappingFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
         NameUtil.validateFileExtension(ucMappingFile.getName(), NameSpace.SUFFIX_UC);
 
+        // this method has to count annotated size in OTU members
+        initCommunity.setCountSizeAnnotation(true);
+
+        boolean countSizeAnnotation = initCommunity.isCountSizeAnnotation();
+        MyLogger.info(countSizeAnnotation ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
+
         TreeSet<String> sites = null;
+        int total = 0;
 
         BufferedReader reader = FileIO.getReader(ucMappingFile, "OTUs and OTU mapping from");
-        int total = 0;
         String line = reader.readLine();
         while (line != null) {
             // 2 columns: 1st -> read id, 2nd -> otu name
@@ -65,18 +71,18 @@ public class CommunityFileIO extends OTUsFileIO {
 
             // important: Centroid is excluded from Hit list
             if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.HIT) || fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid)) {
-                String otuName = Parser.getLabel(fields[UCParser.Target_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                String otuName = Parser.getLabel(fields[UCParser.Target_Sequence_COLUMN_ID], initCommunity.removeSizeAnnotation);
                 if (fields[UCParser.Record_Type_COLUMN_ID].contentEquals(UCParser.Centroid))
-                    otuName = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                    otuName = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], initCommunity.removeSizeAnnotation);
 
                 if (!Parser.isNA(otuName)) {
-                    String finalLabel = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], community.removeSizeAnnotation);
+                    String finalLabel = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], initCommunity.removeSizeAnnotation);
                     double identity = Parser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
                     // annotated size from dereplication
                     int annotatedSize = Parser.getAnnotatedSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
-                    if (community.containsUniqueElement(otuName)) {
-                        OTU otu = community.getOTU(otuName);
+                    if (initCommunity.containsUniqueElement(otuName)) {
+                        OTU otu = initCommunity.getOTU(otuName);
 
                         if (otu == null) {
                             throw new IllegalArgumentException("Error: find an invalid OTU " + otuName +
@@ -104,7 +110,7 @@ public class CommunityFileIO extends OTUsFileIO {
                         representative.setAnnotatedSize(annotatedSize);
                         otu.addElement(representative);
 
-                        community.addUniqueElement(otu);
+                        initCommunity.addUniqueElement(otu);
                     }
 
                     total++;
@@ -116,8 +122,10 @@ public class CommunityFileIO extends OTUsFileIO {
 
         reader.close();
 
-        int[] sizes = community.getSizes();
-        MyLogger.debug("Total valid lines = " + total + ", get OTUs = " + sizes[0] + ", reads = " + sizes[1]);
+        int[] sizes = initCommunity.getSizes();
+        MyLogger.debug("Total valid lines = " + total);
+        MyLogger.debug("OTU clustering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
+                sizes[1] + ", annotated reads = " + sizes[2]);
 
         return sites;
     }
@@ -134,30 +142,35 @@ public class CommunityFileIO extends OTUsFileIO {
      * IPCL6BO02F6OAL|18S-combined|5-I|18S-FLX;size=23;	match	99.3	*	IPCL6BO02H63PX|18S-combined|4-N|18S-FLX
      * IPCL6BO02FK1D5|18S-combined|CM30C30-N|18S-FLX;size=23;	chimera	96.3	97.7	IPCL6BO02G7N0M|18S-combined|CM30C30-L|18S-FLX(1-68)+IPCL6BO02IQUGN|18S-combined|3-N|18S-FLX(69-300)
      *
-     * @param community
+     * @param initCommunity
      * @param upMappingFile
-     * @param siteNameParser          used only for community, if null then ignore sites
+     * @param siteNameParser          used only for initCommunity, if null then ignore sites
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static TreeSet<String> importCommunityFromUPFile(OTUs community, Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
+    public static TreeSet<String> importCommunityFromUPFile(Community initCommunity, Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
         NameUtil.validateFileExtension(upMappingFile.getFileName().toString(), NameSpace.SUFFIX_UP);
 
-        List<String> chimeras = null;
+        List<DereplicatedSequence> chimeras = null;
         if (chimerasFile != null) {
             NameUtil.validateFileExtension(chimerasFile.getFileName().toString(), NameSpace.SUFFIX_FASTA);
 
-            // load chimeras from label that includes size annotation
-            chimeras = SequenceFileIO.importFastaLabelOnly(chimerasFile, false);
+            // load chimeras from label
+            chimeras = SequenceFileIO.importDereplicatedSequences(chimerasFile, false, initCommunity.removeSizeAnnotation);
         }
 
+        // TODO
+        // this method has to count annotated size in OTU members
+        initCommunity.setCountSizeAnnotation(true);
+        boolean countSizeAnnotation = initCommunity.isCountSizeAnnotation();
+        MyLogger.info(countSizeAnnotation ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
+
         TreeSet<String> sites = null;
-        BufferedReader reader = FileIO.getReader(upMappingFile, "OTUs and OTU mapping from");
-
-        MyLogger.info(community.isCountSizeAnnotation() ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
-
         int total = 0;
         int chimerasFromOTUs = 0;
+        int chimerasFromOTUsSizeAnnotation = 0;
+
+        BufferedReader reader = FileIO.getReader(upMappingFile, "OTUs and OTU mapping from");
         String line = reader.readLine();
         while (line != null) {
             // 5 columns: 1st -> query, 2nd -> classification
@@ -167,7 +180,7 @@ public class CommunityFileIO extends OTUsFileIO {
 
             String querySeqLabel = fields[UPParser.QUERY_COLUMN_ID];
             int annotatedSize = Parser.getAnnotatedSize(querySeqLabel); // annotated size from dereplication
-            String finalLabel = Parser.getLabel(querySeqLabel, community.removeSizeAnnotation);
+            String finalLabel = Parser.getLabel(querySeqLabel, initCommunity.removeSizeAnnotation);
             OTU otu;
 
             String classification = fields[UPParser.Classification_COLUMN_ID];
@@ -178,14 +191,14 @@ public class CommunityFileIO extends OTUsFileIO {
                     DereplicatedSequence representative = new DereplicatedSequence(finalLabel);
                     representative.setAnnotatedSize(annotatedSize);
                     otu.addElement(representative);
-                    community.addUniqueElement(otu);
+                    initCommunity.addUniqueElement(otu);
                     break;
 
                 case UPParser.OTU_MEMBER:
-                    String otuLabel = Parser.getLabel(fields[UPParser.OTU_COLUMN_ID], community.removeSizeAnnotation);
+                    String otuLabel = Parser.getLabel(fields[UPParser.OTU_COLUMN_ID], initCommunity.removeSizeAnnotation);
                     double identity = Parser.getIdentity(fields[UPParser.Identity_COLUMN_ID]);
 
-                    otu = community.getOTU(otuLabel);
+                    otu = initCommunity.getOTU(otuLabel);
 
                     if (otu == null) {
                         throw new IllegalArgumentException("Cannot find OTU " + finalLabel + " from line : " + line);
@@ -209,10 +222,9 @@ public class CommunityFileIO extends OTUsFileIO {
                     break;
 
                 case UPParser.CHIMERA:
-                    if (community.isCountSizeAnnotation()) {
-                        chimerasFromOTUs += annotatedSize;
-                    } else {
-                        chimerasFromOTUs ++;
+                    chimerasFromOTUs ++;
+                    if (initCommunity.isCountSizeAnnotation()) {
+                        chimerasFromOTUsSizeAnnotation += annotatedSize;
                     }
                     break;
 
@@ -227,13 +239,20 @@ public class CommunityFileIO extends OTUsFileIO {
 
         reader.close();
 
-        // this method has to count annotated size in OTU members
-        community.setCountSizeAnnotation(true);
+        int[] sizes = initCommunity.getSizes();
+        MyLogger.debug("Total valid lines = " + total);
+        MyLogger.debug("OTU clustering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
+                sizes[1] + ", annotated reads = " + sizes[2]);
+        MyLogger.debug("OTU clustering get chimeras = " + chimerasFromOTUs + ", which represent reads = " + chimerasFromOTUsSizeAnnotation);
 
-        int[] sizes = community.getSizes();
-        // need to run countReadsPerSite(); to update sizes[1] to annotated size
-        MyLogger.debug("Total valid lines = " + total + ", get OTUs = " + sizes[0] + ", elements = " + sizes[1] +
-                ", chimeras from OTUs = " + chimerasFromOTUs);
+        if (chimeras != null) {
+            int sizeRemoved = initCommunity.filterChimeras(chimeras);
+            MyLogger.debug("Remove " + chimeras.size() + " chimeras OTU , which represent reads = " + sizeRemoved);
+
+            sizes = initCommunity.getSizes();
+            MyLogger.debug("After chimeras filtering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
+                    sizes[1] + ", annotated reads = " + sizes[2]);
+        }
 
         return sites;
     }
