@@ -4,6 +4,7 @@ import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.community.Reference;
 import nzgo.toolkit.core.io.FileIO;
+import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
@@ -15,6 +16,8 @@ import nzgo.toolkit.core.uparse.UCParser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 
 /**
  * OTUs FileIO: OTUs are fasta file, and both OTU mapping and reference mapping files are uc format
@@ -80,39 +83,24 @@ public class OTUsFileIO extends FileIO {
     }
 
     // only use to validate UPARSE pipeline OTUs map
-    public static void importOTUsFromFasta (OTUs otus, File otusFile, boolean importSequence, boolean countSizeAnnotation) throws IOException, IllegalArgumentException {
-        Module.validateFileName(otusFile.getName(), "OTUs", NameSpace.SUFFIX_FASTA);
+    // TODO this seems wrong, annotated reads only includes representatives not members
+    public static OTUs<DereplicatedSequence> importOTUsFromFasta (Path otusFile, boolean importSequence,
+                       boolean removeSizeAnnotation, boolean countSizeAnnotation) throws IOException, IllegalArgumentException {
 
-        BufferedReader reader = getReader(otusFile, "OTUs from");
+        Module.validateFileName(otusFile.getFileName().toString(), "OTUs", NameSpace.SUFFIX_FASTA);
 
+        OTUs<DereplicatedSequence> otus = new OTUs<>(otusFile.getFileName().toString());
         otus.setCountSizeAnnotation(countSizeAnnotation);
 
-        int totalAnnotatedSize = 0;
-        String line = reader.readLine();
-        while (line != null) {
-            if (line.startsWith(">")) {
-                String label = line.substring(1);
-                int annotatedSize = Parser.getAnnotatedSize(label);
+        List<DereplicatedSequence> dereplicatedSequences =
+                SequenceFileIO.importDereplicatedSequences(otusFile, importSequence, removeSizeAnnotation);
 
-                String otuName = Parser.getLabelNoSizeAnnotation(label);
-                DereplicatedSequence representative = new DereplicatedSequence(otuName);
-                if (countSizeAnnotation)
-                    representative.setAnnotatedSize(annotatedSize);
-                otus.addElement(representative);
+        otus.addAllOTUsByDereplicatedSequence(dereplicatedSequences);
 
-                totalAnnotatedSize+=annotatedSize;
+        int[] sizes = otus.getSizes();
+        MyLogger.info("import OTUs = " + sizes[0] + (countSizeAnnotation ? ", annotated reads = " : ", reads = ") + sizes[1]);
 
-            } else if (importSequence) {
-                // TODO add sequence
-            }
-
-            line = reader.readLine();
-        }
-
-        reader.close();
-
-        MyLogger.info("\nImport " + otus.size() + " OTUs, ");
-        if (totalAnnotatedSize > 0) MyLogger.info("Total annotated size = " + totalAnnotatedSize);
+        return otus;
     }
 
     //TODO developing: replace OTU to Target

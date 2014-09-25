@@ -243,11 +243,11 @@ public class CommunityFileIO extends OTUsFileIO {
         MyLogger.debug("Total valid lines = " + total);
         MyLogger.debug("OTU clustering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
                 sizes[1] + ", annotated reads = " + sizes[2]);
-        MyLogger.debug("OTU clustering get chimeras = " + chimerasFromOTUs + ", which represent reads = " + chimerasFromOTUsSizeAnnotation);
+        MyLogger.debug("OTU clustering get chimeras = " + chimerasFromOTUs + ", annotated reads = " + chimerasFromOTUsSizeAnnotation);
 
         if (chimeras != null) {
             int sizeRemoved = initCommunity.filterChimeras(chimeras);
-            MyLogger.debug("Remove " + chimeras.size() + " chimeras OTU , which represent reads = " + sizeRemoved);
+            MyLogger.debug("Remove " + chimeras.size() + " chimeras OTU , annotated reads = " + sizeRemoved);
 
             sizes = initCommunity.getSizes();
             MyLogger.debug("After chimeras filtering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +

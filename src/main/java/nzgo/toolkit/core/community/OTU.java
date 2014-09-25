@@ -3,6 +3,7 @@ package nzgo.toolkit.core.community;
 import jebl.evolution.sequences.Sequence;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.uparse.DereplicatedSequence;
 import nzgo.toolkit.core.util.ArrayUtil;
 import nzgo.toolkit.core.util.BioSortedSet;
 import nzgo.toolkit.core.util.Element;
@@ -20,8 +21,9 @@ import java.util.Arrays;
 public class OTU<E> extends BioSortedSet<E> {
 
     public Taxon taxonLCA;
+    // store counts per site, or total counts of this OTU by use readsPerSite[0] only
+    protected int[] readsPerSite = null;
 
-    protected int[] readsPerSite;
     @Deprecated
     protected Reference reference;
     @Deprecated
@@ -29,6 +31,16 @@ public class OTU<E> extends BioSortedSet<E> {
 
     public OTU(String name) {
         super(name);
+    }
+
+    /**
+     * create OTU only from representative sequence, no element added, use annotated size as size.
+     * @param representative
+     */
+    public OTU(DereplicatedSequence representative) {
+        this(representative.getName());
+        readsPerSite = new int[1];
+        readsPerSite[0] = representative.getAnnotatedSize();
     }
 
     //TODO: is it real faster to use readsPerSite to store number ? it may just save memory.
@@ -40,10 +52,6 @@ public class OTU<E> extends BioSortedSet<E> {
             }
             return size;
         }
-        return super.size();
-    }
-
-    public int getUniqueSize() {
         return super.size();
     }
 

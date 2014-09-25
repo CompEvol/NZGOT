@@ -204,7 +204,7 @@ public class Community<E> extends OTUs<E> {
                     int annotatedSize = ((DereplicatedSequence) chimera).getAnnotatedSize();
                     sizeRemoved += annotatedSize;
                     this.remove(chimera);
-                    MyLogger.debug("remove chimera " + chimera + ", annotated size = " + annotatedSize);
+//                    MyLogger.debug("remove chimera " + chimera + ", annotated size = " + annotatedSize);
                 }
             } else {
                 throw new UnsupportedDataTypeException("Unsupported Sequence Type : " + chimera);
