@@ -1,6 +1,7 @@
 package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.io.FileIO;
+import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -37,6 +39,12 @@ public class Community<E> extends OTUs<E> {
     public final SiteNameParser siteNameParser;
     // the final sites already parsed from label
     protected final String[] sites;
+
+    public int chimerasInClustering = 0;
+    public int chimerasInClusteringAnnotatedSize = 0;
+
+    protected int chimerasRemoved = 0;
+    protected int chimerasRemovedAnnotatedSize = 0;
 
     public Community(Community community, String name) {
         super(name);
@@ -92,9 +100,9 @@ public class Community<E> extends OTUs<E> {
 
     /**
      * create community matrix from upMappingFile generated in OTU clustering,
-     * and remove chimeras discovered in denovo chimeras filtering.
+     * and remove chimeras discovered in denovo/reference chimeras filtering.
      *  @param upMappingFile
-     * @param chimerasFile      if null, no chimeras filtering
+     * @param chimerasFile      chimeras filtering result after OTU clustering, if null, no this step
      * @param siteNameParser
      * @param countSizeAnnotation
      * @param removeElements
@@ -210,18 +218,28 @@ public class Community<E> extends OTUs<E> {
                 throw new UnsupportedDataTypeException("Unsupported Sequence Type : " + chimera);
             }
         }
+        chimerasRemoved = chimeras.size();
+        chimerasRemovedAnnotatedSize = sizeRemoved;
         return sizeRemoved;
     }
 
-//    public File getRefSeqMappingFile() {
+    public int getChimerasRemoved() {
+        return chimerasRemoved;
+    }
+
+    public int getChimerasRemovedAnnotatedSize() {
+        return chimerasRemovedAnnotatedSize;
+    }
+
+    //    public File getRefSeqMappingFile() {
 //        return refSeqMappingFile;
 //    }
 
     //Main method
     public static void main(final String[] args) {
-        String[] experiments = new String[]{"18S-test"}; //"COI","COI-spun","ITS","trnL","16S","18S"
-        int[] thresholds = new int[]{97}; // 90,91,92,93,94,95,96,97,98,99,100
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/PipelineUPARSE/");
+        String[] experiments = new String[]{"COI","COI-spun","ITS","trnL","18S","16S"}; //"COI","COI-spun","ITS","trnL","18S","16S"
+        int[] thresholds = new int[]{100,99,98,97,96,95,94,93,92,91,90}; // 100,99,98,97,96,95,94,93,92,91,90
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/PipelineUSEARCH8/");
         String otuMappingFileName = "out.up";
         String chimerasFileName = "chimeras.fasta";
         String reportFileName = "_otus_report.tsv";
@@ -231,22 +249,41 @@ public class Community<E> extends OTUs<E> {
         boolean removeElements = false;
 
         try {
-//            CommunityFileIO.reportCommunityByOTUThreshold(workDir, otuMappingFileName, reportFileName, cmFileName, experiments, thresholds, 97);
             for (String experiment : experiments) {
+                List<int[]> report = new ArrayList<>();
+                List<String> rowNames = new ArrayList<>();
+
                 // go into each gene folder
                 Path workPath = Paths.get(workDir.toString(), experiment);
                 MyLogger.info("\nWorking path = " + workPath);
+
+                Path qcPath = Paths.get(workPath.toString(), "qc");
+                Path readsFile = Paths.get(qcPath.toString(), "reads.fasta");
+                Path sortedFile = Paths.get(qcPath.toString(), "sorted.fasta");
+
+                int[] row = new int[CommunityFileIO.COMMUNITY_REPORT_COLUMN];
+                row[1] = SequenceFileIO.importFastaLabelOnly(sortedFile).size();
+                row[2] = SequenceFileIO.importFastaLabelOnly(readsFile).size();
+
+                report.add(row);
+                rowNames.add("AfterQc");
+
                 for (int thre : thresholds) {
                     Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
 
                     Path otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName);
-                    Path chimerasFile = Paths.get(otusPath.toString(), chimerasFileName);
+                    Path chimerasFile = null;//Paths.get(otusPath.toString(), chimerasFileName);
                     SiteNameParser siteNameParser = new SiteNameParser();
                     Community community = new Community(otuMappingFile, chimerasFile, siteNameParser, countSizeAnnotation, removeElements);
 
                     Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
-                    int[] report = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+                    row = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
+                    report.add(row);
+                    rowNames.add(Integer.toString(thre));
                 }
+
+                Path reportFile = Paths.get(workPath.toString(), experiment + reportFileName);
+                CommunityFileIO.writeCommunityReport(reportFile, report, rowNames);
             }
         } catch (IOException e) {
             e.printStackTrace();

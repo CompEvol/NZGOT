@@ -16,6 +16,7 @@ import nzgo.toolkit.core.uparse.DereplicatedSequence;
 import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.UCParser;
 import nzgo.toolkit.core.uparse.UPParser;
+import nzgo.toolkit.core.util.StringUtil;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ import java.util.TreeSet;
 public class CommunityFileIO extends OTUsFileIO {
 
     public static final String COMMUNITY_MATRIX = "community_matrix";
+    public static final int COMMUNITY_REPORT_COLUMN = 7;
 
     /**
      * 1st set siteType in siteNameParser, default to BY_PLOT
@@ -167,8 +169,8 @@ public class CommunityFileIO extends OTUsFileIO {
 
         TreeSet<String> sites = null;
         int total = 0;
-        int chimerasFromOTUs = 0;
-        int chimerasFromOTUsSizeAnnotation = 0;
+        int chimerasInClustering = 0;
+        int chimerasInClusteringAnnotatedSize = 0;
 
         BufferedReader reader = FileIO.getReader(upMappingFile, "OTUs and OTU mapping from");
         String line = reader.readLine();
@@ -222,9 +224,9 @@ public class CommunityFileIO extends OTUsFileIO {
                     break;
 
                 case UPParser.CHIMERA:
-                    chimerasFromOTUs ++;
+                    chimerasInClustering ++;
                     if (initCommunity.isCountSizeAnnotation()) {
-                        chimerasFromOTUsSizeAnnotation += annotatedSize;
+                        chimerasInClusteringAnnotatedSize += annotatedSize;
                     }
                     break;
 
@@ -243,7 +245,9 @@ public class CommunityFileIO extends OTUsFileIO {
         MyLogger.debug("Total valid lines = " + total);
         MyLogger.debug("OTU clustering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
                 sizes[1] + ", annotated reads = " + sizes[2]);
-        MyLogger.debug("OTU clustering get chimeras = " + chimerasFromOTUs + ", annotated reads = " + chimerasFromOTUsSizeAnnotation);
+        MyLogger.debug("OTU clustering get chimeras = " + chimerasInClustering + ", annotated reads = " + chimerasInClusteringAnnotatedSize);
+        initCommunity.chimerasInClustering = chimerasInClustering;
+        initCommunity.chimerasInClusteringAnnotatedSize = chimerasInClusteringAnnotatedSize;
 
         if (chimeras != null) {
             int sizeRemoved = initCommunity.filterChimeras(chimeras);
@@ -277,6 +281,7 @@ public class CommunityFileIO extends OTUsFileIO {
         }
         writer.write("\n");
 
+        int uniqueTotal = 0;
         int total = 0;
         int otu1Read = 0;
         int otu2Reads = 0;
@@ -309,6 +314,7 @@ public class CommunityFileIO extends OTUsFileIO {
             writer.write("\n");
 
             int size;
+            int unique = otu.size(); // real size
             if (community.isCountSizeAnnotation()) {
                 size = otu.getTotalAnnotatedSize(); // annotated size
             } else {
@@ -318,6 +324,7 @@ public class CommunityFileIO extends OTUsFileIO {
             if (size != rowsum)
                 throw new RuntimeException("OTU " + otu + " size " + size + " not equal community matrix row sum " + rowsum);
 
+            uniqueTotal += unique;
             total += size;
             if (size == 1) {
                 otu1Read ++;
@@ -330,12 +337,15 @@ public class CommunityFileIO extends OTUsFileIO {
         writer.flush();
         writer.close();
 
-        MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " + total + " sequences " +
+        MyLogger.info("\nCommunity Matrix " + community.getName() + ": " + community.size() + " OTUs, " +
+                uniqueTotal + " unique sequences, " + total + " reads " +
                 (community.isCountSizeAnnotation() ? "from size annotation, " : ", ") +
-                otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads, " +
+                otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads,");
+        MyLogger.info("OTU clustering removed " + community.chimerasInClustering + " chimeras unique sequences (" +
+                community.chimerasInClusteringAnnotatedSize + " chimeras reads), " +
                 community.getSites().length + " sites = " + Arrays.toString(community.getSites()));
 
-        return new int[]{community.size(), total, otu1Read, otu2Reads, community.getSites().length};
+        return new int[]{community.size(), uniqueTotal, total, otu1Read, otu2Reads, community.chimerasInClustering, community.chimerasInClusteringAnnotatedSize, community.getSites().length};
     }
 
     public static int[] writeCommunityMatrix(Path outCMFilePath, Community community) throws IOException, IllegalArgumentException {
@@ -369,6 +379,35 @@ public class CommunityFileIO extends OTUsFileIO {
         out.close();
     }
 
+    /**
+     * write Community Report, rowNames.size() == report.size()
+     * @param reportFile
+     * @param report
+     * @param rowNames
+     * @throws IOException
+     */
+    public static void writeCommunityReport(Path reportFile, List<int[]> report, List<String> rowNames) throws IOException {
+        BufferedWriter writer = FileIO.getWriter(reportFile, "OTUs summary report");
+
+        String[] colNames = new String[]{"Stage","OTUs","Unique","Reads","OTUs1Read","OTUs2Reads","UniqueChimeras","Chimeras"};
+        writer.write(StringUtil.getRow(colNames));
+
+        for (int i = 0; i < report.size(); i++) {
+            int[] row = report.get(i);
+            String rowName = "";
+            if (rowNames != null) {
+                assert rowNames.size() == report.size();
+                rowName = rowNames.get(i);
+            }
+            writer.write(rowName);
+            for (int j = 0; j < COMMUNITY_REPORT_COLUMN; j++) {
+                writer.write("\t" + row[j]);
+            }
+            writer.write("\n");
+        }
+
+        writer.close();
+    }
 
     /**
      * this method only works for specific directory structure described in WalterPipeline.txt
@@ -381,6 +420,7 @@ public class CommunityFileIO extends OTUsFileIO {
      * @param thresholdWhoseOTUsToAppendSize    add size to sequence label to combine with BLAST taxonomy
      * @throws java.io.IOException
      */
+    @Deprecated
     public static void reportCommunityByOTUThreshold(Path workDir, String otuMappingFile, String reportFileName, String cmFileName,
                                                      String[] experiments, int[] thresholds, int thresholdWhoseOTUsToAppendSize) throws IOException {
 
@@ -403,7 +443,7 @@ public class CommunityFileIO extends OTUsFileIO {
 
                 Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
                 int[] report = writeCommunityMatrix(outCMFilePath, community);
-                writer.write(thre + "\t" + report[0] + "\t" + report[1] + "\t" + report[2] + "\t" + report[3] + "\n");
+                writer.write(thre + "\t" + report[0] + "\t" + report[2] + "\t" + report[3] + "\t" + report[4] + "\n");
 
                 if (thresholdWhoseOTUsToAppendSize == thre) { // 97
                     Path otusFile = Paths.get(otusPath.toString(), "otus.fasta");
