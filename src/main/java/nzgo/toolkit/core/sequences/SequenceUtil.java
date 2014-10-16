@@ -230,13 +230,13 @@ public class SequenceUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        String inFastaFile = "sorted.fasta";
+        String inFastaFile = "otus.fasta";//"sorted.fasta";
         String regex = ".*\\|prep1.*";//".*\\|MID-.*";  //".*\\|28S.*";
 //        String regex = ".*up=chimera.*";
-        splitFastAOrQTo2(workPath, inFastaFile, regex);
+//        splitFastAOrQTo2(workPath, inFastaFile, regex);
 //        splitFastaByLabelItem(workPath, inFastaFile, 3);
 
-//        splitFastaBySites(workPath, "otus.fasta");
+        splitFastaBySites(workPath, "otus.fasta");
 
 //        diffFastAFrom(workPath, "reads.fasta", "map.fasta");
     }

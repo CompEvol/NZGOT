@@ -90,7 +90,7 @@ public class OTU<E> extends BioSortedSet<E> {
             String sampleLocation = siteNameParser.getSite(label);
             int i = ArrayUtil.indexOf(sampleLocation, sites);
             if (i < 0) {
-                throw new IllegalArgumentException("Error: incorrect site location : " + sampleLocation +
+                throw new IllegalArgumentException("Error: Cannot find site location : " + sampleLocation +
                         " from sites array : " + Arrays.asList(sites));
             } else {
                 if (countSizeAnnotation) {

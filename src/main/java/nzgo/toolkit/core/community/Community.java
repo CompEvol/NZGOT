@@ -231,15 +231,15 @@ public class Community<E> extends OTUs<E> {
         return chimerasRemovedAnnotatedSize;
     }
 
-    //    public File getRefSeqMappingFile() {
+//    public File getRefSeqMappingFile() {
 //        return refSeqMappingFile;
 //    }
 
     //Main method
     public static void main(final String[] args) {
-        String[] experiments = new String[]{"COI","COI-spun","ITS","trnL","18S","16S"}; //"COI","COI-spun","ITS","trnL","18S","16S"
+        String[] experiments = new String[]{"FolCOI"}; //"COI","COI-spun","ITS","trnL","18S","16S"
         int[] thresholds = new int[]{100,99,98,97,96,95,94,93,92,91,90}; // 100,99,98,97,96,95,94,93,92,91,90
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/PipelineUSEARCH8/");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/Miseq/");
         String otuMappingFileName = "out.up";
         String chimerasFileName = "chimeras.fasta";
         String reportFileName = "_otus_report.tsv";

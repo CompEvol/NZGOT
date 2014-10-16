@@ -61,6 +61,10 @@ public class CommunityFileIO extends OTUsFileIO {
         MyLogger.info(countSizeAnnotation ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
 
         TreeSet<String> sites = null;
+        if (siteNameParser != null) {
+            sites = new TreeSet<>();
+            MyLogger.info("Site type: " + siteNameParser.siteType);
+        }
         int total = 0;
 
         BufferedReader reader = FileIO.getReader(ucMappingFile, "OTUs and OTU mapping from");
@@ -95,16 +99,7 @@ public class CommunityFileIO extends OTUsFileIO {
                             member.setAnnotatedSize(annotatedSize);
                             otu.addElement(member);
 
-                            if (siteNameParser != null) {
-                                if (sites == null) {
-                                    sites = new TreeSet<>();
-                                    MyLogger.info("Site type: " + siteNameParser.siteType);
-                                }
-
-                                // if by plot, then add plot to TreeSet, otherwise add subplot
-                                String sampleLocation = siteNameParser.getSite(finalLabel);
-                                sites.add(sampleLocation);
-                            }
+                            addSite(sites, siteNameParser, finalLabel);
                         }
                     } else {
                         OTU otu = new OTU(otuName);
@@ -113,6 +108,8 @@ public class CommunityFileIO extends OTUsFileIO {
                         otu.addElement(representative);
 
                         initCommunity.addUniqueElement(otu);
+
+                        addSite(sites, siteNameParser, finalLabel);
                     }
 
                     total++;
@@ -126,6 +123,8 @@ public class CommunityFileIO extends OTUsFileIO {
 
         int[] sizes = initCommunity.getSizes();
         MyLogger.debug("Total valid lines = " + total);
+        if (sites != null)
+            MyLogger.debug(sites.size() + " sites = " + sites);
         MyLogger.debug("OTU clustering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
                 sizes[1] + ", annotated reads = " + sizes[2]);
 
@@ -168,6 +167,10 @@ public class CommunityFileIO extends OTUsFileIO {
         MyLogger.info(countSizeAnnotation ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
 
         TreeSet<String> sites = null;
+        if (siteNameParser != null) {
+            sites = new TreeSet<>();
+            MyLogger.info("Site type: " + siteNameParser.siteType);
+        }
         int total = 0;
         int chimerasInClustering = 0;
         int chimerasInClusteringAnnotatedSize = 0;
@@ -194,6 +197,9 @@ public class CommunityFileIO extends OTUsFileIO {
                     representative.setAnnotatedSize(annotatedSize);
                     otu.addElement(representative);
                     initCommunity.addUniqueElement(otu);
+
+                    addSite(sites, siteNameParser, finalLabel);
+
                     break;
 
                 case UPParser.OTU_MEMBER:
@@ -210,16 +216,7 @@ public class CommunityFileIO extends OTUsFileIO {
                         member.setAnnotatedSize(annotatedSize);
                         otu.addElement(member);
 
-                        if (siteNameParser != null) {
-                            if (sites == null) {
-                                sites = new TreeSet<>();
-                                MyLogger.info("Site type: " + siteNameParser.siteType);
-                            }
-
-                            // if by plot, then add plot to TreeSet, otherwise add subplot
-                            String sampleLocation = siteNameParser.getSite(finalLabel);
-                            sites.add(sampleLocation);
-                        }
+                        addSite(sites, siteNameParser, finalLabel);
                     }
                     break;
 
@@ -243,6 +240,8 @@ public class CommunityFileIO extends OTUsFileIO {
 
         int[] sizes = initCommunity.getSizes();
         MyLogger.debug("Total valid lines = " + total);
+        if (sites != null)
+            MyLogger.debug(sites.size() + " sites = " + sites);
         MyLogger.debug("OTU clustering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
                 sizes[1] + ", annotated reads = " + sizes[2]);
         MyLogger.debug("OTU clustering get chimeras = " + chimerasInClustering + ", annotated reads = " + chimerasInClusteringAnnotatedSize);
@@ -259,6 +258,14 @@ public class CommunityFileIO extends OTUsFileIO {
         }
 
         return sites;
+    }
+
+    protected static void addSite(TreeSet<String> sites, SiteNameParser siteNameParser, String finalLabel) {
+        if (siteNameParser != null) {
+            // if by plot, then add plot to TreeSet, otherwise add subplot
+            String sampleLocation = siteNameParser.getSite(finalLabel);
+            sites.add(sampleLocation);
+        }
     }
 
     /**
