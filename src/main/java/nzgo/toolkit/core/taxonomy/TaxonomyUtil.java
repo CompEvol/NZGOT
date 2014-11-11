@@ -2,16 +2,13 @@ package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.blast.*;
 import nzgo.toolkit.core.blast.parser.BlastStAXParser;
-import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
-import nzgo.toolkit.core.io.TaxonomyFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
-import nzgo.toolkit.core.uparse.io.CommunityFileIO;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.bind.JAXBContext;
@@ -21,14 +18,13 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Taxa Util
@@ -225,27 +221,120 @@ public class TaxonomyUtil {
 
     //Main method
     public static void main(final String[] args) {
-        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
+//        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        String workPath = args[0];
-        MyLogger.info("\nWorking path = " + workPath);
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
+        MyLogger.info("\nWorking path = " + workDir);
 
         try {
+            Path newTaxa = Paths.get(workDir.toString(), "COI-new.txt");
+            BufferedReader reader = FileIO.getReader(newTaxa, "");
+
+            List<String> BLAST = new ArrayList<>();
+            List<String> Morphology = new ArrayList<>();
+            Map<String, Integer> sequences = new HashMap<>(); // key is BLAST|Morphology
+
+            String line = reader.readLine();
+            while (line != null) {
+                String[] labels = FileIO.lineParser.getSeparator(0).parse(line);
+
+                if (!BLAST.contains(labels[1])) {
+                    BLAST.add(labels[1]);
+                }
+                if (!Morphology.contains(labels[2])) {
+                    Morphology.add(labels[2]);
+                }
+
+                String key = labels[1] + "|" + labels[2];
+
+                if (!sequences.containsKey(key)) {
+                    sequences.put(key, 1);
+                } else {
+                    Integer seq = sequences.get(key);
+                    seq++;
+                    sequences.put(key, seq);
+                }
+
+                line = reader.readLine();
+            }
+            reader.close();
+
+
+            Path taxaTable = Paths.get(workDir.toString(), "COI-BLAST-Morph.txt");
+            BufferedWriter writer = FileIO.getWriter(taxaTable, " BLAST vs Morph table");
+            // column names
+            writer.write("BLAST/Morph");
+            for (String bla : BLAST) {
+                writer.write("\t" + bla);
+            }
+            writer.write("\n");
+
+            int total = 0;
+            for (String morph : Morphology) {
+                writer.write(morph);
+                for (String bla : BLAST) {
+                    String key = bla + "|" + morph;
+                    Integer seq = sequences.get(key);
+                    if (seq == null) {
+                        writer.write("\t");
+                    } else {
+                        total += seq;
+                        writer.write("\t" + seq);
+                    }
+                }
+                writer.write("\n");
+            }
+
+            writer.flush();
+            writer.close();
+
+            MyLogger.info("\ntotal = " + total);
+
+//            Path sequences = Paths.get(workDir.toString(), "COI.fasta");
+//            List<String> sequenceLabels = SequenceFileIO.importFastaLabelOnly(sequences, false);
+//
+//            Path taxa = Paths.get(workDir.toString(), "COI-ex.txt");
+//            BufferedReader reader = FileIO.getReader(taxa, "");
+//
+//            Path newTaxa = Paths.get(workDir.toString(), "COI-new.txt");
+//            BufferedWriter writer = FileIO.getWriter(newTaxa, " new taxa mapping");
+//
+//            String line = reader.readLine();
+//            while (line != null) {
+//
+//                String[] labels = FileIO.lineParser.getSeparator(0).parse(line);
+//
+//                for (String shortLabel : sequenceLabels) {
+//                    String[] itemsShort = FileIO.lineParser.getSeparator(1).parse(shortLabel);
+//                    String[] items = FileIO.lineParser.getSeparator(1).parse(labels[0]);
+//                    if (items[0].contentEquals(itemsShort[0]) && items[1].contentEquals(itemsShort[1])) {
+//
+//                        writer.write(labels[0] + "\t" + shortLabel + "\t" + labels[1] + "\t" + itemsShort[4] + "\n");
+//                        break;
+//                    }
+//                }
+//
+//                line = reader.readLine();
+//            }
+//            reader.close();
+//            writer.flush();
+//            writer.close();
+
 //            File otusFile = new File(workPath + "otus1.fasta");
-            File otuMappingFile = new File(workPath + "map.uc");
-            SiteNameParser siteNameParser = new SiteNameParser();
-            Community community = new Community(otuMappingFile, siteNameParser);
-
-            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
-            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
-            community.setTaxonomy(otuTaxaMap);
-
-            Community communityArthopoda = community.getClassifiedCommunity();
-            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
-            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
-
-            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
-            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
+//            File otuMappingFile = new File(workPath + "map.uc");
+//            SiteNameParser siteNameParser = new SiteNameParser();
+//            Community community = new Community(otuMappingFile, siteNameParser);
+//
+//            File otuTaxidMappingFile = new File(workPath + "otus1-Arthopoda.txt");
+//            SortedMap<String, Taxon> otuTaxaMap = getOTUTaxaMapByFile(otuTaxidMappingFile);
+//            community.setTaxonomy(otuTaxaMap);
+//
+//            Community communityArthopoda = community.getClassifiedCommunity();
+//            Path outCMFilePath = Paths.get(workPath, CommunityFileIO.COMMUNITY_MATRIX + "-Arthopoda.csv");
+//            CommunityFileIO.writeCommunityMatrix(outCMFilePath, communityArthopoda);
+//
+//            Path outFilePath = Paths.get(workPath, "otus_taxa-Arthopoda.tsv");
+//            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.CLASS, Rank.ORDER);
 
 //            File xmlBLASTOutputFile = new File(workPath + "blast" + File.separator + "otus1.xml");
 //            File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
@@ -254,9 +343,9 @@ public class TaxonomyUtil {
 //            Path outFilePath = Paths.get(workPath, "otus_taxa.tsv");
 //            TaxonomyFileIO.writeElementTaxonomyMap(outFilePath, otuTaxaMap, Rank.PHYLUM, Rank.ORDER);
 
-            TaxonomicAssignment taxonomicAssignment = new TaxonomicAssignment(communityArthopoda, Rank.CLASS, Rank.ORDER);
-
-            taxonomicAssignment.writeTaxonomyAssignment(workPath);
+//            TaxonomicAssignment taxonomicAssignment = new TaxonomicAssignment(communityArthopoda, Rank.CLASS, Rank.ORDER);
+//
+//            taxonomicAssignment.writeTaxonomyAssignment(workPath);
 
 //            TaxonSet<Taxon> taxonomySet = communityArthopoda.getTaxonomy();
 //

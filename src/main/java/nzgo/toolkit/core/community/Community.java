@@ -1,7 +1,6 @@
 package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.io.FileIO;
-import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
@@ -237,9 +236,9 @@ public class Community<E> extends OTUs<E> {
 
     //Main method
     public static void main(final String[] args) {
-        String[] experiments = new String[]{"FolCOI"}; //"COI","COI-spun","ITS","trnL","18S","16S"
+        String[] experiments = new String[]{"COITraditional"}; //"COI","COI-spun","ITS","trnL","18S","16S"
         int[] thresholds = new int[]{100,99,98,97,96,95,94,93,92,91,90}; // 100,99,98,97,96,95,94,93,92,91,90
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/Miseq/");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/");
         String otuMappingFileName = "out.up";
         String chimerasFileName = "chimeras.fasta";
         String reportFileName = "_otus_report.tsv";
@@ -252,21 +251,21 @@ public class Community<E> extends OTUs<E> {
             for (String experiment : experiments) {
                 List<int[]> report = new ArrayList<>();
                 List<String> rowNames = new ArrayList<>();
-
+//
                 // go into each gene folder
                 Path workPath = Paths.get(workDir.toString(), experiment);
                 MyLogger.info("\nWorking path = " + workPath);
-
-                Path qcPath = Paths.get(workPath.toString(), "qc");
-                Path readsFile = Paths.get(qcPath.toString(), "reads.fasta");
-                Path sortedFile = Paths.get(qcPath.toString(), "sorted.fasta");
-
+//
+//                Path qcPath = Paths.get(workPath.toString(), "qc");
+//                Path readsFile = Paths.get(qcPath.toString(), "reads.fasta");
+//                Path sortedFile = Paths.get(qcPath.toString(), "sorted.fasta");
+//
                 int[] row = new int[CommunityFileIO.COMMUNITY_REPORT_COLUMN];
-                row[1] = SequenceFileIO.importFastaLabelOnly(sortedFile).size();
-                row[2] = SequenceFileIO.importFastaLabelOnly(readsFile).size();
-
-                report.add(row);
-                rowNames.add("AfterQc");
+//                row[1] = SequenceFileIO.importFastaLabelOnly(sortedFile).size();
+//                row[2] = SequenceFileIO.importFastaLabelOnly(readsFile).size();
+//
+//                report.add(row);
+//                rowNames.add("AfterQc");
 
                 for (int thre : thresholds) {
                     Path otusPath = Paths.get(workPath.toString(), "otus" + thre);

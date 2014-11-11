@@ -13,6 +13,7 @@ import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
+import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -116,7 +117,7 @@ public class SequenceUtil {
     }
 
     /**
-     * split sequences into n fasta files by items parsed by itemIndex in the label, files are limited to 50
+     * split sequences into n fasta files by items parsed by itemIndex in the label, files are limited to 100
      *
      * @param workPathString
      * @param inFastaFileName
@@ -128,7 +129,7 @@ public class SequenceUtil {
 
         String outputFileNameStem = NameUtil.getNameNoExtension(inFastaFilePath.toFile().getName());
 
-        int fileLimit = 50;
+        int fileLimit = 100;
         SiteNameParser siteNameParser = new SiteNameParser(itemIndex);
         Map<String, PrintStream> outMap = new HashMap<>();
 
@@ -172,6 +173,62 @@ public class SequenceUtil {
         }
 
         MyLogger.debug("original file total lines = " + originalTotal + ", write to new files total lines = " + total);
+    }
+
+    /**
+     *
+     * @param workPathString
+     * @param inFastaFileName
+     * @param itemIndex
+     * @param matches          such as the barcode: NZAC03010806, NZAC03010894
+     * @throws IOException
+     */
+    public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemIndex, String... matches) throws IOException {
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "original file", NameSpace.SUFFIX_FASTA);
+
+        BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
+
+        String outputFileNameStem = NameUtil.getNameNoExtension(inFastaFilePath.toFile().getName());
+
+        Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-matches" + NameSpace.SUFFIX_FASTA);
+        PrintStream out1 = FileIO.getPrintStream(outputFilePath, "matches");
+        outputFilePath = Paths.get(workPathString, outputFileNameStem + "-remains" + NameSpace.SUFFIX_FASTA);
+        PrintStream out2 = FileIO.getPrintStream(outputFilePath, "remains");
+
+        int lMatch = 0;
+        int lRemain = 0;
+        String line = reader.readLine();
+        PrintStream out = out1;
+        while (line != null) {
+            if (line.startsWith(">")) {
+                String label = line.substring(1);
+                String[] items = FileIO.lineParser.getSeparator(1).parse(label); // default "|"
+
+                if (items.length <= itemIndex)
+                    throw new IllegalArgumentException("Do not have enough items for itemIndex = " + itemIndex + " in the string " + label);
+
+                int matchedId = ArrayUtil.indexOf(items[itemIndex], matches);
+
+                if (matchedId >= 0) {
+                    out = out1;
+                    lMatch++;
+                } else {
+                    out = out2;
+                    lRemain++;
+                }
+
+            }
+            out.println(line);
+            line = reader.readLine();
+        }
+
+        reader.close();
+        out1.flush();
+        out1.close();
+        out2.flush();
+        out2.close();
+
+        MyLogger.debug("Total " + (lMatch+lRemain) + " sequences, separate " + lMatch + " matched sequences, and " + lRemain + " remain.");
     }
 
     /**
@@ -230,15 +287,17 @@ public class SequenceUtil {
         String workPath = args[0];
         MyLogger.info("\nWorking path = " + workPath);
 
-        String inFastaFile = "otus.fasta";//"sorted.fasta";
-        String regex = ".*\\|prep1.*";//".*\\|MID-.*";  //".*\\|28S.*";
+//        String inFastaFile = "otus.fasta";//"sorted.fasta";
+//        String regex = ".*\\|prep1.*";//".*\\|MID-.*";  //".*\\|28S.*";
 //        String regex = ".*up=chimera.*";
 //        splitFastAOrQTo2(workPath, inFastaFile, regex);
 //        splitFastaByLabelItem(workPath, inFastaFile, 3);
 
-        splitFastaBySites(workPath, "otus.fasta");
+//        splitFastaBySites(workPath, "otus.fasta");
 
 //        diffFastAFrom(workPath, "reads.fasta", "map.fasta");
+
+        splitFastaByLabelItem(workPath, "COI.fasta", 1, "NZAC03010806", "NZAC03010894", "NZAC03011914", "NZAC03011905", "NZAC03011634", "NZAC03010302", "NZAC03010913", "NZAC03010897", "NZAC03010906", "NZAC03012413", "NZAC03010752", "NZAC03011443", "NZAC03013543", "NZAC03011474", "NZAC03009260", "NZAC03010909", "NZAC03010904", "NZAC03010711", "NZAC03013640", "NZAC03011787");
     }
 
 }
