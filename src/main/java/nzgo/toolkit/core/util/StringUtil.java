@@ -23,4 +23,12 @@ public class StringUtil {
         row += "\n";
         return row;
     }
+
+    public static boolean contains(String original, String[] keywords) {
+        for (String keyw : keywords) {
+            if (original.contains(keyw))
+                return true;
+        }
+        return false;
+    }
 }

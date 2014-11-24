@@ -125,7 +125,7 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemIndex) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "original file", NameSpace.SUFFIX_FASTA);
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "input", NameSpace.SUFFIX_FASTA);
 
         String outputFileNameStem = NameUtil.getNameNoExtension(inFastaFilePath.toFile().getName());
 
@@ -172,6 +172,7 @@ public class SequenceUtil {
             entry.getValue().close();
         }
 
+        MyLogger.info("Split to " + outMap.size() + " files.");
         MyLogger.debug("original file total lines = " + originalTotal + ", write to new files total lines = " + total);
     }
 
@@ -184,7 +185,7 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemIndex, String... matches) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "original file", NameSpace.SUFFIX_FASTA);
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "input", NameSpace.SUFFIX_FASTA);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 
@@ -280,24 +281,91 @@ public class SequenceUtil {
 
     }
 
+    /**
+     *
+     * @param workPathString
+     * @param inFastqFileName
+     * @param itemIndex
+     * @throws IOException
+     */
+    public static void splitFastqByLabelItem(String workPathString, String inFastqFileName, int itemIndex) throws IOException {
+        Path inFastqFilePath = Module.validateInputFile(Paths.get(workPathString), inFastqFileName, "input", NameSpace.SUFFIX_FASTQ);
+
+        String outputFileNameStem = NameUtil.getNameNoExtension(inFastqFilePath.toFile().getName());
+
+        int fileLimit = 100;
+        SiteNameParser siteNameParser = new SiteNameParser(itemIndex);
+        Map<String, PrintStream> outMap = new HashMap<>();
+
+        BufferedReader reader = OTUsFileIO.getReader(inFastqFilePath, "original file");
+
+        int lineNum = 0;
+        int total = 0;
+        String line = reader.readLine();
+        PrintStream out = null;
+        while (line != null) {
+            if (lineNum % 4 == 0) {
+                String label = line.substring(1);
+                String item = siteNameParser.getSiteFullName(label);
+
+                if (outMap.containsKey(item)) {
+                    out = outMap.get(item);
+                } else {
+                    if (outMap.size() > fileLimit)
+                        throw new IllegalStateException("Cannot split to more than " + fileLimit + " files !");
+
+                    Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-" + item + NameSpace.SUFFIX_FASTQ);
+                    out = FileIO.getPrintStream(outputFilePath, null);
+                    outMap.put(item, out);
+                }
+            }
+
+            if (out != null) {
+                out.println(line);
+                total++;
+            }
+
+            line = reader.readLine();
+            lineNum++;
+        }
+
+        reader.close();
+
+        for (Map.Entry<String, PrintStream> entry : outMap.entrySet()) {
+            entry.getValue().flush();
+            entry.getValue().close();
+        }
+
+        MyLogger.info("Split to " + outMap.size() + " files.");
+        MyLogger.debug("original file total lines = " + lineNum + ", write to new files total lines = " + total);
+    }
+
     // main
     public static void main(String[] args) throws IOException{
-        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
+//        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        String workPath = args[0];
-        MyLogger.info("\nWorking path = " + workPath);
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/");
+//        MyLogger.info("\nWorking path = " + workDir);
 
-//        String inFastaFile = "otus.fasta";//"sorted.fasta";
+//        String inFile = "otus.fasta";//"sorted.fasta";
 //        String regex = ".*\\|prep1.*";//".*\\|MID-.*";  //".*\\|28S.*";
 //        String regex = ".*up=chimera.*";
-//        splitFastAOrQTo2(workPath, inFastaFile, regex);
-//        splitFastaByLabelItem(workPath, inFastaFile, 3);
+//        splitFastAOrQTo2(workDir.toString(), inFastaFile, regex);
+//        splitFastaByLabelItem(workDir.toString(), inFile, SiteNameParser.LABEL_SAMPLE_INDEX);
 
-//        splitFastaBySites(workPath, "otus.fasta");
+//        splitFastaBySites(workDir.toString(), "otus.fasta");
 
-//        diffFastAFrom(workPath, "reads.fasta", "map.fasta");
+//        diffFastAFrom(workDir.toString(), "reads.fasta", "map.fasta");
 
-        splitFastaByLabelItem(workPath, "COI.fasta", 1, "NZAC03010806", "NZAC03010894", "NZAC03011914", "NZAC03011905", "NZAC03011634", "NZAC03010302", "NZAC03010913", "NZAC03010897", "NZAC03010906", "NZAC03012413", "NZAC03010752", "NZAC03011443", "NZAC03013543", "NZAC03011474", "NZAC03009260", "NZAC03010909", "NZAC03010904", "NZAC03010711", "NZAC03013640", "NZAC03011787");
+//        splitFastaByLabelItem(workDir.toString(), "COI.fasta", 1, "NZAC03010806", "NZAC03010894", "NZAC03011914", "NZAC03011905", "NZAC03011634", "NZAC03010302", "NZAC03010913", "NZAC03010897", "NZAC03010906", "NZAC03012413", "NZAC03010752", "NZAC03011443", "NZAC03013543", "NZAC03011474", "NZAC03009260", "NZAC03010909", "NZAC03010904", "NZAC03010711", "NZAC03013640", "NZAC03011787");
+
+        String[] experiments = new String[]{"COI","COI-spun","ITS","trnL","18S","16S"}; //"COI","COI-spun","ITS","trnL","18S","16S"
+        for (String experiment : experiments) {
+            // go into each gene folder
+            Path workPath = Paths.get(workDir.toString(), experiment);
+            MyLogger.info("\nWorking path = " + workPath);
+            splitFastqByLabelItem(workPath.toString(), experiment + NameSpace.SUFFIX_FASTQ, SiteNameParser.LABEL_SAMPLE_INDEX);
+        }
     }
 
 }
