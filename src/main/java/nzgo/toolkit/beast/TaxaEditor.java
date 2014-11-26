@@ -16,8 +16,8 @@ import java.nio.file.Paths;
  */
 public class TaxaEditor {
     private static String[] taxaToKeep = new String[]{
-//            "CB070121.08_1", "CB070121.16_1", "CB111229.15_1", "CB130106.26_1" // 403gene4t716
-        "CB070121.08_1", "CB070121.16_1", "CA1.T401_1", "CA3.T415_1"     // 403gene4t0
+            "CB070121.08_1", "CB070121.16_1", "CB070117.03_1", "CB121212.12_1", "CB111229.15_1", "CB130106.26_1" // 403gene6t716
+//        "CB070121.08_1", "CB070121.16_1", "CB070117.03_1", "CB121212.12_1", "CA1.T401_1", "CA3.T415_1"     // 403gene6t0
     };
 
     public TaxaEditor() {
@@ -33,7 +33,7 @@ public class TaxaEditor {
         try {
             BufferedReader reader = FileIO.getReader(inputXML, "xml file");
 
-            Path outputXML = Paths.get(workPath.toString(), "403gene4t0.xml");
+            Path outputXML = Paths.get(workPath.toString(), "403gene6t716.xml");
             PrintStream out = FileIO.getPrintStream(outputXML, "XML");
 
             String line = reader.readLine();

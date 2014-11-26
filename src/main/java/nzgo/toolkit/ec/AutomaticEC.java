@@ -88,10 +88,10 @@ public class AutomaticEC {
 
         File file = new File(mapSeqOtu);
         OTUs otus = new OTUs(file.getName());
-        OTUsFileIO.importOTUsFromMapUC(otus, file);
+        OTUsFileIO.importOTUsFromMapUC(otus, file.toPath());
 
         file = new File(mapOtuRef);
-        OTUsFileIO.importRefSeqFromMapUCAndMapToOTUs(otus, file);
+        OTUsFileIO.importRefSeqFromMapUCAndMapToOTUs(otus, file.toPath());
 
         double count = 0;
         double size = sequences.size();

@@ -9,7 +9,6 @@ import nzgo.toolkit.core.uparse.DereplicatedSequence;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 import nzgo.toolkit.core.util.BioSortedSet;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -229,10 +228,10 @@ public class OTUs<E> extends BioSortedSet<E> {
     }
 
 
-    public static void validateOTUsMapping(Path otusFile, File otuMappingUCFile) throws IOException {
+    public static void validateOTUsMapping(Path otusFile, Path otuMappingUCFile) throws IOException {
         OTUs otus = OTUsFileIO.importOTUsFromFasta(otusFile, false, true, true);
 
-        OTUs otusMap = new OTUs(otuMappingUCFile.getName());
+        OTUs otusMap = new OTUs(otuMappingUCFile.toFile().getName());
         OTUsFileIO.importOTUsFromMapUC(otusMap, otuMappingUCFile);
 
         BioSortedSet diff = otus.symmetricDiff(otusMap);

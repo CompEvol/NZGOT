@@ -38,7 +38,7 @@ public class OTUsFileIO extends FileIO {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static void importOTUsFromMapUC(OTUs otus, File otuMappingUCFile) throws IOException, IllegalArgumentException {
+    public static void importOTUsFromMapUC(OTUs otus, Path otuMappingUCFile) throws IOException, IllegalArgumentException {
         CommunityFileIO.importCommunityFromUCFile(otus, otuMappingUCFile, null);
     }
 
