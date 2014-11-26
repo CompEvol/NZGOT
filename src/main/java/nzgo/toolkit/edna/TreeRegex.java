@@ -1,4 +1,4 @@
-package nzgo.toolkit.labelregex;
+package nzgo.toolkit.edna;
 
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;

@@ -1,4 +1,4 @@
-package nzgo.toolkit.metabarcoding;
+package nzgo.toolkit.edna;
 
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.GeneticCode;

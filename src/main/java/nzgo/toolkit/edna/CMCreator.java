@@ -1,4 +1,4 @@
-package nzgo.toolkit.cma;
+package nzgo.toolkit.edna;
 
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.io.Arguments;

@@ -13,7 +13,7 @@
     <property name="dist" location="${build}/dist"/>
     <property name="doc" location="${build}/doc" />
 
-    <property name="main_CMCreator" value="nzgo.toolkit.cma.CMCreator"/>
+    <property name="main_CMCreator" value="nzgo.toolkit.edna.CMCreator"/>
 
 	<path id="classpath">
 		<fileset dir="${lib}" includes="beast.jar"/>
@@ -45,7 +45,7 @@
                memoryinitialsize="512m"
                memorymaximumsize="2048m">
             <include name="nzgo/core/**"/>
-            <include name="nzgo/cma/**"/>
+            <include name="nzgo/edna/**"/>
         </javac>
         <echo message="Successfully complied."/>
     </target>
