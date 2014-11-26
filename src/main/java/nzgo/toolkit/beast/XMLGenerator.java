@@ -20,37 +20,108 @@ public class XMLGenerator {
     public static void main(String[] args) throws IOException {
         System.out.println("Input " + ids.length + " ids ...\n\n");
 
+//        for (String id : ids) {
+//            System.out.print(getTrait(id));
+//        }
+//        System.out.println();
+//
+//        for (String id : ids) {
+//            System.out.print(getRandomTree(id));
+//        }
+//        System.out.println();
+//
+//        for (String id : ids) {
+//            System.out.print(getCoalescent(id));
+//        }
+//        System.out.println();
+//
+//        for (String id : ids) {
+//            System.out.print(getBranchRateModel(id));
+//        }
+//        System.out.println();
+
+//        for (String id : ids) {
+//            System.out.print(getTreeOperators(id));
+//        }
+//        System.out.println();
+//
         for (String id : ids) {
             System.out.print(getUpDownXML(id));
         }
         System.out.println();
         System.out.println(getBigUpDownXML());
-
-
-        System.out.println();
-        for (String id : ids) {
-            System.out.print(getTreeHeightLog(id));
-        }
-        for (String id : ids) {
-            System.out.print(getCoalescentLog(id));
-        }
-        System.out.println();
+//
+//
+//        System.out.println();
+//        for (String id : ids) {
+//            System.out.print(getTreeHeightLog(id));
+//        }
+//        for (String id : ids) {
+//            System.out.print(getCoalescentLog(id));
+//        }
+//        System.out.println();
 
     } // main
 
-    private static String getXMLId2(int id) {
-        return "<init estimate=\"false\" id=\"RandomTree.t:Pad_concate" + id + "\" initial=\"@Tree.t:Pad_concate" + id + "\"\n" +
-                "\tspec=\"beast.evolution.tree.RandomTree\" taxa=\"@Pad_concate" + id + "\">\n" +
-                "\t<populationModel id=\"ConstantPopulation0.t:Pad_concate" + id + "\" spec=\"ConstantPopulation\">\n" +
-                "\t\t<parameter idref=\"randomPopSize.t:Pad_concate0\" name=\"popSize\"/>\n" +
-                "\t</populationModel>\n" +
-                "</init>\n";
+    private static String getTrait(String id) {
+        return "\t\t<tree id=\"Tree.t:" + id + "\" name=\"stateNode\">\n" +
+                "\t\t\t<trait idref=\"dateTrait.t:" + ids[0] + "\" spec=\"beast.evolution.tree.TraitSet\" traitname=\"date\"/>\n" +
+                "\t\t\t<taxonset idref=\"TaxonSet." + ids[0] + "\"/>\n" +
+                "\t\t</tree>\n";
+    }
+
+
+    private static String getRandomTree(String id) {
+        return "\t<init estimate=\"false\" id=\"RandomTree.t:" + id + "\" initial=\"@Tree.t:" + id + "\"\n" +
+                "\t\tspec=\"beast.evolution.tree.RandomTree\" taxa=\"@" + id + "\">\n" +
+                "\t\t<populationModel id=\"ConstantPopulation0.t:" + id + "\" spec=\"ConstantPopulation\">\n" +
+                "\t\t\t<parameter idref=\"randomPopSize.t:" + ids[0] + "\" name=\"popSize\"/>\n" +
+                "\t\t</populationModel>\n" +
+                "\t</init>\n";
+    }
+
+    private static String getCoalescent(String id) {
+        return "\t\t\t\t<distribution id=\"CoalescentConstant.t:" + id + "\" spec=\"Coalescent\">\n" +
+                "\t\t\t\t\t<populationModel id=\"ConstantPopulation.t:" + id + "\"\n" +
+                "\t\t\t\t\t\tpopSize=\"@popSize.t:" + ids[0] + "\" spec=\"ConstantPopulation\"/>\n" +
+                "\t\t\t\t\t<treeIntervals id=\"TreeIntervals.t:" + id + "\" spec=\"TreeIntervals\"\n" +
+                "\t\t\t\t\t\ttree=\"@Tree.t:" + id + "\"/>\n" +
+                "\t\t\t\t</distribution>\n";
+    }
+
+    private static String getBranchRateModel(String id) {
+        return "\t\t\t<distribution branchRateModel=\"@StrictClock.c:" + ids[0] + "\" data=\"@" + id + "\"\n" +
+                "\t\t\t\tid=\"treeLikelihood." + id + "\" siteModel=\"@SiteModel.s:" + ids[0] + "\"\n" +
+                "\t\t\t\tspec=\"TreeLikelihood\" tree=\"@Tree.t:" + id + "\"/>\n";
+    }
+
+    private static String getTreeOperators(String id) {
+        return "<operator id=\"treeScaler.t:" + id + "\" scaleFactor=\"0.8\" optimise=\"false\" spec=\"ScaleOperator\"\n" +
+                "\ttree=\"@Tree.t:" + id + "\" weight=\"3.0\"/>\n" +
+                "\n" +
+                "<operator id=\"treeRootScaler.t:" + id + "\" rootOnly=\"true\" scaleFactor=\"0.7\" optimise=\"false\" spec=\"ScaleOperator\"\n" +
+                "\t  tree=\"@Tree.t:" + id + "\" weight=\"3.0\"/>\n" +
+                "\n" +
+                "<operator id=\"UniformOperator.t:" + id + "\" spec=\"Uniform\" tree=\"@Tree.t:" + id + "\"\n" +
+                "\tweight=\"30.0\"/>\n" +
+                "\n" +
+                "<operator id=\"SubtreeSlide.t:" + id + "\" spec=\"SubtreeSlide\" tree=\"@Tree.t:" + id + "\"\n" +
+                "\tweight=\"15.0\"/>\n" +
+                "\n" +
+                "<operator id=\"narrow.t:" + id + "\" spec=\"Exchange\" tree=\"@Tree.t:" + id + "\"\n" +
+                "\tweight=\"15.0\"/>\n" +
+                "\n" +
+                "<operator id=\"wide.t:" + id + "\" isNarrow=\"false\" spec=\"Exchange\"\n" +
+                "\ttree=\"@Tree.t:" + id + "\" weight=\"3.0\"/>\n" +
+                "\n" +
+                "<operator id=\"WilsonBalding.t:" + id + "\" spec=\"WilsonBalding\" tree=\"@Tree.t:" + id + "\"\n" +
+                "\tweight=\"3.0\"/>\n";
     }
 
     private static String getUpDownXML(String id) {
         return "\t\t<operator id=\"strictClockUpDownOperator.c:" + id +
                 "\" scaleFactor=\"0.9\" optimise=\"false\" spec=\"UpDownOperator\" weight=\"15.0\">\n" +
-                "\t\t\t<parameter idref=\"clockRate.c:Pad_concate0\" name=\"up\"/>\n" +
+                "\t\t\t<parameter idref=\"clockRate.c:" + ids[0] + "\" name=\"up\"/>\n" +
                 "\t\t\t<tree idref=\"Tree.t:" + id + "\" name=\"down\"/>\n" +
                 "\t\t</operator>\n";
     }
@@ -59,7 +130,7 @@ public class XMLGenerator {
         StringBuilder stringBuilder = new StringBuilder(1000);
         stringBuilder.append("\t\t<operator id=\"strictClockUpDownOperator.all\" scaleFactor=\"0.95\" ");
         stringBuilder.append("optimise=\"false\" spec=\"UpDownOperator\" weight=\"15.0\">\n");
-        stringBuilder.append("\t\t\t<parameter idref=\"clockRate.c:Pad_R000255_Scaffold10\" name=\"up\"/>\n");
+        stringBuilder.append("\t\t\t<parameter idref=\"clockRate.c:" + ids[0] + "\" name=\"up\"/>\n");
         for (String id : ids) {
             stringBuilder.append("\t\t\t<tree idref=\"Tree.t:").append(id).append("\" name=\"down\"/>\n");
         }
@@ -77,9 +148,9 @@ public class XMLGenerator {
         return "\t\t<log idref=\"CoalescentConstant.t:" + id + "\"/>\n";
     }
 
-//        return "<logger fileName=\"$(tree).trees\" id=\"treelog.t:Pad_concate" + id + "\" logEvery=\"100000\" mode=\"tree\">\n" +
-//                "\t<log id=\"TreeWithMetaDataLogger.t:Pad_concate" + id + "\" spec=\"beast.evolution.tree.TreeWithMetaDataLogger\"\n" +
-//                "\t\ttree=\"@Tree.t:Pad_concate" + id + "\"/>\n" +
+//        return "<logger fileName=\"$(tree).trees\" id=\"treelog.t:" + id + "\" logEvery=\"100000\" mode=\"tree\">\n" +
+//                "\t<log id=\"TreeWithMetaDataLogger.t:" + id + "\" spec=\"beast.evolution.tree.TreeWithMetaDataLogger\"\n" +
+//                "\t\ttree=\"@Tree.t:" + id + "\"/>\n" +
 //                "</logger>\n";
 
 }

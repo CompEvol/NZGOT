@@ -15,32 +15,42 @@ import java.nio.file.Paths;
 
 /**
  * Module of each program
+ *
  * @author Walter Xie
  */
 public class Module {
 
     private final static Version version = new NZGOTVersion();
+    // name, description
     protected final String[] names = new String[2];
 
-    public Module() {  }
+    public Module() {
+    }
 
-    public Module(String name, String fullName) {
-        setName(name, fullName);
+    public Module(String name, String description) {
+        setName(name, description);
     }
 
     protected String getName() {
         return names[0];
     }
 
-    protected String getFullName() {
+    protected String getDescription() {
         return names[1];
     }
 
-    protected void setName(String name, String fullName) {
+    protected void setName(String name, String description) {
         this.names[0] = name;
-        this.names[1] = fullName;
+        this.names[1] = description;
     }
 
+    /**
+     * initiate program, return working directory or null if not set
+     *
+     * @param arguments
+     * @param args
+     * @return
+     */
     public Path init(Arguments arguments, String[] args) {
         try {
             arguments.parseArguments(args);
@@ -60,13 +70,14 @@ public class Module {
         printTitle();
 
         // set working directory
-        Path working = null;
+        Path working = Paths.get(System.getProperty("user.home"));
         if (arguments.hasOption("working")) {
             working = Paths.get(arguments.getStringOption("working"));
             if (Files.notExists(working)) {
                 MyLogger.error("Cannot find working path : " + working);
                 System.exit(0);
             }
+            System.setProperty("user.dir", working.toString());
         }
         return working;
     }
@@ -90,31 +101,38 @@ public class Module {
         return firstArg;
     }
 
-    /**
-     * add new options to Arguments
-     * @param newOptions
-     * @return
-     */
-    public Arguments getArguments(Arguments.Option[] newOptions) {
-        Arguments.Option[] commonOptions = new Arguments.Option[]{
-                new Arguments.StringOption("working", "working-path", "Change working directory (" + NameSpace.HOME_DIR +
-                        ") to given path, otherwise change to input file's directory by default if this option is not used."),
-                new Arguments.Option("overwrite", "Allow overwriting of output files."),
+    //+++++++++++++++ Arguments +++++++++++++++++
+
+    Arguments.Option[] defaultOptions = new Arguments.Option[]{
+            new Arguments.StringOption("working", "working-path", "Change working directory (" + NameSpace.HOME_DIR +
+                    ") to given path, otherwise change to input file's directory by default if this option is not used."),
+            new Arguments.Option("overwrite", "Allow overwriting of output files."),
 //                        new Arguments.Option("options", "Display an options dialog."),
 //                        new Arguments.Option("window", "Provide a console window."),
 //                        new Arguments.Option("verbose", "Give verbose parsing messages."),
 
-                new Arguments.Option("help", "Print this information and stop."),
-        };
+            new Arguments.Option("help", "Print this information and stop."),
+    };
 
-        Arguments.Option[] allOptions = ArrayUtil.combineArrays(commonOptions, newOptions);
+    public Arguments getArguments() {
+        return new Arguments(defaultOptions);
+    }
+
+    /**
+     * add new options to Arguments
+     *
+     * @param newOptions
+     * @return
+     */
+    public Arguments getArguments(Arguments.Option[] newOptions) {
+        Arguments.Option[] allOptions = ArrayUtil.combineArrays(defaultOptions, newOptions);
         return new Arguments(allOptions);
     }
 
     protected void printTitle() {
         System.out.println();
         centreLine(getName() + " " + version.getVersionString() + ", " + version.getDateString(), 60);
-        centreLine(getFullName(), 60);
+        centreLine(getDescription(), 60);
         for (String creditLine : version.getCredits()) {
             centreLine(creditLine, 60);
         }
@@ -142,6 +160,7 @@ public class Module {
 
     /**
      * common method to get input file
+     *
      * @param workPath
      * @param inputFileName
      * @param inputfileNameExtension
@@ -168,6 +187,7 @@ public class Module {
 
     /**
      * validate file name
+     *
      * @param fileName
      * @param ioMessage
      * @param fileNameExtension
@@ -186,6 +206,7 @@ public class Module {
     /**
      * validate input file
      * if fileNameSuffix is null, ignore checking suffix
+     *
      * @param workPath
      * @param fileName
      * @param fileNameExtension

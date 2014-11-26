@@ -51,8 +51,8 @@ public class OTUsFileIO extends FileIO {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static void importRefSeqFromMapUCAndMapToOTUs(OTUs otus, File refSeqMappingUCFile) throws IOException, IllegalArgumentException {
-        NameUtil.validateFileExtension(refSeqMappingUCFile.getName(), NameSpace.SUFFIX_UC);
+    public static void importRefSeqFromMapUCAndMapToOTUs(OTUs otus, Path refSeqMappingUCFile) throws IOException, IllegalArgumentException {
+        NameUtil.validateFileExtension(refSeqMappingUCFile.toFile().getName(), NameSpace.SUFFIX_UC);
 
         BufferedReader reader = getReader(refSeqMappingUCFile, "reference sequence mapping (to OTU) from");
 

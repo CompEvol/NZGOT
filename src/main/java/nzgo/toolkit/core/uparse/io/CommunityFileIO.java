@@ -51,8 +51,8 @@ public class CommunityFileIO extends OTUsFileIO {
      * @throws java.io.IOException
      * @throws IllegalArgumentException
      */
-    public static TreeSet<String> importCommunityFromUCFile(OTUs initCommunity, File ucMappingFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
-        NameUtil.validateFileExtension(ucMappingFile.getName(), NameSpace.SUFFIX_UC);
+    public static TreeSet<String> importCommunityFromUCFile(OTUs initCommunity, Path ucMappingFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
+        NameUtil.validateFileExtension(ucMappingFile.toFile().getName(), NameSpace.SUFFIX_UC);
 
         // this method has to count annotated size in OTU members
         initCommunity.setCountSizeAnnotation(true);
@@ -444,7 +444,7 @@ public class CommunityFileIO extends OTUsFileIO {
             for (int thre : thresholds) {
                 Path otusPath = Paths.get(workPath.toString(), "otus" + thre);
 
-                File mappingFile = Paths.get(otusPath.toString(), otuMappingFile).toFile();
+                Path mappingFile = Paths.get(otusPath.toString(), otuMappingFile);
                 SiteNameParser siteNameParser = new SiteNameParser();
                 Community community = new Community(mappingFile, siteNameParser);
 

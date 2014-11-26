@@ -14,18 +14,18 @@ public class NZGOTVersion extends Version {
      */
     private static final String VERSION = "0.0.1";
 
-    private static final String DATE_STRING = "2013-2014";
+    private static final String DATE_STRING = "2013-2015";
 
     private static final boolean IS_PRERELEASE = false;
 
-    private static final String REVISION = "$Rev: 1040 $";
+//    private static final String REVISION = "$Rev: 1040 $"; // TODO git?
 
     public String getVersion() {
         return VERSION;
     }
 
     public String getVersionString() {
-        return "v" + VERSION + (IS_PRERELEASE ? " Prerelease " + getBuildString() : "");
+        return "v" + VERSION + (IS_PRERELEASE ? " Prerelease " : "");
     }
 
     public String[] getCredits() {
@@ -60,6 +60,7 @@ public class NZGOTVersion extends Version {
     }
 
     public String getBuildString() {
-        return "r" + REVISION.split(" ")[1];
+//        return "r" + REVISION.split(" ")[1];
+        throw new UnsupportedOperationException();
     }
 }

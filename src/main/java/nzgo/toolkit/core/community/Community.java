@@ -12,7 +12,6 @@ import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,28 +50,32 @@ public class Community<E> extends OTUs<E> {
         this.sites = community.sites;
     }
 
-    public Community(File otuMappingFile, SiteNameParser siteNameParser) {
+    public Community(Path otuMappingFile, SiteNameParser siteNameParser) {
         this(otuMappingFile, siteNameParser, false, false);
     }
 
     /**
-     * create community matrix from ucMappingFile only
-     * @param ucMappingFile
+     * create community matrix from mappingFile only
+     * @param mappingFile                    uc or up
      * @param siteNameParser
      * @param countSizeAnnotation
      * @param removeElements                 if true, then clear elementsSet
      */
-    public Community(File ucMappingFile, SiteNameParser siteNameParser, boolean countSizeAnnotation, final boolean removeElements) {
-        super(NameUtil.getNameNoExtension(ucMappingFile.getName()));
+    public Community(Path mappingFile, SiteNameParser siteNameParser, boolean countSizeAnnotation, final boolean removeElements) {
+        super(NameUtil.getNameNoExtension(mappingFile.getFileName().toString()));
         this.siteNameParser = siteNameParser;
 
-        if (ucMappingFile == null)
+        if (mappingFile == null)
             throw new IllegalArgumentException("Community needs mapping file ! ");
 
         TreeSet<String> sitesTS = null;
         try {
             this.setCountSizeAnnotation(countSizeAnnotation);
-            sitesTS = CommunityFileIO.importCommunityFromUCFile(this, ucMappingFile, siteNameParser);
+            if (mappingFile.endsWith(NameSpace.SUFFIX_UC)) {
+                sitesTS = CommunityFileIO.importCommunityFromUCFile(this, mappingFile, siteNameParser);
+            } else {
+                sitesTS = CommunityFileIO.importCommunityFromUPFile(this, mappingFile, null, siteNameParser);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,7 +88,7 @@ public class Community<E> extends OTUs<E> {
         }
     }
 
-    public Community(File otuMappingFile, File refSeqMappingFile, SiteNameParser siteNameParser) {
+    public Community(Path otuMappingFile, Path refSeqMappingFile, SiteNameParser siteNameParser) {
         this(otuMappingFile, siteNameParser, false, false);
 
         try {
