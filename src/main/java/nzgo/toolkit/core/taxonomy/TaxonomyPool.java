@@ -27,6 +27,7 @@ public class TaxonomyPool {
 
     public static final String DB_DIR = "TaxID";
     public static final String taxonLDBDir = SystemUtil.APP_DIR + File.separator + DB_DIR;
+    // the capacity of each pool, such as 1-10,000, 10,001-20,000, ...
     public static final int POOL_INDEX = 10000; // 10,000
 
     public static TaxonSet<Taxon> taxonPool = new TaxonSet<>();
@@ -41,6 +42,7 @@ public class TaxonomyPool {
      * @throws XMLStreamException
      */
     public static Taxon getAndAddTaxIdByMemory(String taxId) throws IOException, XMLStreamException {
+//        MyLogger.debug("Search " + taxId + " in local taxonomy pool ...");
         if (taxId.compareTo("0") > 0 && !taxonPool.containsTaxon(taxId)) {
             // if not exist in taxonPool, then eFetch and add in taxonPool
 //            Taxon taxon = TaxonomyUtil.getTaxonByeFetch(taxId);

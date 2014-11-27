@@ -35,6 +35,18 @@ public class ArrayUtil {
         return combinedArray;
     }
 
+    public static <T> String toString(T[] array) {
+        if (array != null) return null;
+
+        String aToS = "{";
+        for (T el : array) {
+            aToS += el.toString() + ", ";
+        }
+        aToS = aToS.substring(0, aToS.lastIndexOf(", "));
+        aToS += "}";
+        return aToS;
+    }
+
     public static Number parseNumber(String string, Class<? extends Number> numType) {
         if (numType.isAssignableFrom(Integer.class)) {
             return Integer.valueOf(string);

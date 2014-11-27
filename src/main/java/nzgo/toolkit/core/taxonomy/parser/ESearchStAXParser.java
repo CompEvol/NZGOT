@@ -18,6 +18,14 @@ import java.util.List;
  */
 public class ESearchStAXParser {
 
+    /**
+     * get NCBI tax id list given a scientific name, list could 0, 1, or multi ids (same name but different id)
+     *
+     * @param scientificName
+     * @return
+     * @throws XMLStreamException
+     * @throws IOException
+     */
     public static List<String> getIdList(String scientificName) throws XMLStreamException, IOException {
         URL url = NCBIeUtils.eSearch(scientificName);
         XMLStreamReader xmlStreamReader = XMLUtil.parse(url);

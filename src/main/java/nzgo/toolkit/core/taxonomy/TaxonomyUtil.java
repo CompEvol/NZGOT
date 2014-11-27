@@ -9,6 +9,7 @@ import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
+import nzgo.toolkit.core.taxonomy.parser.ESearchStAXParser;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.bind.JAXBContext;
@@ -189,13 +190,33 @@ public class TaxonomyUtil {
      * @throws javax.xml.stream.XMLStreamException
      * @throws java.io.IOException
      */
-    public static Taxon getTaxonByeFetch(String taxId) throws XMLStreamException, IOException {
+    public static Taxon getTaxonFromId(String taxId) throws XMLStreamException, IOException {
         MyLogger.debug("eFetch " + taxId + " ...");
 
         URL url = NCBIeUtils.eFetch(taxId);
         XMLStreamReader xmlStreamReader = XMLUtil.parse(url);
 
         return EFetchStAXParser.getTaxon(xmlStreamReader);
+    }
+
+    public static Taxon getTaxonFromName(String scientificName) throws XMLStreamException, IOException {
+        String taxId = getTaxIdFromName(scientificName);
+
+        return taxId == null ? null : getTaxonFromId(taxId);
+    }
+
+    public static String getTaxIdFromName(String scientificName) throws XMLStreamException, IOException {
+        MyLogger.debug("eSearch " + scientificName + " ...");
+
+        List<String> taxIdList = ESearchStAXParser.getIdList(scientificName);
+
+        if (taxIdList.size() < 0) {
+            return null;
+        } else if (taxIdList.size() > 1) {
+            return null;
+        }
+
+        return taxIdList.get(0);
     }
 
     // customized taxId, use taxId.compareTo("0") > 0 to filter out
