@@ -35,15 +35,16 @@ public class ArrayUtil {
         return combinedArray;
     }
 
-    public static <T> String toString(T[] array) {
-        if (array != null) return null;
+    public static <T> String toString(T... array) {
+        if (array == null) return null;
 
-        String aToS = "{";
+        String aToS = "";
+        if (array.length > 1)  aToS += "{";
         for (T el : array) {
             aToS += el.toString() + ", ";
         }
         aToS = aToS.substring(0, aToS.lastIndexOf(", "));
-        aToS += "}";
+        if (array.length > 1) aToS += "}";
         return aToS;
     }
 

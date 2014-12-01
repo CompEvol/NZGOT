@@ -1,11 +1,18 @@
 package nzgo.toolkit.core.taxonomy;
 
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameUtil;
+import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import javax.xml.stream.XMLStreamException;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Finding the lowest common ancestor (LCA)
@@ -53,7 +60,8 @@ public class TaxonLCA {
         try {
             String taxId = TaxonomyUtil.getTaxIdFromName(taxon1);
             if (taxId == null)
-                throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
+                return null;
+//                throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
             taxonLCA = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
             if (taxonLCA == null)
                 throw new RuntimeException("Cannot get taxid " + taxId + " from local taxonomy pool !");
@@ -67,7 +75,8 @@ public class TaxonLCA {
             try {
                 String taxId = TaxonomyUtil.getTaxIdFromName(oTaxon);
                 if (taxId == null)
-                    throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
+                    return null;
+//                    throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
 
                 taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
 
@@ -79,7 +88,7 @@ public class TaxonLCA {
         }
 
         MyLogger.debug("Find LCA taxon " + taxonLCA.getScientificName() + ", rank " + taxonLCA.getRank() +
-                    ", between "+ taxon1 + " and " + ArrayUtil.toString(otherTaxa));
+                ", between "+ taxon1 + " and " + ArrayUtil.toString(otherTaxa));
 
         return taxonLCA;
     }
@@ -87,18 +96,63 @@ public class TaxonLCA {
 
     //Main method
     public static void main(final String[] args) {
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
+        MyLogger.info("\nWorking path = " + workDir);
 
-        TaxonSet taxidSet = new TaxonSet(Arrays.asList("104782", "104786", "104788", "317506", "563909", "563911"));
+        Path inFilePath = Module.validateInputFile(workDir, "COI.txt", "input", null);
+
+        String outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
+        String outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
+
+        Path outputFilePath = Paths.get(workDir.toString(), outputFileNameStem + "-LCA" + outputFileExtension);
 
         try {
-            Taxon taxonLCA = TaxonLCA.getTaxonLCA(taxidSet);
+            BufferedReader reader = OTUsFileIO.getReader(inFilePath, "original file");
 
-            MyLogger.info("\nTaxonomy LCA is " + taxonLCA.getScientificName() + ", taxid = " + taxonLCA.getTaxId() +
-                    ", rank = " + taxonLCA.getRank());
+            PrintStream out = FileIO.getPrintStream(outputFilePath, "LCA file");
 
-        } catch (IOException | XMLStreamException e) {
+            String line = reader.readLine();
+            while (line != null) {
+                String[] items = FileIO.lineParser.getSeparator(0).parse(line); // default "\t"
+
+                String blast = items[1];
+                if (items.length > 3 && items[3].trim().length() > 0) {
+                    blast = items[3];
+                }
+
+                String lca;
+                if (items[2].equalsIgnoreCase("null")) {
+                    lca = blast;
+                } else {
+                    Taxon t = getTaxonLCA(blast, items[2]);
+                    lca = t == null ? "" : t.getScientificName();
+                }
+
+                out.println(items[0] + "\t" + blast + "\t" + items[2] + "\t" + lca);
+                line = reader.readLine();
+            }
+
+            reader.close();
+            out.flush();
+            out.close();
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+
+//        TaxonSet taxidSet = new TaxonSet(Arrays.asList("104782", "104786", "104788", "317506", "563909", "563911"));
+//
+//        try {
+//            Taxon taxonLCA = TaxonLCA.getTaxonLCA(taxidSet);
+//
+//            MyLogger.info("\nTaxonomy LCA is " + taxonLCA.getScientificName() + ", taxid = " + taxonLCA.getTaxId() +
+//                    ", rank = " + taxonLCA.getRank());
+//
+//        } catch (IOException | XMLStreamException e) {
+//            e.printStackTrace();
+//        }
 
 
     }

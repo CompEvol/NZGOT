@@ -10,6 +10,7 @@ import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.taxonomy.parser.ESearchStAXParser;
+import nzgo.toolkit.core.util.ArrayUtil;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.bind.JAXBContext;
@@ -211,8 +212,10 @@ public class TaxonomyUtil {
         List<String> taxIdList = ESearchStAXParser.getIdList(scientificName);
 
         if (taxIdList.size() < 0) {
+            MyLogger.warn("Cannot get NCBI Id for " + scientificName);
             return null;
         } else if (taxIdList.size() > 1) {
+            MyLogger.warn("Find multi-taxa-id : " + ArrayUtil.toString(taxIdList));
             return null;
         }
 
