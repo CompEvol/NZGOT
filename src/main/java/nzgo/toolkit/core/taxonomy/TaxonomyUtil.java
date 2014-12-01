@@ -203,7 +203,7 @@ public class TaxonomyUtil {
     public static Taxon getTaxonFromName(String scientificName) throws XMLStreamException, IOException {
         String taxId = getTaxIdFromName(scientificName);
 
-        return taxId == null ? null : getTaxonFromId(taxId);
+        return taxId == null ? null : TaxonomyPool.getAndAddTaxIdByMemory(taxId);//getTaxonFromId(taxId);
     }
 
     public static String getTaxIdFromName(String scientificName) throws XMLStreamException, IOException {

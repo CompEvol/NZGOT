@@ -55,40 +55,29 @@ public class TaxonLCA {
         return taxonLCA;
     }
 
-    public static Taxon getTaxonLCA(String taxon1, String... otherTaxa) {
-        Taxon taxonLCA = null;
-        try {
-            String taxId = TaxonomyUtil.getTaxIdFromName(taxon1);
+    public static Taxon getTaxonLCA(String taxonName1, String... otherTaxaNames) throws IOException, XMLStreamException {
+
+        String taxId = TaxonomyUtil.getTaxIdFromName(taxonName1);
+        if (taxId == null)
+            return null;
+//           throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
+        Taxon taxonLCA = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
+        if (taxonLCA == null)
+            throw new RuntimeException("Cannot get taxid " + taxId + " from local taxonomy pool !");
+
+        for (String oTaxon : otherTaxaNames) {
+            taxId = TaxonomyUtil.getTaxIdFromName(oTaxon);
             if (taxId == null)
                 return null;
-//                throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
-            taxonLCA = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
-            if (taxonLCA == null)
-                throw new RuntimeException("Cannot get taxid " + taxId + " from local taxonomy pool !");
+//               throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
 
-        } catch (XMLStreamException | IOException e) {
-            e.printStackTrace();
-        }
-
-        for (String oTaxon : otherTaxa) {
-            Taxon taxon2 = null;
-            try {
-                String taxId = TaxonomyUtil.getTaxIdFromName(oTaxon);
-                if (taxId == null)
-                    return null;
-//                    throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
-
-                taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
-
-            } catch (XMLStreamException | IOException e) {
-                e.printStackTrace();
-            }
+            Taxon taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
 
             taxonLCA = taxonLCA.getTaxonLCA(taxon2);
         }
 
         MyLogger.debug("Find LCA taxon " + taxonLCA.getScientificName() + ", rank " + taxonLCA.getRank() +
-                ", between "+ taxon1 + " and " + ArrayUtil.toString(otherTaxa));
+                ", between "+ taxonName1 + " and " + ArrayUtil.toString(otherTaxaNames));
 
         return taxonLCA;
     }
@@ -120,12 +109,21 @@ public class TaxonLCA {
                     blast = items[3];
                 }
 
-                String lca;
+                String lca = null;
                 if (items[2].equalsIgnoreCase("null")) {
-                    lca = blast;
+                    try {
+                        Taxon t = TaxonomyUtil.getTaxonFromName(blast);
+                        lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.getLineageString();
+                    } catch (XMLStreamException e) {
+                        e.printStackTrace();
+                    }
                 } else {
-                    Taxon t = getTaxonLCA(blast, items[2]);
-                    lca = t == null ? "" : t.getScientificName();
+                    try {
+                        Taxon t = getTaxonLCA(blast, items[2]);
+                        lca = t == null ? "\t" : t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.getLineageString();
+                    } catch (XMLStreamException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 out.println(items[0] + "\t" + blast + "\t" + items[2] + "\t" + lca);

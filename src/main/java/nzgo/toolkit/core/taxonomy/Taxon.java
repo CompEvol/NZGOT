@@ -15,6 +15,7 @@ public class Taxon extends TaxonNoID {
     protected String taxId;
     protected String parentTaxId;
 //    protected Taxon parentTaxon; //TODO Taxon or String?
+    protected String lineageString;
 
     public Taxon() {
         super();
@@ -143,6 +144,15 @@ public class Taxon extends TaxonNoID {
 //    public void setParentTaxon(Taxon parentTaxon) {
 //        this.parentTaxon = parentTaxon;
 //    }
+
+
+    public String getLineageString() {
+        return lineageString;
+    }
+
+    public void setLineageString(String lineageString) {
+        this.lineageString = lineageString.replaceAll("; ", ";");
+    }
 
     public boolean isSameAs(Taxon taxon) {
         return this.getTaxId().contentEquals(taxon.getTaxId());

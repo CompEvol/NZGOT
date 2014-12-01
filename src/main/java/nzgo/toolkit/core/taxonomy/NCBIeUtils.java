@@ -2,8 +2,10 @@ package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.util.XMLUtil;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 /**
  * NCBI eUtils
@@ -16,7 +18,13 @@ public class NCBIeUtils {
     protected static String E_SEARCH_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term=\"";
 
     public static URL eSearch(String scientificName) throws MalformedURLException {
-        return new URL(E_SEARCH_URL + scientificName + "\"");
+        String encodedString = null;
+        try {
+            encodedString = URLEncoder.encode(scientificName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return new URL(E_SEARCH_URL + encodedString + "\"");
     }
 
     public static boolean isCount(String name) {
@@ -53,6 +61,10 @@ public class NCBIeUtils {
 
     public static boolean isRank(String name) {
         return XMLUtil.isTag("Rank", name);
+    }
+
+    public static boolean isLineage(String name) {
+        return XMLUtil.isTag("Lineage", name);
     }
 
     public static boolean isLineageEx(String name) {

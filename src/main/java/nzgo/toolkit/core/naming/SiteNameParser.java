@@ -5,7 +5,7 @@ package nzgo.toolkit.core.naming;
  * @author Walter Xie
  */
 public class SiteNameParser extends NameParser {
-
+    // such as >IDME8NK01BSVYW|CO1-soilkit|8-I|prep1;size=60863;
     public static final int LABEL_SAMPLE_INDEX = 2;
 
     // the sampling location parsed is determined by siteType

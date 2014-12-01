@@ -99,6 +99,9 @@ public class EFetchStAXParser {
                 } else if (NCBIeUtils.isRank(elementName)) {
                     Rank rank = Rank.fromString(xmlStreamReader.getElementText());
                     taxon.setRank(rank); // if text not included in Rank, then rank == null
+                } else if (NCBIeUtils.isLineage(elementName)) { // lineage string separated by ;
+                    String lineageString = xmlStreamReader.getElementText();
+                    taxon.setLineageString(lineageString);
                 } else if (NCBIeUtils.isLineageEx(elementName)) {
                     return taxon; // not parse lineage, use List<Taxon> getLineage () now
 
