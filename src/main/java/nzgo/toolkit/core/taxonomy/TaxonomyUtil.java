@@ -1,13 +1,13 @@
 package nzgo.toolkit.core.taxonomy;
 
-import nzgo.toolkit.core.blast.*;
-import nzgo.toolkit.core.blast.parser.BlastStAXParser;
 import nzgo.toolkit.core.community.OTU;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.GiTaxidIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.SiteNameParser;
+import nzgo.toolkit.core.ncbi.blast.*;
+import nzgo.toolkit.core.ncbi.blast.parser.BlastStAXParser;
 import nzgo.toolkit.core.taxonomy.parser.EFetchStAXParser;
 import nzgo.toolkit.core.taxonomy.parser.ESearchStAXParser;
 import nzgo.toolkit.core.util.ArrayUtil;

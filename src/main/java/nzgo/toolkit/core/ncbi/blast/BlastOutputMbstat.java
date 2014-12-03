@@ -6,7 +6,7 @@
 //
 
 
-package nzgo.toolkit.core.blast;
+package nzgo.toolkit.core.ncbi.blast;
 
 import javax.xml.bind.annotation.*;
 
@@ -18,8 +18,8 @@ import javax.xml.bind.annotation.*;
 @XmlType(name = "", propOrder = {
     "statistics"
 })
-@XmlRootElement(name = "Iteration_stat")
-public class IterationStat {
+@XmlRootElement(name = "BlastOutput_mbstat")
+public class BlastOutputMbstat {
 
     @XmlElement(name = "Statistics", required = true)
     protected Statistics statistics;

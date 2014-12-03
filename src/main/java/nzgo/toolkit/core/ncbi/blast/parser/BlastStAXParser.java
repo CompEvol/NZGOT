@@ -1,7 +1,7 @@
-package nzgo.toolkit.core.blast.parser;
+package nzgo.toolkit.core.ncbi.blast.parser;
 
-import nzgo.toolkit.core.blast.*;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.ncbi.blast.*;
 import nzgo.toolkit.core.util.XMLUtil;
 
 import javax.xml.bind.JAXBContext;

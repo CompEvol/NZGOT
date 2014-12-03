@@ -1,4 +1,4 @@
-package nzgo.toolkit.core.blast.parser;
+package nzgo.toolkit.core.ncbi.blast.parser;
 
 /**
  * parse Blast XML output by SAX (XMLReader)

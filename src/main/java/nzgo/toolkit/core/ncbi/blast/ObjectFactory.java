@@ -6,7 +6,7 @@
 //
 
 
-package nzgo.toolkit.core.blast;
+package nzgo.toolkit.core.ncbi.blast;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

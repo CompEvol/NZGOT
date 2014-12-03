@@ -5,7 +5,7 @@
 // Generated on: 2013.11.05 at 10:15:55 AM NZDT 
 //
 
-package nzgo.toolkit.core.blast;
+package nzgo.toolkit.core.ncbi.blast;
 
 import javax.xml.bind.annotation.*;
 
