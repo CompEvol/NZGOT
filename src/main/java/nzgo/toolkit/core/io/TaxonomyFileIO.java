@@ -3,7 +3,10 @@ package nzgo.toolkit.core.io;
 import nzgo.toolkit.core.community.OTUs;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.Separator;
-import nzgo.toolkit.core.taxonomy.*;
+import nzgo.toolkit.core.taxonomy.Rank;
+import nzgo.toolkit.core.taxonomy.Taxon;
+import nzgo.toolkit.core.taxonomy.TaxonSet;
+import nzgo.toolkit.core.taxonomy.TaxonomyPool;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -56,8 +59,8 @@ public class TaxonomyFileIO extends FileIO {
      * @return
      * @throws IOException
      */
-    public static SortedMap<String, TaxonNCBI> importElementTaxonomyMap(Path inFilePath) throws IOException, XMLStreamException {
-        SortedMap<String, TaxonNCBI> otuTaxaMap = new TreeMap<>();
+    public static SortedMap<String, Taxon> importElementTaxonomyMap(Path inFilePath) throws IOException, XMLStreamException {
+        SortedMap<String, Taxon> otuTaxaMap = new TreeMap<>();
         BufferedReader reader = getReader(inFilePath, "Element taxonomy mapping");
 
         Separator lineSeparator = new Separator("\t");
@@ -70,7 +73,7 @@ public class TaxonomyFileIO extends FileIO {
                 if (otuTaxaMap.containsKey(items[0]))
                     throw new IllegalArgumentException("Find duplicate name for " + items[0]);
 
-                TaxonNCBI taxon = TaxonomyPool.getAndAddTaxIdByMemory(items[1]);
+                Taxon taxon = TaxonomyPool.getAndAddTaxIdByMemory(items[1]);
                 otuTaxaMap.put(items[0], taxon);
             }
 
