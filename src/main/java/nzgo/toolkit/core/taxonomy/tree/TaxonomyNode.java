@@ -13,7 +13,7 @@ public class TaxonomyNode extends Taxon {
 
     public TaxonomyNode getTaxonomyNode(String taxId) {
         for (TaxonomyNode node : getAllNodes()) {
-            if (node.isSameAs(taxId))
+            if (node.isSameId(taxId))
                 return node;
         }
         return null;

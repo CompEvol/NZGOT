@@ -25,9 +25,9 @@ public class TaxonomicAssignment {
 
     protected final OTUs<OTU> otus;
 
-    // the high level taxonomy of biological classification that all given taxa should belong to
+    // taxonomic category, the high level taxonomy that all given taxa should belong to
     // e.g. new Taxon("Insecta", "50557"); or TaxonomyUtil.getTaxonByeFetch("50557");
-    protected Taxon bioClass;
+    protected Taxon taxonCategory;
 
     protected Rank[] ranksToBreak;
 
@@ -113,12 +113,12 @@ public class TaxonomicAssignment {
 //        }
     }
 
-    public Taxon getBioClass() {
-        return bioClass;
+    public Taxon getTaxonCategory() {
+        return taxonCategory;
     }
 
-    public void setBioClass(Taxon bioClass) {
-        this.bioClass = bioClass;
+    public void setTaxonCategory(Taxon taxonCategory) {
+        this.taxonCategory = taxonCategory;
     }
 
 
@@ -139,8 +139,8 @@ public class TaxonomicAssignment {
     public Map<String, String> errors = new TreeMap<>();
 
     @Deprecated
-    public TaxonomicAssignment(TaxonSet taxonomySet, Rank rankToBreak, Taxon bioClass) {
-        this(taxonomySet, rankToBreak, "_", bioClass);
+    public TaxonomicAssignment(TaxonSet taxonomySet, Rank rankToBreak, Taxon taxonCategory) {
+        this(taxonomySet, rankToBreak, "_", taxonCategory);
     }
 
     /**
@@ -148,10 +148,10 @@ public class TaxonomicAssignment {
      * @param taxonomySet
      * @param rankToBreak
      * @param regexPrefix
-     * @param bioClass
+     * @param taxonCategory
      */
     @Deprecated
-    public TaxonomicAssignment(TaxonSet taxonomySet, Rank rankToBreak, String regexPrefix, Taxon bioClass) {
+    public TaxonomicAssignment(TaxonSet taxonomySet, Rank rankToBreak, String regexPrefix, Taxon taxonCategory) {
         otus = null;
         this.taxonomySet = taxonomySet;
         if (regexPrefix == null) {
@@ -159,7 +159,7 @@ public class TaxonomicAssignment {
         } else {
             regexPrefixSeparator = new Separator(regexPrefix);
         }
-        setBioClass(bioClass);
+        setTaxonCategory(taxonCategory);
     }
 
     public Map<String, String> getTaxaAssignementMap() throws IOException, XMLStreamException {
@@ -231,8 +231,8 @@ public class TaxonomicAssignment {
                 errors.put(queryTaxon, errMsg);
                 taxaAssignementMap.put(queryTaxon, Error.UNIDENTIFIED.toString());
 
-            } else if (!taxon.belongsTo(bioClass)) {
-                // filter out taxon not belong to bioClass, but always true if bioClass == null
+            } else if (!taxon.belongsTo(taxonCategory)) {
+                // filter out taxon not belong to taxonCategory, but always true if taxonCategory == null
                 String errMsg = appendPrefixMsg(Error.NOT_IN_BIO_CLASS.toString(), prefix);
                 errors.put(queryTaxon, errMsg);
                 taxaAssignementMap.put(queryTaxon, Error.UNIDENTIFIED.toString());
@@ -344,8 +344,8 @@ public class TaxonomicAssignment {
 
 //    protected void writeParentTaxon(String queryTaxon, List<Taxon> taxonList, BufferedWriter out) throws IOException {
 //        for (Taxon taxon : taxonList) {
-//            // filter out taxon not belong to bioClass, but always true if bioClass == null
-//            if (taxon.belongsTo(bioClass)) {
+//            // filter out taxon not belong to taxonCategory, but always true if taxonCategory == null
+//            if (taxon.belongsTo(taxonCategory)) {
 //                Taxon t = taxon.getParentTaxonOn(rankToBreak);
 //                out.write("\t" + t);
 //                if (t != null) {

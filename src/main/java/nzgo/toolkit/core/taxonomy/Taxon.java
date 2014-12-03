@@ -51,23 +51,35 @@ public class Taxon extends TaxonNoID {
     }
 
     /**
-     * if this taxon belong to given biology classification
+     * if this taxon belong to given taxonomic category
      * if give null return true
-     * @param bioClassification
+     * @param taxonCategory
      * @return
      */
-    public boolean belongsTo (Taxon bioClassification) {
-        if (bioClassification == null)
+    public boolean belongsTo (Taxon... taxonCategory) {
+        if (taxonCategory == null)
             return true;
-        if (isSameAs(bioClassification))
+        if (isSameIn(taxonCategory))
             return true;
 
         List<Taxon> lineage = getLineage();
         for(int i = lineage.size() - 1; i >= 0; i--){
-            if (lineage.get(i).isSameAs(bioClassification))
+            if (lineage.get(i).isSameIn(taxonCategory))
                 return true;
         }
         return false;
+    }
+
+    public boolean isSameIn(Taxon... taxon) {
+        for (Taxon t: taxon) {
+            if (this.getTaxId().contentEquals(t.getTaxId()))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean isSameId(String taxId) {
+        return this.getTaxId().contentEquals(taxId);
     }
 
     /**
@@ -145,25 +157,55 @@ public class Taxon extends TaxonNoID {
 //        this.parentTaxon = parentTaxon;
 //    }
 
+    public String toString() {
+        return getTaxId();
+    }
 
+
+    //+++++++++ only work with lineageString ++++++++++
+
+    /**
+     * if not include this taxon, then add it in the end
+     * @return    the string of taxonomy lineage including this taxon separated by ;
+     */
     public String getLineageString() {
+        if (!lineageString.contains(getScientificName())) {
+            String includeThisTaxon = lineageString + ";" + getScientificName();
+            setLineageString(includeThisTaxon);
+        }
         return lineageString;
     }
 
+    /**
+     *
+     * @return   the string of parent taxonomy lineage excluding this taxon separated by ;
+     */
+    public String getParentLineageString() {
+        if (lineageString.contains(getScientificName())) {
+            return lineageString.substring(0, lineageString.lastIndexOf(";"));
+        }
+        return lineageString;
+    }
+
+    /**
+     * set the string of taxonomy lineage separated by ;
+     * @param lineageString
+     */
     public void setLineageString(String lineageString) {
         this.lineageString = lineageString.replaceAll("; ", ";");
     }
 
-    public boolean isSameAs(Taxon taxon) {
-        return this.getTaxId().contentEquals(taxon.getTaxId());
-    }
-
-    public boolean isSameAs(String taxId) {
-        return this.getTaxId().contentEquals(taxId);
-    }
-
-    public String toString() {
-        return getTaxId();
+    /**
+     * if this taxon belong to given taxonomic category
+     * @param taxonCategory
+     * @return
+     */
+    public boolean belongsTo(String... taxonCategory) {
+        for (String taxCate: taxonCategory) {
+            if (lineageString.contains(taxCate))
+                return true;
+        }
+        return false;
     }
 
 }
