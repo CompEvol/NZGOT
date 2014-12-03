@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class Taxon extends TaxonNoID {
 
+    public String identifiedBy = "LCA"; // default for taxon in the lineage
+
     protected String taxId;
     protected String parentTaxId;
 //    protected Taxon parentTaxon; //TODO Taxon or String?
@@ -100,13 +102,37 @@ public class Taxon extends TaxonNoID {
     }
 
     /**
-     * get agreed taxon between the lineages of this and taxon2 including themselves
-     *
+     * get agreed taxon between the lineages of this and taxon2 including themselves,
+     * always take the lowest common ancestor
      * @param taxon2
      * @return
      */
     public Taxon getTaxonLCA(Taxon taxon2) {
-        if (taxon2 == null || taxon2.belongsTo(this))
+        if (taxon2 == null)
+            throw new IllegalArgumentException("Cannot take null taxon as input to take LCA !");
+        if (taxon2.belongsTo(this)) // taxon2 is lower than this
+            return this;
+
+        List<Taxon> lineage = getLineage();
+        for(int i = lineage.size() - 1; i >= 0; i--){
+            if (taxon2.belongsTo(lineage.get(i)))
+                return lineage.get(i);
+        }
+
+        return null; // exception
+    }
+
+    /**
+     * take the lowest taxon if in the same lineage, otherwise take LCA if contradict
+     * @param taxon2
+     * @return
+     */
+    public Taxon getTaxonLowLinLCA(Taxon taxon2) {
+        if (taxon2 == null)
+            throw new IllegalArgumentException("Cannot take null taxon as input to take LCA !");
+        if (taxon2.belongsTo(this))
+            return taxon2;
+        if (this.belongsTo(taxon2))
             return this;
 
         List<Taxon> lineage = getLineage();

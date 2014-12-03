@@ -19,6 +19,23 @@ import java.nio.file.Paths;
  * @author Walter Xie
  */
 public class TaxonLCA {
+    public static enum Agreement {
+        LCA_ONLY ("Always take the lowest common ancestor."),
+        LOW_LIN_LCA ("Take the lowest taxon if in the same lineage, otherwise take LCA if contradict.");
+
+        private String type;
+        private Agreement(String type) {
+            this.type = type;
+        }
+        @Override
+        public String toString() {
+            return type;
+        }
+
+    }
+
+    public static final String BLAST = "BLAST";
+    public static final String MORPHOLOGY = "Barbara Agabiti";
 
     /**
      * return LCA given Taxa whose elements could be taxid String or Taxon
@@ -55,7 +72,8 @@ public class TaxonLCA {
         return taxonLCA;
     }
 
-    public static Taxon getTaxonLCA(String taxonName1, String... otherTaxaNames) throws IOException, XMLStreamException {
+    public static Taxon getAgreedTaxon(Agreement agreement, String taxonName1, String... otherTaxaNames) throws IOException, XMLStreamException {
+        MyLogger.info("\n Apply agreement: " + agreement + "\n");
 
         String taxId = TaxonomyUtil.getTaxIdFromName(taxonName1);
         if (taxId == null)
@@ -64,6 +82,8 @@ public class TaxonLCA {
         Taxon taxonLCA = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
         if (taxonLCA == null)
             throw new RuntimeException("Cannot get taxid " + taxId + " from local taxonomy pool !");
+        // assume taxonName1 is identified by BLAST
+        taxonLCA.identifiedBy = BLAST;
 
         for (String oTaxon : otherTaxaNames) {
             taxId = TaxonomyUtil.getTaxIdFromName(oTaxon);
@@ -72,14 +92,26 @@ public class TaxonLCA {
 //               throw new RuntimeException("Cannot get NCBI Id for " + taxon1);
 
             Taxon taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
-
-            taxonLCA = taxonLCA.getTaxonLCA(taxon2);
+            // assume taxon2 is morphology
+            taxon2.identifiedBy = MORPHOLOGY;
+//            taxonLCA = taxonLCA.getTaxonLCA(taxon2);
+//            taxonLCA = taxonLCA.getTaxonLowLinLCA(taxon2);
+            taxonLCA = getAgreedTaxon(agreement, taxonLCA, taxon2);
         }
 
         MyLogger.debug("Find LCA taxon " + taxonLCA.getScientificName() + ", rank " + taxonLCA.getRank() +
                 ", between "+ taxonName1 + " and " + ArrayUtil.toString(otherTaxaNames));
 
         return taxonLCA;
+    }
+
+
+    public static Taxon getAgreedTaxon(Agreement agreement, Taxon taxon1, Taxon taxon2) {
+        if (agreement == Agreement.LOW_LIN_LCA) {
+            return taxon1.getTaxonLowLinLCA(taxon2);
+        } else { // default LCA only
+            return taxon1.getTaxonLCA(taxon2);
+        }
     }
 
 
@@ -97,8 +129,9 @@ public class TaxonLCA {
 
         try {
             BufferedReader reader = OTUsFileIO.getReader(inFilePath, "original file");
-
             PrintStream out = FileIO.getPrintStream(outputFilePath, "LCA file");
+
+            int[] count = new int[3];
 
             String line = reader.readLine();
             while (line != null) {
@@ -113,14 +146,25 @@ public class TaxonLCA {
                 if (items[2].equalsIgnoreCase("null")) {
                     try {
                         Taxon t = TaxonomyUtil.getTaxonFromName(blast);
-                        lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.getLineageString();
+                        t.identifiedBy = BLAST;
+                        lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.identifiedBy +
+                                "\t" + t.getLineageString();
+                        count[0]++;
                     } catch (XMLStreamException e) {
                         e.printStackTrace();
                     }
                 } else {
                     try {
-                        Taxon t = getTaxonLCA(blast, items[2]);
-                        lca = t == null ? "\t" : t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.getLineageString();
+                        Taxon t = getAgreedTaxon(Agreement.LOW_LIN_LCA, blast, items[2]);
+                        lca = t == null ? "\t" : t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.identifiedBy +
+                                "\t" + t.getLineageString();
+                        if (t.identifiedBy.equalsIgnoreCase(BLAST)) {
+                            count[0]++;
+                        } else if (t.identifiedBy.equalsIgnoreCase(MORPHOLOGY)) {
+                            count[1]++;
+                        } else {
+                            count[2]++;
+                        }
                     } catch (XMLStreamException e) {
                         e.printStackTrace();
                     }
@@ -133,6 +177,9 @@ public class TaxonLCA {
             reader.close();
             out.flush();
             out.close();
+
+            MyLogger.info("\nTaxonomy identified by BLAST = " + count[0] + ", by " + MORPHOLOGY + " = " + count[1] +
+                    ", (contradicted) take LCA = " + count[2]);
 
         } catch (IOException e) {
             e.printStackTrace();
