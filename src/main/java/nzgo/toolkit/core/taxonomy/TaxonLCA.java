@@ -40,7 +40,7 @@ public class TaxonLCA {
     public static final String MORPHOLOGY = "Barbara Agabiti";
 
     // cannot set identifiedBy in Taxon, because taxonPool keeps all Taxon instance
-    protected static Map<Taxon, String> identifiedByMap = new HashMap<>();
+    public static Map<Taxon, String> identifiedByMap = new HashMap<>();
 
     /**
      * return LCA given Taxa whose elements could be taxid String or Taxon
