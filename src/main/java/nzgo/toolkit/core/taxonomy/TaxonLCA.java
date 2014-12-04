@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Finding the lowest common ancestor (LCA)
@@ -36,6 +38,9 @@ public class TaxonLCA {
 
     public static final String BLAST = "BLAST";
     public static final String MORPHOLOGY = "Barbara Agabiti";
+
+    // cannot set identifiedBy in Taxon, because taxonPool keeps all Taxon instance
+    protected static Map<Taxon, String> identifiedByMap = new HashMap<>();
 
     /**
      * return LCA given Taxa whose elements could be taxid String or Taxon
@@ -73,7 +78,6 @@ public class TaxonLCA {
     }
 
     public static Taxon getAgreedTaxon(Agreement agreement, String taxonName1, String... otherTaxaNames) throws IOException, XMLStreamException {
-        MyLogger.info("\n Apply agreement: " + agreement + "\n");
 
         String taxId = TaxonomyUtil.getTaxIdFromName(taxonName1);
         if (taxId == null)
@@ -83,7 +87,7 @@ public class TaxonLCA {
         if (taxonLCA == null)
             throw new RuntimeException("Cannot get taxid " + taxId + " from local taxonomy pool !");
         // assume taxonName1 is identified by BLAST
-        taxonLCA.identifiedBy = BLAST;
+        identifiedByMap.put(taxonLCA, BLAST);
 
         for (String oTaxon : otherTaxaNames) {
             taxId = TaxonomyUtil.getTaxIdFromName(oTaxon);
@@ -93,7 +97,7 @@ public class TaxonLCA {
 
             Taxon taxon2 = TaxonomyPool.getAndAddTaxIdByMemory(taxId);
             // assume taxon2 is morphology
-            taxon2.identifiedBy = MORPHOLOGY;
+            identifiedByMap.put(taxon2, MORPHOLOGY);
 //            taxonLCA = taxonLCA.getTaxonLCA(taxon2);
 //            taxonLCA = taxonLCA.getTaxonLowLinLCA(taxon2);
             taxonLCA = getAgreedTaxon(agreement, taxonLCA, taxon2);
@@ -127,6 +131,9 @@ public class TaxonLCA {
 
         Path outputFilePath = Paths.get(workDir.toString(), outputFileNameStem + "-LCA" + outputFileExtension);
 
+        Agreement agreement = Agreement.LOW_LIN_LCA;
+        MyLogger.info("\n Apply agreement: " + agreement + "\n");
+
         try {
             BufferedReader reader = OTUsFileIO.getReader(inFilePath, "original file");
             PrintStream out = FileIO.getPrintStream(outputFilePath, "LCA file");
@@ -146,8 +153,7 @@ public class TaxonLCA {
                 if (items[2].equalsIgnoreCase("null")) {
                     try {
                         Taxon t = TaxonomyUtil.getTaxonFromName(blast);
-                        t.identifiedBy = BLAST;
-                        lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.identifiedBy +
+                        lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + BLAST +
                                 "\t" + t.getLineageString();
                         count[0]++;
                     } catch (XMLStreamException e) {
@@ -155,12 +161,15 @@ public class TaxonLCA {
                     }
                 } else {
                     try {
-                        Taxon t = getAgreedTaxon(Agreement.LOW_LIN_LCA, blast, items[2]);
-                        lca = t == null ? "\t" : t.getScientificName() + "\t" + t.getTaxId() + "\t" + t.identifiedBy +
+                        Taxon t = getAgreedTaxon(agreement, blast, items[2]);
+                        String ident = identifiedByMap.get(t);
+                        if (ident == null)
+                            ident = "LCA";
+                        lca = t == null ? "\t" : t.getScientificName() + "\t" + t.getTaxId() + "\t" + ident +
                                 "\t" + t.getLineageString();
-                        if (t.identifiedBy.equalsIgnoreCase(BLAST)) {
+                        if (ident.equalsIgnoreCase(BLAST)) {
                             count[0]++;
-                        } else if (t.identifiedBy.equalsIgnoreCase(MORPHOLOGY)) {
+                        } else if (ident.equalsIgnoreCase(MORPHOLOGY)) {
                             count[1]++;
                         } else {
                             count[2]++;
@@ -172,6 +181,8 @@ public class TaxonLCA {
 
                 out.println(items[0] + "\t" + blast + "\t" + items[2] + "\t" + lca);
                 line = reader.readLine();
+
+                identifiedByMap.clear();
             }
 
             reader.close();

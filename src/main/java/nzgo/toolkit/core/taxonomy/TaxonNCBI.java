@@ -2,9 +2,6 @@ package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.naming.Separator;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-
 /**
  * Taxon specially for NCBI eFecth
  *
@@ -93,36 +90,4 @@ public class TaxonNCBI extends Taxon {
         return false;
     }
 
-    /**
-     * get agreed taxon between the lineages of this and taxon2 including themselves
-     *
-     * @param taxon2
-     * @return
-     */
-    public TaxonNCBI getTaxonLCA(TaxonNCBI taxon2) {
-        return (TaxonNCBI) super.getTaxonLCA(taxon2);
-    }
-//    public TaxonNCBI getTaxonLCA(TaxonNCBI taxon2) {
-//        String[] lineage = taxonSeparator.parse(this.getLineageString());
-//        String[] lineage2 = taxonSeparator.parse(taxon2.getLineageString());
-//
-//        int minLen = (lineage.length > lineage2.length) ? lineage2.length : lineage.length;
-//
-//        // assume lineage[0] == lineage2[0]
-//        for(int i = 1; i < minLen; i++){
-//            if (!lineage[i].equalsIgnoreCase(lineage2[i]))
-//                return lineage[i-1];
-//        }
-//
-//        return null; // exception
-//    }
-
-    public Taxon getParentTaxon() {
-        try {
-            return (parentTaxId != null) ? TaxonomyPool.getAndAddTaxIdByMemory(parentTaxId) : null;
-        } catch (IOException | XMLStreamException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

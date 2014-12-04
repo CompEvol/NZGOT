@@ -12,8 +12,6 @@ import java.util.List;
  */
 public class Taxon extends TaxonNoID {
 
-    public String identifiedBy = "LCA"; // default for taxon in the lineage
-
     protected String taxId;
     protected String parentTaxId;
 //    protected Taxon parentTaxon; //TODO Taxon or String?
