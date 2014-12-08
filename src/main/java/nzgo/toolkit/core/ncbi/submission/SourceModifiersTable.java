@@ -2,6 +2,7 @@ package nzgo.toolkit.core.ncbi.submission;
 
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.taxonomy.TaxonLCA;
@@ -34,6 +35,8 @@ public class SourceModifiersTable {
 
     protected List[] extraColumns;
 
+    protected List<String> labels;
+
     public SourceModifiersTable() {
         Sequence_ID = new ArrayList<>();
         Collected_by = new ArrayList<>();
@@ -45,6 +48,8 @@ public class SourceModifiersTable {
         Specimen_voucher = new ArrayList<>();
 
         extraColumns = new List[0]; // make for loop valid
+
+        labels = new ArrayList<>();
     }
 
     public void addValue(String sequence_ID, String specimen_voucher) {
@@ -101,7 +106,7 @@ public class SourceModifiersTable {
         PrintStream out = FileIO.getPrintStream(outPath, "Sample Source Modifiers Table");
 
         //head
-        out.println("Sequence_ID\tCollected_by\tCollection_date\tCountry\tIdentified_by\tIsolate\tLat_Lon\tSpecimen_voucher");
+        out.println("Sequence_ID\tCollected_by\tCollection_date\tCountry\tIdentified_by\tLat_Lon\tSpecimen_voucher");
 
         for (int i = 0; i < Sequence_ID.size(); i++) {
             out.print(Sequence_ID.get(i) + "\t" + Collected_by.get(i) + "\t" + Collection_date.get(i) + "\t" +
@@ -119,6 +124,47 @@ public class SourceModifiersTable {
         out.close();
     }
 
+    private String[] getTaxonIdentified(String[] items, int[] count) {
+        String taxonIdentified = items[3];
+        String identified_by = items[5];
+
+        if (items[2].equalsIgnoreCase("null")) {
+            taxonIdentified = items[1];
+            identified_by = TaxonLCA.BLAST;
+            count[3]++;
+        } else {
+            if (identified_by.equalsIgnoreCase("LCA")) {
+                // contradicted, take LCA
+                identified_by = TaxonLCA.MORPHOLOGY;
+                count[2]++;
+            } else if (identified_by.equalsIgnoreCase(TaxonLCA.MORPHOLOGY)) {
+                count[1]++;
+            } else {
+                // BLAST is lower than morph, but still take morph?
+                taxonIdentified = items[2];
+                identified_by = TaxonLCA.MORPHOLOGY;
+                count[0]++;
+            }
+        }
+
+        return new String[]{taxonIdentified, identified_by};
+    }
+
+    private void addLabel(String label) {
+        labels.add(label);
+    }
+
+    private String getLabel(String seqId) {
+        for (String l : labels) {
+            String id = l;
+            if (id.contains("["))
+                id = id.substring(0, id.indexOf("[")).trim();
+
+            if (id.contentEquals(seqId))
+                return ">" + l;
+        }
+        return null;
+    }
 
     //Main method
     public static void main(final String[] args) {
@@ -143,7 +189,7 @@ public class SourceModifiersTable {
             String line = reader.readLine();
             while (line != null) {
                 String[] items = FileIO.lineParser.getSeparator(0).parse(line); // default "\t"
-                String[] ids =  FileIO.lineParser.getSeparator(1).parse(items[0]); // default "|"
+                String[] ids = FileIO.lineParser.getSeparator(1).parse(items[0]); // default "|"
 
                 final String sequence_ID = ids[0];
                 final String specimen_voucher = ids[1];
@@ -161,34 +207,17 @@ public class SourceModifiersTable {
                 if (plotIndex < 1 || plotIndex > 10)
                     throw new IllegalArgumentException("Invalid plotIndex " + plotIndex + " from plot name " + plot);
 
-                final String lat_lon = lat_lon_array[plotIndex-1];
+                final String lat_lon = lat_lon_array[plotIndex - 1];
 
-                String taxonIdentified = items[3];
-                String identified_by = items[5];
-
-                if (items[2].equalsIgnoreCase("null")) {
-                    taxonIdentified = "";
-                    identified_by = "";
-                    count[3]++;
-                } else {
-                    if (identified_by.equalsIgnoreCase("LCA")) {
-                        // contradicted, take LCA
-                        identified_by = TaxonLCA.MORPHOLOGY;
-                        count[2]++;
-                    } else if (identified_by.equalsIgnoreCase(TaxonLCA.MORPHOLOGY)) {
-                        count[1]++;
-                    } else {
-                        // BLAST is lower than morph, but still take morph?
-                        taxonIdentified = items[2];
-                        identified_by = TaxonLCA.MORPHOLOGY;
-                        count[0]++;
-                    }
-                }
+                String[] ti = sourceModifiersTable.getTaxonIdentified(items, count);
+                String taxonIdentified = ti[0];
+                String identified_by = ti[1];
 
                 final String label = sequence_ID + (taxonIdentified.length() > 1 ? " [organism=" + taxonIdentified + "]" : "");
+                sourceModifiersTable.addLabel(label);
 
                 sourceModifiersTable.addValue(sequence_ID, specimen_voucher, collected_by, collection_date,
-                        identified_by, lat_lon, taxonIdentified, items[5], plot, label);
+                        identified_by, lat_lon, taxonIdentified, plot, label);
 
                 line = reader.readLine();
             }
@@ -211,6 +240,46 @@ public class SourceModifiersTable {
             e.printStackTrace();
         }
 
+        // fasta file
+        inFilePath = Module.validateInputFile(workDir, "COI.fasta", "input", NameSpace.SUFFIX_FASTA);
+
+        outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
+        outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
+        outputFilePath = Paths.get(workDir.toString(), outputFileNameStem + "-BankIt" + outputFileExtension);
+
+        try {
+            BufferedReader reader = OTUsFileIO.getReader(inFilePath, "LCA file");
+            PrintStream out = FileIO.getPrintStream(outputFilePath, "BankIt submission FASTA file");
+
+            int i = 0;
+            String line = reader.readLine();
+            while (line != null) {
+                if (line.startsWith(">")) {
+                    String label = line.substring(1);
+                    String[] ids = FileIO.lineParser.getSeparator(1).parse(label); // default "|"
+                    String newLabel = sourceModifiersTable.getLabel(ids[0]);
+                    if (newLabel == null)
+                        throw new IllegalArgumentException("Cannot find sequence id " + ids[0] + " from new labels !");
+
+                    out.println(newLabel);
+                    i++;
+                } else {
+                    out.println(line);
+                }
+                line = reader.readLine();
+            }
+
+            reader.close();
+            out.flush();
+            out.close();
+
+            MyLogger.info("\nReplace " + i + " sequences labels.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
+
 }
