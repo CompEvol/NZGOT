@@ -340,6 +340,49 @@ public class SequenceUtil {
         MyLogger.debug("original file total lines = " + lineNum + ", write to new files total lines = " + total);
     }
 
+    /**
+     * replace all regex to replacement in identifier (and  3rd line description) in given FastA or FastaQ
+     *
+     * @param workPathString
+     * @param inFileName
+     * @param regex
+     * @param replacement
+     * @throws IOException
+     */
+    public static void renameIdentifierInFastAOrQ(String workPathString, String inFileName, String regex, String replacement) throws IOException {
+        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+                "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ);
+
+        BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
+
+        String outputFileNameStem = NameUtil.getNameNoExtension(inFileName);
+        String suffix = NameUtil.getSuffix(inFileName);
+        Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-new" + suffix);
+        PrintStream out = FileIO.getPrintStream(outputFilePath, "identifier renamed file");
+
+        int l = 0;
+        String line = reader.readLine();
+        while (line != null) {
+
+            if ( (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
+                    (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTQ) && l % 2 == 0)) {
+                String newLine = line.replaceAll(regex, replacement);
+                out.println(newLine);
+            } else {
+                out.println(line);
+            }
+
+            line = reader.readLine();
+            l++;
+        }
+
+        reader.close();
+        out.flush();
+        out.close();
+
+        MyLogger.debug("total lines = " + l);
+    }
+
     // main
     public static void main(String[] args) throws IOException{
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
