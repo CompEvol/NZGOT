@@ -17,14 +17,15 @@ import java.nio.file.Path;
 public class CMCreator extends Module {
 
     public CMCreator() {
-        super("CMCreator", "Create Community Matrix from UPARSE output file");
+        super("CMCreator", "Create community matrix from UPARSE output UC/UP file");
     }
 
     public void printUsage(final Arguments arguments) {
         arguments.printUsage(getName(), "[<input-file-name>]");
         System.out.println("  <input-file-name> is either uc or up mapping file from UPARSE.");
         System.out.println();
-        System.out.println("  Example: " + getName() + " out.up");
+        System.out.println("  Example: " + getName() + " clusters.uc");
+        System.out.println("  Example: " + getName() + " -working /mypath out.up");
         System.out.println("  Example: " + getName() + " -help");
         System.out.println();
     }

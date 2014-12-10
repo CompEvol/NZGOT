@@ -220,7 +220,7 @@ public class Module {
         // input
         Path file = Paths.get(workPath.toString(), fileName);
         if (file == null || Files.notExists(file)) {
-            MyLogger.error("Cannot find " + ioMessage + " file : " + fileName);
+            MyLogger.error("Cannot find " + ioMessage + " file " + fileName + " from directory " + workPath);
             System.exit(0);
         }
 
