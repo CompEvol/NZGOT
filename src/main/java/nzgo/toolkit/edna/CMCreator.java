@@ -35,6 +35,8 @@ public class CMCreator extends Module {
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
                 new Arguments.StringOption("out", "output-file-name", "Output community matrix in csv file."),
+                new Arguments.Option("countSizeAnnotation", "Count annotated size in sequences identifier, " +
+                        "for example, HA5K40001BTFNL|IndirectSoil|3-H;size=177;.")
         };
         final Arguments arguments = module.getArguments(newOptions);
 
@@ -50,7 +52,7 @@ public class CMCreator extends Module {
         }
         Path outFile = module.validateOutputFile(outFileName, "output", arguments.hasOption("overwrite"), NameSpace.SUFFIX_CSV);
 
-        boolean countSizeAnnotation = true;
+        boolean countSizeAnnotation = arguments.hasOption("countSizeAnnotation");
         boolean removeElements = false;
 
         SiteNameParser siteNameParser = new SiteNameParser();

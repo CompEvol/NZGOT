@@ -54,8 +54,8 @@ public class CommunityFileIO extends OTUsFileIO {
     public static TreeSet<String> importCommunityFromUCFile(OTUs initCommunity, Path ucMappingFile, SiteNameParser siteNameParser) throws IOException, IllegalArgumentException {
         NameUtil.validateFileExtension(ucMappingFile.toFile().getName(), NameSpace.SUFFIX_UC);
 
-        // this method has to count annotated size in OTU members
-        initCommunity.setCountSizeAnnotation(true);
+        // if count annotated size in OTU members, then setCountSizeAnnotation(true) before this method
+//        initCommunity.setCountSizeAnnotation(true);
 
         boolean countSizeAnnotation = initCommunity.isCountSizeAnnotation();
         MyLogger.info(countSizeAnnotation ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
@@ -121,7 +121,7 @@ public class CommunityFileIO extends OTUsFileIO {
 
         reader.close();
 
-        int[] sizes = initCommunity.getSizes();
+        int[] sizes = initCommunity.getSizes(); // depend on countSizeAnnotation
         MyLogger.debug("Total valid lines = " + total);
         if (sites != null)
             MyLogger.debug(sites.size() + " sites = " + sites);
@@ -160,8 +160,7 @@ public class CommunityFileIO extends OTUsFileIO {
             chimeras = SequenceFileIO.importDereplicatedSequences(chimerasFile, false, initCommunity.removeSizeAnnotation);
         }
 
-        // TODO
-        // this method has to count annotated size in OTU members
+        // TODO this method has to count annotated size in OTU members ?
         initCommunity.setCountSizeAnnotation(true);
         boolean countSizeAnnotation = initCommunity.isCountSizeAnnotation();
         MyLogger.info(countSizeAnnotation ? "Sum up annotated size in OTU ... " : "Count reads in OTU ignoring size annotation ... ");
@@ -244,11 +243,12 @@ public class CommunityFileIO extends OTUsFileIO {
             MyLogger.debug(sites.size() + " sites = " + sites);
         MyLogger.debug("OTU clustering get OTUs = " + sizes[0] + (countSizeAnnotation ? ", unique reads = " : ", reads = ") +
                 sizes[1] + ", annotated reads = " + sizes[2]);
-        MyLogger.debug("OTU clustering get chimeras = " + chimerasInClustering + ", annotated reads = " + chimerasInClusteringAnnotatedSize);
-        initCommunity.chimerasInClustering = chimerasInClustering;
-        initCommunity.chimerasInClusteringAnnotatedSize = chimerasInClusteringAnnotatedSize;
 
         if (chimeras != null) {
+            MyLogger.debug("OTU clustering get chimeras = " + chimerasInClustering + ", annotated reads = " + chimerasInClusteringAnnotatedSize);
+            initCommunity.chimerasInClustering = chimerasInClustering;
+            initCommunity.chimerasInClusteringAnnotatedSize = chimerasInClusteringAnnotatedSize;
+
             int sizeRemoved = initCommunity.filterChimeras(chimeras);
             MyLogger.debug("Remove " + chimeras.size() + " chimeras OTU , annotated reads = " + sizeRemoved);
 
@@ -348,9 +348,12 @@ public class CommunityFileIO extends OTUsFileIO {
                 uniqueTotal + " unique sequences, " + total + " reads " +
                 (community.isCountSizeAnnotation() ? "from size annotation, " : ", ") +
                 otu1Read + " OTUs represented by 1 reads, " + otu2Reads + " OTUs represented by 2 reads,");
-        MyLogger.info("OTU clustering removed " + community.chimerasInClustering + " chimeras unique sequences (" +
-                community.chimerasInClusteringAnnotatedSize + " chimeras reads), " +
-                community.getSites().length + " sites = " + Arrays.toString(community.getSites()));
+
+        if (community.chimerasInClustering >= 0) {
+            MyLogger.info("OTU clustering removed " + community.chimerasInClustering + " chimeras unique sequences (" +
+                    community.chimerasInClusteringAnnotatedSize + " chimeras reads), " +
+                    community.getSites().length + " sites = " + Arrays.toString(community.getSites()));
+        }
 
         return new int[]{community.size(), uniqueTotal, total, otu1Read, otu2Reads, community.chimerasInClustering, community.chimerasInClusteringAnnotatedSize, community.getSites().length};
     }

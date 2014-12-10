@@ -14,7 +14,7 @@ public class NameUtil {
      */
     public static boolean hasFileExtension(String fileName, String... fileNameExtension) {
         for (String fnex : fileNameExtension) {
-            if (fileName.endsWith(fnex))
+            if (fileName.toLowerCase().endsWith(fnex.toLowerCase()))
                 return true;
         }
         return false;

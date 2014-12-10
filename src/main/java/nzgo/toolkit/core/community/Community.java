@@ -38,8 +38,8 @@ public class Community<E> extends OTUs<E> {
     // the final sites already parsed from label
     protected final String[] sites;
 
-    public int chimerasInClustering = 0;
-    public int chimerasInClusteringAnnotatedSize = 0;
+    public int chimerasInClustering = -1;
+    public int chimerasInClusteringAnnotatedSize = -1;
 
     protected int chimerasRemoved = 0;
     protected int chimerasRemovedAnnotatedSize = 0;
@@ -71,7 +71,7 @@ public class Community<E> extends OTUs<E> {
         TreeSet<String> sitesTS = null;
         try {
             this.setCountSizeAnnotation(countSizeAnnotation);
-            if (mappingFile.endsWith(NameSpace.SUFFIX_UC)) {
+            if (mappingFile.toString().toLowerCase().endsWith(NameSpace.SUFFIX_UC)) {
                 sitesTS = CommunityFileIO.importCommunityFromUCFile(this, mappingFile, siteNameParser);
             } else {
                 sitesTS = CommunityFileIO.importCommunityFromUPFile(this, mappingFile, null, siteNameParser);

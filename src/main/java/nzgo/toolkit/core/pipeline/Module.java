@@ -8,7 +8,6 @@ import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.util.ArrayUtil;
 
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,14 +69,14 @@ public class Module {
         printTitle();
 
         // set working directory
-        Path working = Paths.get(System.getProperty("user.home"));
+        Path working = Paths.get(System.getProperty(NameSpace.HOME_DIR));
         if (arguments.hasOption("working")) {
             working = Paths.get(arguments.getStringOption("working"));
             if (Files.notExists(working)) {
                 MyLogger.error("Cannot find working path : " + working);
                 System.exit(0);
             }
-            System.setProperty("user.dir", working.toString());
+            System.setProperty(NameSpace.HOME_DIR, working.toString());
         }
         return working;
     }
@@ -111,7 +110,7 @@ public class Module {
 //                        new Arguments.Option("window", "Provide a console window."),
 //                        new Arguments.Option("verbose", "Give verbose parsing messages."),
 
-            new Arguments.Option("help", "Print this information and stop."),
+            new Arguments.Option("help", "Print this information and stop.")
     };
 
     public Arguments getArguments() {
@@ -125,7 +124,7 @@ public class Module {
      * @return
      */
     public Arguments getArguments(Arguments.Option[] newOptions) {
-        Arguments.Option[] allOptions = ArrayUtil.combineArrays(defaultOptions, newOptions);
+        Arguments.Option[] allOptions = ArrayUtil.combineArrays(defaultOptions, newOptions, Arguments.Option.class);
         return new Arguments(allOptions);
     }
 
@@ -242,7 +241,8 @@ public class Module {
     public Path validateOutputFile(String fileName, String ioMessage, boolean overwrite, String... fileNameExtension) {
         validateFileName(fileName, ioMessage, fileNameExtension);
 
-        Path outFile = FileSystems.getDefault().getPath("", fileName);
+        Path working = Paths.get(System.getProperty(NameSpace.HOME_DIR));
+        Path outFile = Paths.get(working.toString(), fileName);
         if (!overwrite && Files.exists(outFile)) {
             MyLogger.error("Output file exists, please use \"-overwrite\" to allow overwrite output");
             System.exit(0);

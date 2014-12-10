@@ -31,7 +31,7 @@ public class OTUs<E> extends BioSortedSet<E> {
 
     protected final boolean removeElements; // if true, remove elements in Set, use readsPerSite to keep the numbers
 
-    protected boolean countSizeAnnotation;
+    protected boolean countSizeAnnotation = false; // default not to count the annotated size
 
     public OTUs(String name) {
         this(name, false, false);

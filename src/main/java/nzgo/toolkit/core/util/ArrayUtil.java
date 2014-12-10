@@ -1,6 +1,6 @@
 package nzgo.toolkit.core.util;
 
-import java.util.Arrays;
+import java.lang.reflect.Array;
 
 /**
  * ArrayUtil
@@ -27,10 +27,13 @@ public class ArrayUtil {
         return maxId;
     }
 
-    public static <T> T[] combineArrays(T[] array1, T[] array2) {
-        T[] combinedArray = Arrays.copyOfRange(array2, array1.length, array1.length + array2.length);
+    public static <T> T[] combineArrays(T[] array1, T[] array2, Class<? extends T> elementType) {
+        final T[] combinedArray = (T[]) Array.newInstance(elementType, array1.length + array2.length);
         for (int i=0; i < array1.length; i++) {
             combinedArray[i] = array1[i];
+        }
+        for (int i=0; i < array2.length; i++) {
+            combinedArray[i+array1.length] = array2[i];
         }
         return combinedArray;
     }
