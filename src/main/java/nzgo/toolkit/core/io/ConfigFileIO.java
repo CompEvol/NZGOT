@@ -26,7 +26,7 @@ public class ConfigFileIO extends FileIO {
      * @throws IOException
      */
     public static SortedMap<String, String> importTwoColumnTSV (Path twoColumnTSV, String desc) throws IOException {
-        Module.validateFileName(twoColumnTSV.getFileName().toString(), "", NameSpace.SUFFIX_TSV);
+        Module.validateFileName(twoColumnTSV.getFileName().toString(), "", NameSpace.SUFFIX_TSV, NameSpace.SUFFIX_TXT);
 
         SortedMap<String, String> twoColumnMap = new TreeMap<>();
         BufferedReader reader = getReader(twoColumnTSV, desc);

@@ -28,6 +28,7 @@ public class NameSpace {
 
     public static final String SUFFIX_CSV = ".csv";
     public static final String SUFFIX_TSV = ".tsv";
+    public static final String SUFFIX_TXT = ".txt";
 
     public static final String SUFFIX_TAX_ID_FILE = ".xml";
 

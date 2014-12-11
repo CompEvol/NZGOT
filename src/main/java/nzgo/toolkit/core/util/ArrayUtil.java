@@ -46,7 +46,8 @@ public class ArrayUtil {
         for (T el : array) {
             aToS += el.toString() + ", ";
         }
-        aToS = aToS.substring(0, aToS.lastIndexOf(", "));
+        if (aToS.lastIndexOf(", ") > 0)
+            aToS = aToS.substring(0, aToS.lastIndexOf(", "));
         if (array.length > 1) aToS += "}";
         return aToS;
     }

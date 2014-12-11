@@ -18,6 +18,8 @@ import nzgo.toolkit.core.util.ArrayUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -363,7 +365,6 @@ public class SequenceUtil {
         int l = 0;
         String line = reader.readLine();
         while (line != null) {
-
             if ( (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
                     (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTQ) && l % 2 == 0)) {
                 String newLine = line.replaceAll(regex, replacement);
@@ -388,7 +389,7 @@ public class SequenceUtil {
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/");
-//        MyLogger.info("\nWorking path = " + workDir);
+        MyLogger.info("\nWorking path = " + workDir);
 
 //        String inFile = "otus.fasta";//"sorted.fasta";
 //        String regex = ".*\\|prep1.*";//".*\\|MID-.*";  //".*\\|28S.*";
@@ -402,12 +403,23 @@ public class SequenceUtil {
 
 //        splitFastaByLabelItem(workDir.toString(), "COI.fasta", 1, "NZAC03010806", "NZAC03010894", "NZAC03011914", "NZAC03011905", "NZAC03011634", "NZAC03010302", "NZAC03010913", "NZAC03010897", "NZAC03010906", "NZAC03012413", "NZAC03010752", "NZAC03011443", "NZAC03013543", "NZAC03011474", "NZAC03009260", "NZAC03010909", "NZAC03010904", "NZAC03010711", "NZAC03013640", "NZAC03011787");
 
-        String[] experiments = new String[]{"COI","COI-spun","ITS","trnL","18S","16S"}; //"COI","COI-spun","ITS","trnL","18S","16S"
-        for (String experiment : experiments) {
-            // go into each gene folder
-            Path workPath = Paths.get(workDir.toString(), experiment);
-            MyLogger.info("\nWorking path = " + workPath);
-            splitFastqByLabelItem(workPath.toString(), experiment + NameSpace.SUFFIX_FASTQ, SiteNameParser.LABEL_SAMPLE_INDEX);
+//        String[] experiments = new String[]{"COI","COI-spun","ITS","trnL","18S","16S"}; //"COI","COI-spun","ITS","trnL","18S","16S"
+//        for (String experiment : experiments) {
+//            // go into each gene folder
+//            Path workPath = Paths.get(workDir.toString(), experiment);
+//            MyLogger.info("\nWorking path = " + workPath);
+//            splitFastqByLabelItem(workPath.toString(), experiment + NameSpace.SUFFIX_FASTQ, SiteNameParser.LABEL_SAMPLE_INDEX);
+//        }
+
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(workDir)) {
+            for(Path file : stream) {
+                if (Files.exists(file)) {
+                    String fileName = file.getFileName().toString();
+                    if (fileName.toLowerCase().endsWith(NameSpace.SUFFIX_FASTQ) && !fileName.toLowerCase().contains("-new")) {
+                        renameIdentifierInFastAOrQ(workDir.toString(), fileName, "\\|", ":");
+                    }
+                }
+            }
         }
     }
 

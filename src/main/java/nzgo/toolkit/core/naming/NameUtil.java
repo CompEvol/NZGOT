@@ -72,4 +72,10 @@ public class NameUtil {
         return name.replaceAll("\\W", "");
     }
 
+    public static boolean hasSameItem(String label1, int index1, String label2, int index2, String regex) {
+        String[] items1 = label1.split(regex, -1);
+        String[] items2 = label2.split(regex, -1);
+        return index1 < items1.length && index2 < items2.length && items1[index1].contentEquals(items2[index2]);
+    }
+
 }

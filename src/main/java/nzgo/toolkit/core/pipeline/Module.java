@@ -195,9 +195,9 @@ public class Module {
         if (fileName == null) {
             MyLogger.error("Invalid " + ioMessage + " file name : " + fileName);
             System.exit(0);
-        } else if (fileNameExtension != null && !NameUtil.hasFileExtension(fileName, fileNameExtension)) {
+        } else if (fileNameExtension != null && fileNameExtension.length > 0 && !NameUtil.hasFileExtension(fileName, fileNameExtension)) {
             MyLogger.error("Invalid " + ioMessage + " file format : " + fileName +
-                    ", where " + fileNameExtension + " is required");
+                    ", where " + ArrayUtil.toString(fileNameExtension) + " is required");
             System.exit(0);
         }
     }
