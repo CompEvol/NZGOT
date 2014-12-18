@@ -259,43 +259,43 @@ public class SourceModifiersTable {
         }
 
         // fasta file
-//        inFilePath = Module.validateInputFile(workDir, "COI.fasta", "input", NameSpace.SUFFIX_FASTA);
-//
-//        outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
-//        outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
-//        outputFilePath = Paths.get(workDir.toString(), outputFileNameStem + "-BankIt" + outputFileExtension);
-//
-//        try {
-//            BufferedReader reader = OTUsFileIO.getReader(inFilePath, "LCA file");
-//            PrintStream out = FileIO.getPrintStream(outputFilePath, "BankIt submission FASTA file");
-//
-//            int i = 0;
-//            String line = reader.readLine();
-//            while (line != null) {
-//                if (line.startsWith(">")) {
-//                    String label = line.substring(1);
-//                    String[] ids = FileIO.lineParser.getSeparator(1).parse(label); // default "|"
-//                    String newLabel = sourceModifiersTable.getLabel(ids[0]);
-//                    if (newLabel == null)
-//                        throw new IllegalArgumentException("Cannot find sequence id " + ids[0] + " from new labels !");
-//
-//                    out.println(newLabel);
-//                    i++;
-//                } else {
-//                    out.println(line);
-//                }
-//                line = reader.readLine();
-//            }
-//
-//            reader.close();
-//            out.flush();
-//            out.close();
-//
-//            MyLogger.info("\nReplace " + i + " sequences labels.");
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        inFilePath = Module.validateInputFile(workDir, "COI.fasta", "input", NameSpace.SUFFIX_FASTA);
+
+        outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
+        outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
+        outputFilePath = Paths.get(workDir.toString(), outputFileNameStem + "-BankIt" + outputFileExtension);
+
+        try {
+            BufferedReader reader = OTUsFileIO.getReader(inFilePath, "LCA file");
+            PrintStream out = FileIO.getPrintStream(outputFilePath, "BankIt submission FASTA file");
+
+            int i = 0;
+            String line = reader.readLine();
+            while (line != null) {
+                if (line.startsWith(">")) {
+                    String label = line.substring(1);
+                    String[] ids = FileIO.lineParser.getSeparator(1).parse(label); // default "|"
+                    String newLabel = sourceModifiersTable.getLabel(ids[0]);
+                    if (newLabel == null)
+                        throw new IllegalArgumentException("Cannot find sequence id " + ids[0] + " from new labels !");
+
+                    out.println(newLabel);
+                    i++;
+                } else {
+                    out.println(line);
+                }
+                line = reader.readLine();
+            }
+
+            reader.close();
+            out.flush();
+            out.close();
+
+            MyLogger.info("\nReplace " + i + " sequences labels.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
     }

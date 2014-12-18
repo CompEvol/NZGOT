@@ -349,9 +349,10 @@ public class SequenceUtil {
      * @param inFileName
      * @param regex
      * @param replacement
+     * @param removeLengthSmallerThan    remove sequence length smaller than given number, 0 will keep all empty sequences
      * @throws IOException
      */
-    public static void renameIdentifierInFastAOrQ(String workPathString, String inFileName, String regex, String replacement) throws IOException {
+    public static void renameIdentifierInFastAOrQ(String workPathString, String inFileName, String regex, String replacement, int removeLengthSmallerThan) throws IOException {
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ);
 
@@ -362,15 +363,26 @@ public class SequenceUtil {
         Path outputFilePath = Paths.get(workPathString, outputFileNameStem + "-new" + suffix);
         PrintStream out = FileIO.getPrintStream(outputFilePath, "identifier renamed file");
 
+        if (removeLengthSmallerThan > 0)
+            MyLogger.info("Remove all sequences whose length < " + removeLengthSmallerThan);
+
         int l = 0;
+        int removed = 0;
         String line = reader.readLine();
         while (line != null) {
             if ( (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
                     (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTQ) && l % 2 == 0)) {
-                String newLine = line.replaceAll(regex, replacement);
-                out.println(newLine);
-            } else {
-                out.println(line);
+                String newIdentifier = line.replaceAll(regex, replacement);
+                // read line
+                String sequence = reader.readLine();
+                l++;
+
+                if (sequence.trim().length() >= removeLengthSmallerThan) {
+                    out.println(newIdentifier);
+                    out.println(sequence);
+                } else {
+                    removed++;
+                }
             }
 
             line = reader.readLine();
@@ -381,14 +393,17 @@ public class SequenceUtil {
         out.flush();
         out.close();
 
-        MyLogger.debug("total lines = " + l);
+        if (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTQ))
+            removed = removed / 2;
+
+        MyLogger.debug("total lines = " + l + ", removed sequences = " + removed);
     }
 
     // main
     public static void main(String[] args) throws IOException{
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/SRA/bak/COI-spun");
         MyLogger.info("\nWorking path = " + workDir);
 
 //        String inFile = "otus.fasta";//"sorted.fasta";
@@ -416,7 +431,7 @@ public class SequenceUtil {
                 if (Files.exists(file)) {
                     String fileName = file.getFileName().toString();
                     if (fileName.toLowerCase().endsWith(NameSpace.SUFFIX_FASTQ) && !fileName.toLowerCase().contains("-new")) {
-                        renameIdentifierInFastAOrQ(workDir.toString(), fileName, "\\|", ":");
+                        renameIdentifierInFastAOrQ(workDir.toString(), fileName, "\\|", ":", 1);
                     }
                 }
             }

@@ -53,6 +53,33 @@ public class ConfigFileIO extends FileIO {
         return twoColumnMap;
     }
 
+    public static List<String[]> importTSV (Path tsvFile, String desc) throws IOException {
+        Module.validateFileName(tsvFile.getFileName().toString(), "tsv", NameSpace.SUFFIX_TSV, NameSpace.SUFFIX_TXT);
+
+        List<String[]> rows = new ArrayList<>();
+        BufferedReader reader = getReader(tsvFile, desc);
+
+        String line = reader.readLine();
+        while (line != null) {
+            if (hasContent(line)) { // not comments "#" or empty
+                String[] items = lineParser.getSeparator(0).parse(line);
+                if (items.length < 2)
+                    throw new IllegalArgumentException("TSV file requires at least 2 columns, line = " + line);
+
+                rows.add(items);
+            }
+
+            line = reader.readLine();
+        }
+        reader.close();
+
+        if (rows.size() < 1)
+            throw new IllegalArgumentException("It needs at least one valid row in " + tsvFile);
+
+        return rows;
+    }
+
+
     public static List<Regex> importRegex (Path regexTSV, RegexFactory.RegexType regexType) throws IOException {
         List<Regex> regexList = new ArrayList<>();
         RegexFactory regexFactory = new RegexFactory(regexType);

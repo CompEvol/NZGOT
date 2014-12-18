@@ -19,7 +19,7 @@ import java.util.SortedMap;
  */
 public class MD5ChecksumTable {
 
-    final static String[] genes = new String[]{"16S", "18S", "COI", "ITS", "trnL"};
+    final static String[] genes = new String[]{"COI-spun"};//"16S", "18S", "COI", "ITS", "trnL"
     final static String[] location = new String[]{"1-B","1-L","2-C","2-M","3-H","3-N","4-A","4-N","5-I","5-N","6-I","6-N","7-M","7-N","8-I","8-O","CM30C30-L","CM30C30-N","LB1-A","LB1-E"};
     final static String[] biosamples = new String[]{"SAMN03200223", "SAMN03200224", "SAMN03200225", "SAMN03200226", "SAMN03200227", "SAMN03200228", "SAMN03200229", "SAMN03200230", "SAMN03200231", "SAMN03200232", "SAMN03200233", "SAMN03200234", "SAMN03200235", "SAMN03200236", "SAMN03200237", "SAMN03200238", "SAMN03200239", "SAMN03200240", "SAMN03200241", "SAMN03200242"};
 
@@ -58,7 +58,7 @@ public class MD5ChecksumTable {
 
     //Main method
     public static void main(final String[] args) {
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/SRA/COI-spun");
         MyLogger.info("\nWorking path = " + workDir);
 
         Path inPath = Module.validateInputFile(workDir, "md5.txt", "input");

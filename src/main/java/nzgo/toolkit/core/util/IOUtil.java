@@ -9,6 +9,8 @@ import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -17,6 +19,13 @@ import java.nio.file.Paths;
  * @author Walter Xie
  */
 public class IOUtil {
+
+    // http://stackoverflow.com/questions/5930087/how-to-check-if-a-directory-is-empty-in-java
+    public static boolean isDirEmpty(final Path directory) throws IOException {
+        try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
+            return !dirStream.iterator().hasNext();
+        }
+    }
 
     /**
      *

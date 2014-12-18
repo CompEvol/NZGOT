@@ -1,11 +1,13 @@
 package nzgo.toolkit.core.taxonomy;
 
+import nzgo.toolkit.core.io.ConfigFileIO;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 import nzgo.toolkit.core.util.ArrayUtil;
+import nzgo.toolkit.core.util.ListUtil;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -14,6 +16,7 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -121,15 +124,24 @@ public class TaxonLCA {
 
     //Main method
     public static void main(final String[] args) {
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/20141215/");
         MyLogger.info("\nWorking path = " + workDir);
 
         Path inFilePath = Module.validateInputFile(workDir, "COI.txt", "input", null);
 
+        Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
+        Path inFilePath2 = Module.validateInputFile(workDir2, "1721_COI_fixed_MEGAN_taxon_names_genus.txt", "BLAST", null);
+        List<String[]> blastList = null;
+        try {
+            blastList = ConfigFileIO.importTSV(inFilePath2, "");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         String outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
         String outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
 
-        Path outputFilePath = Paths.get(workDir.toString(), outputFileNameStem + "-LCA" + outputFileExtension);
+        Path outputFilePath = Paths.get(workDir2.toString(), outputFileNameStem + "-LCA" + outputFileExtension);
 
         Agreement agreement = Agreement.LOW_LIN_LCA;
         MyLogger.info("\n Apply agreement: " + agreement + "\n");
@@ -143,43 +155,51 @@ public class TaxonLCA {
             String line = reader.readLine();
             while (line != null) {
                 String[] items = FileIO.lineParser.getSeparator(0).parse(line); // default "\t"
+                String[] ids = FileIO.lineParser.getSeparator(1).parse(items[0]); // default "|"
 
-                String blast = items[1];
-                if (items.length > 3 && items[3].trim().length() > 0) {
-                    blast = items[3];
-                }
+                String[] matchedRow = ListUtil.getFirstRowMatch(blastList, 0, ids[0]);
 
-                String lca = null;
-                if (items[2].equalsIgnoreCase("null")) {
-                    try {
-                        Taxon t = TaxonomyUtil.getTaxonFromName(blast);
-                        lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + BLAST +
-                                "\t" + t.getLineageString();
-                        count[0]++;
-                    } catch (XMLStreamException e) {
-                        e.printStackTrace();
+                if (matchedRow != null) {
+                    String blast = matchedRow[1];
+                    if (items.length > 3 && items[3].trim().length() > 0) {
+                        blast = items[3];
                     }
-                } else {
-                    try {
-                        Taxon t = getAgreedTaxon(agreement, blast, items[2]);
-                        String ident = identifiedByMap.get(t);
-                        if (ident == null)
-                            ident = "LCA";
-                        lca = t == null ? "\t" : t.getScientificName() + "\t" + t.getTaxId() + "\t" + ident +
-                                "\t" + t.getLineageString();
-                        if (ident.equalsIgnoreCase(BLAST)) {
+
+                    String lca = null;
+                    if (items[2].equalsIgnoreCase("null")) {
+                        try {
+                            Taxon t = TaxonomyUtil.getTaxonFromName(blast);
+                            lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + BLAST +
+                                    "\t" + t.getLineageString();
                             count[0]++;
-                        } else if (ident.equalsIgnoreCase(MORPHOLOGY)) {
-                            count[1]++;
-                        } else {
-                            count[2]++;
+                        } catch (XMLStreamException e) {
+                            e.printStackTrace();
                         }
-                    } catch (XMLStreamException e) {
-                        e.printStackTrace();
+                    } else {
+                        try {
+                            Taxon t = getAgreedTaxon(agreement, blast, items[2]);
+                            String ident = identifiedByMap.get(t);
+                            if (ident == null)
+                                ident = "LCA";
+                            lca = t == null ? "\t" : t.getScientificName() + "\t" + t.getTaxId() + "\t" + ident +
+                                    "\t" + t.getLineageString();
+                            if (ident.equalsIgnoreCase(BLAST)) {
+                                count[0]++;
+                            } else if (ident.equalsIgnoreCase(MORPHOLOGY)) {
+                                count[1]++;
+                            } else {
+                                count[2]++;
+                            }
+                        } catch (XMLStreamException e) {
+                            e.printStackTrace();
+                        }
                     }
+
+                    out.println(items[0] + "\t" + blast + "\t" + items[2] + "\t" + lca);
+                } else {
+                    MyLogger.warn("Cannot find seq id " + ids[0] + " from BLAST list !");
                 }
 
-                out.println(items[0] + "\t" + blast + "\t" + items[2] + "\t" + lca);
                 line = reader.readLine();
 
                 identifiedByMap.clear();
