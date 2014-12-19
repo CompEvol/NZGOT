@@ -130,7 +130,7 @@ public class TaxonLCA {
         Path inFilePath = Module.validateInputFile(workDir, "COI.txt", "input", null);
 
         Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
-        Path inFilePath2 = Module.validateInputFile(workDir2, "1721_COI_fixed_MEGAN_taxon_names_genus.txt", "BLAST", null);
+        Path inFilePath2 = Module.validateInputFile(workDir2, "1721_COI_fixed_MEGAN_taxon_ids_order_LCA300.txt", "BLAST", null);
         List<String[]> blastList = null;
         try {
             blastList = ConfigFileIO.importTSV(inFilePath2, "");
@@ -141,7 +141,7 @@ public class TaxonLCA {
         String outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
         String outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
 
-        Path outputFilePath = Paths.get(workDir2.toString(), outputFileNameStem + "-LCA" + outputFileExtension);
+        Path outputFilePath = Paths.get(workDir2.toString(), outputFileNameStem + "-LCA-order-LCA300" + outputFileExtension);
 
         Agreement agreement = Agreement.LOW_LIN_LCA;
         MyLogger.info("\n Apply agreement: " + agreement + "\n");
@@ -172,6 +172,15 @@ public class TaxonLCA {
                             lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + BLAST +
                                     "\t" + t.getLineageString();
                             count[0]++;
+                        } catch (XMLStreamException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (blast.toLowerCase().contains("not assigned")) {
+                        try {
+                            Taxon t = TaxonomyUtil.getTaxonFromName(items[2]);
+                            lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + MORPHOLOGY +
+                                    "\t" + t.getLineageString();
+                            count[1]++;
                         } catch (XMLStreamException e) {
                             e.printStackTrace();
                         }
@@ -210,7 +219,7 @@ public class TaxonLCA {
             out.close();
 
             MyLogger.info("\nTaxonomy identified by BLAST = " + count[0] + ", by " + MORPHOLOGY + " = " + count[1] +
-                    ", (contradicted) take LCA = " + count[2]);
+                    ", (contradicted) take LCA = " + count[2] + ", total = " + (count[0] + count[1] + count[2]));
 
         } catch (IOException e) {
             e.printStackTrace();
