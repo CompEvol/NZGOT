@@ -175,15 +175,15 @@ public class TaxonLCA {
                         } catch (XMLStreamException e) {
                             e.printStackTrace();
                         }
-                    } else if (blast.toLowerCase().contains("not assigned")) {
-                        try {
-                            Taxon t = TaxonomyUtil.getTaxonFromName(items[2]);
-                            lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + MORPHOLOGY +
-                                    "\t" + t.getLineageString();
-                            count[1]++;
-                        } catch (XMLStreamException e) {
-                            e.printStackTrace();
-                        }
+//                    } else if (blast.toLowerCase().contains("not assigned")) {
+//                        try {
+//                            Taxon t = TaxonomyUtil.getTaxonFromName(items[2]);
+//                            lca = t.getScientificName() + "\t" + t.getTaxId() + "\t" + MORPHOLOGY +
+//                                    "\t" + t.getLineageString();
+//                            count[1]++;
+//                        } catch (XMLStreamException e) {
+//                            e.printStackTrace();
+//                        }
                     } else {
                         try {
                             Taxon t = getAgreedTaxon(agreement, blast, items[2]);
