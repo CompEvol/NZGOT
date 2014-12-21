@@ -2,7 +2,9 @@ package nzgo.toolkit.core.taxonomy;
 
 import nzgo.toolkit.core.io.ConfigFileIO;
 import nzgo.toolkit.core.io.FileIO;
+import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +133,7 @@ public class TaxonLCA {
         Path inFilePath = Module.validateInputFile(workDir, "COI.txt", "input", null);
 
         Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
-        Path inFilePath2 = Module.validateInputFile(workDir2, "1721_COI_fixed_MEGAN_taxon_ids_order_LCA300.txt", "BLAST", null);
+        Path inFilePath2 = Module.validateInputFile(workDir2, "1721_COI_fixed_MEGAN_taxon_ids_order.txt", "BLAST", null);
         List<String[]> blastList = null;
         try {
             blastList = ConfigFileIO.importTSV(inFilePath2, "");
@@ -138,10 +141,20 @@ public class TaxonLCA {
             e.printStackTrace();
         }
 
+        Path workDir3 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/bak/longlabel/");
+        Path inFilePath3 = Module.validateInputFile(workDir3, "COI.fasta", "long identifiers", NameSpace.SUFFIX_FASTA);
+        List<String> longIdentifier = new ArrayList<>();
+        try {
+            longIdentifier = SequenceFileIO.importFastaLabelOnly(inFilePath3, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         String outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
         String outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
 
-        Path outputFilePath = Paths.get(workDir2.toString(), outputFileNameStem + "-LCA-order-LCA300" + outputFileExtension);
+        Path outputFilePath = Paths.get(workDir2.toString(), outputFileNameStem + "-LCA-order" + outputFileExtension);
 
         Agreement agreement = Agreement.LOW_LIN_LCA;
         MyLogger.info("\n Apply agreement: " + agreement + "\n");
@@ -204,7 +217,16 @@ public class TaxonLCA {
                         }
                     }
 
-                    out.println(items[0] + "\t" + blast + "\t" + items[2] + "\t" + lca);
+                    String note = "";
+                    for (String longL : longIdentifier) {
+                        String[] ids2 = FileIO.lineParser.getSeparator(1).parse(longL);
+                        if (ids2[0].contentEquals(ids[0])) {
+                            note = ids2[4];
+                            break;
+                        }
+                    }
+
+                    out.println(items[0] + "\t" + blast + "\t" + items[2] + "\t" + lca + "\t" + note);
                 } else {
                     MyLogger.warn("Cannot find seq id " + ids[0] + " from BLAST list !");
                 }

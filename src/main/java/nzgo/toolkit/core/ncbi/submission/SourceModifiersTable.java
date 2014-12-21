@@ -1,7 +1,6 @@
 package nzgo.toolkit.core.ncbi.submission;
 
 import nzgo.toolkit.core.io.FileIO;
-import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
@@ -178,16 +177,16 @@ public class SourceModifiersTable {
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
         MyLogger.info("\nWorking path = " + workDir);
 
-        Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/bak/longlabel");
-        Path inFilePath2 = Module.validateInputFile(workDir2, "COI.fasta", "long identifiers", NameSpace.SUFFIX_FASTA);
-        List<String> longIdentifier = new ArrayList<>();
-        try {
-            longIdentifier = SequenceFileIO.importFastaLabelOnly(inFilePath2, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
+//        Path inFilePath2 = Module.validateInputFile(workDir2, "COI-fixed.fasta", "old identifiers", NameSpace.SUFFIX_FASTA);
+//        List<String> longIdentifier = new ArrayList<>();
+//        try {
+//            longIdentifier = SequenceFileIO.importFastaLabelOnly(inFilePath2, false);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        Path inFilePath = Module.validateInputFile(workDir, "COI-LCA.txt", "input");
+        Path inFilePath = Module.validateInputFile(workDir, "COI-LCA-order.txt", "input");
 
         String outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
         String outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
@@ -226,14 +225,14 @@ public class SourceModifiersTable {
                 final String label = sequence_ID + (taxonIdentified.length() > 1 ? " [organism=" + taxonIdentified + "]" : "");
                 sourceModifiersTable.addLabel(label);
 
-                String note = "";
-                for (String longL : longIdentifier) {
-                    String[] ids2 = FileIO.lineParser.getSeparator(1).parse(longL);
-                     if (ids2[0].contentEquals(sequence_ID)) {
-                         note = ids2[4];
-                         break;
-                     }
-                }
+                String note = items[items.length-1];
+//                for (String longL : longIdentifier) {
+//                    String[] ids2 = FileIO.lineParser.getSeparator(1).parse(longL);
+//                     if (ids2[0].contentEquals(sequence_ID)) {
+//                         note = ids2[4];
+//                         break;
+//                     }
+//                }
                 sourceModifiersTable.addValue(sequence_ID, specimen_voucher, collected_by, collection_date,
                         identified_by, lat_lon, taxonIdentified, plot, label, note);
 
@@ -259,14 +258,14 @@ public class SourceModifiersTable {
         }
 
         // fasta file
-        inFilePath = Module.validateInputFile(workDir, "COI.fasta", "input", NameSpace.SUFFIX_FASTA);
+        inFilePath = Module.validateInputFile(workDir, "COI-fixed.fasta", "input", NameSpace.SUFFIX_FASTA);
 
         outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
         outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
         outputFilePath = Paths.get(workDir.toString(), outputFileNameStem + "-BankIt" + outputFileExtension);
 
         try {
-            BufferedReader reader = OTUsFileIO.getReader(inFilePath, "LCA file");
+            BufferedReader reader = OTUsFileIO.getReader(inFilePath, "old fasta file");
             PrintStream out = FileIO.getPrintStream(outputFilePath, "BankIt submission FASTA file");
 
             int i = 0;
@@ -274,10 +273,11 @@ public class SourceModifiersTable {
             while (line != null) {
                 if (line.startsWith(">")) {
                     String label = line.substring(1);
-                    String[] ids = FileIO.lineParser.getSeparator(1).parse(label); // default "|"
-                    String newLabel = sourceModifiersTable.getLabel(ids[0]);
+//                    String[] ids = FileIO.lineParser.getSeparator(1).parse(label); // default "|"
+                    String seqId = label.substring(0, label.indexOf("[")).trim();
+                    String newLabel = sourceModifiersTable.getLabel(seqId);
                     if (newLabel == null)
-                        throw new IllegalArgumentException("Cannot find sequence id " + ids[0] + " from new labels !");
+                        throw new IllegalArgumentException("Cannot find sequence id " + seqId + " from new labels !");
 
                     out.println(newLabel);
                     i++;
