@@ -106,7 +106,8 @@ public class SourceModifiersTable {
         PrintStream out = FileIO.getPrintStream(outPath, "Sample Source Modifiers Table");
 
         //head
-        out.println("Sequence_ID\tCollected_by\tCollection_date\tCountry\tIdentified_by\tLat_Lon\tSpecimen_voucher");
+        out.println("Sequence_ID\tCollected_by\tCollection_date\tCountry\tIdentified_by\tLat_Lon\tSpecimen_voucher" +
+                    "\ttaxonIdentified\tplot\tlabel\ttaxId\tnote");
 
         for (int i = 0; i < Sequence_ID.size(); i++) {
             out.print(Sequence_ID.get(i) + "\t" + Collected_by.get(i) + "\t" + Collection_date.get(i) + "\t" +
@@ -221,6 +222,7 @@ public class SourceModifiersTable {
                 String[] ti = sourceModifiersTable.getTaxonIdentified(items, count);
                 String taxonIdentified = ti[0];
                 String identified_by = ti[1];
+                final String taxId = items[4];
 
                 final String label = sequence_ID + (taxonIdentified.length() > 1 ? " [organism=" + taxonIdentified + "]" : "");
                 sourceModifiersTable.addLabel(label);
@@ -234,7 +236,7 @@ public class SourceModifiersTable {
 //                     }
 //                }
                 sourceModifiersTable.addValue(sequence_ID, specimen_voucher, collected_by, collection_date,
-                        identified_by, lat_lon, taxonIdentified, plot, label, note);
+                        identified_by, lat_lon, taxonIdentified, plot, label, taxId, note);
 
                 line = reader.readLine();
             }
