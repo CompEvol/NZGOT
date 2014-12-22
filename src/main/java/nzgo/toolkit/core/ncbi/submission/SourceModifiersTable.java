@@ -276,13 +276,16 @@ public class SourceModifiersTable {
 //                    String[] ids = FileIO.lineParser.getSeparator(1).parse(label); // default "|"
                     String seqId = label.substring(0, label.indexOf("[")).trim();
                     String newLabel = sourceModifiersTable.getLabel(seqId);
-                    if (newLabel == null)
-                        throw new IllegalArgumentException("Cannot find sequence id " + seqId + " from new labels !");
 
-                    out.println(newLabel);
-                    i++;
-                } else {
-                    out.println(line);
+                    if (newLabel == null) {
+                        MyLogger.warn("Cannot find sequence id " + seqId + " from new labels !");
+                    } else {
+                        out.println(newLabel);
+                        i++;
+                        // sequences
+                        line = reader.readLine();
+                        out.println(line);
+                    }
                 }
                 line = reader.readLine();
             }
