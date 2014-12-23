@@ -37,6 +37,18 @@ public class NameUtil {
         return fileName.substring(0, dot);
     }
 
+    public static String getExtension (String fileName) {
+        if (fileName == null)
+            return null;
+
+        int dot = fileName.lastIndexOf(".");
+
+        if (dot < 0)
+            return fileName;
+
+        return fileName.substring(dot+1);
+    }
+
     public static String getSuffix (String fileName) {
         if (fileName == null)
             return null;

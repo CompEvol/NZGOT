@@ -38,6 +38,18 @@ public class ArrayUtil {
         return combinedArray;
     }
 
+    public static <T> String toString(String delimiter, T[] array) {
+        if (array == null) return null;
+
+        String aToS = "";
+        for (T el : array) {
+            aToS += el.toString() + delimiter;
+        }
+        if (aToS.length() > 0)
+            aToS = aToS.substring(0, aToS.lastIndexOf(delimiter));
+        return aToS;
+    }
+
     public static <T> String toString(T... array) {
         if (array == null) return null;
 
