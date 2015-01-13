@@ -1,0 +1,48 @@
+
+User Guide for "Evaluating a multigene environmental DNA approach for comprehensive biodiversity assessment"
+
+
+========== Prepare data ==========
+1) Download soil environmental sequences (454) in SRA:
+http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?study=SRP050103
+
+2) Convert sra format into fastq using SRA Toolkit, such as:
+/sratoolkit.2.4.3-mac64/bin/fastq-dump SRR1720812.sra
+
+SRR1720812.fastq will be ready in the same folder.
+
+3) Combine all fastq files from the same marker into one file:
+cat *.fastq > 16S.fastq
+
+========== Create OTUs ==========
+UPARSE pipeline (http://drive5.com/usearch/manual/uparse_pipeline.html)
+
+1)
+
+
+
+
+
+
+
+
+
+
+========== Taxonomy Identification ==========
+
+
+
+
+
+
+
+
+
+
+
+========== Analysis & figures ==========
+
+
+
+
+
