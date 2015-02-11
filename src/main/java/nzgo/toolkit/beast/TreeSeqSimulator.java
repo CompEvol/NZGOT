@@ -163,7 +163,7 @@ public class TreeSeqSimulator {
             e.printStackTrace();
         }
 
-        //403gene6t0
+        //403gene6t0 swap rate
         popSize = 7.5583E5;
         taxa = new String[]{"CA1.T401_1", "CA3.T415_1", "CB121212.12_1", "CB070117.03_1", "CB070121.08_1", "CB070121.16_1"};
         dates = new int[]{0, 0, 5388, 6220, 25600, 30000};
@@ -208,7 +208,7 @@ public class TreeSeqSimulator {
             e.printStackTrace();
         }
 
-        //403gene6t716
+        //403gene6t716 swap rate
         popSize = 4.2299E5;
         taxa = new String[]{"CB111229.15_1", "CB130106.26_1", "CB121212.12_1", "CB070117.03_1", "CB070121.08_1", "CB070121.16_1"};
         dates = new int[]{716, 1937, 5388, 6220, 25600, 30000};
