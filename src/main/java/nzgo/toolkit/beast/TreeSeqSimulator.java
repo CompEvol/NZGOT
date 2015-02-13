@@ -155,6 +155,12 @@ public class TreeSeqSimulator {
         createXML(outFile, reader, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
 
         //====== 2nd simulation
+        try {
+            reader = FileIO.getReader(inPath, "403gene6t0 xml");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         outPath = Paths.get(workPath, "403gene6t0simRev.xml");
         outFile = null;
         try {
@@ -201,6 +207,12 @@ public class TreeSeqSimulator {
         createXML(outFile, reader, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
 
         //====== 4th simulation
+        try {
+            reader = FileIO.getReader(inPath, "403gene6t716 xml");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         outPath = Paths.get(workPath, "403gene6t716simRev.xml");
         try {
             outFile = new PrintStream(outPath.toFile());
@@ -229,7 +241,11 @@ public class TreeSeqSimulator {
 
         PrintStream out = java.lang.System.out;
         out.println("Total " + ids.length + " genes");
+        // print head
+        outFile.println("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>");
+        outFile.println("<beast beautitemplate=\"Standard\" beautistatus=\"\" namespace=\"beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood\" version=\"2.0\">\n");
 
+        // print data
         for (String id : ids) {
             TreeSeqSimulator treeSeqSimulator = new TreeSeqSimulator(popSize, taxa, dates);
             try {
@@ -255,6 +271,7 @@ public class TreeSeqSimulator {
             }
         }
 
+        // print rest
         boolean copy = false;
         try {
             String line = reader.readLine();
