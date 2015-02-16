@@ -89,7 +89,7 @@ public class TreeSeqSimulator {
 
     public Alignment getSimulatedAlignment(Alignment dummyAlg, Tree tree, SiteModel siteModel, BranchRateModel branchRateModel) throws Exception {
         // feed to sequence simulator and generate leaves
-        SequenceSimulator sequenceSimulator = new SequenceSimulator();
+        SequenceSimulator sequenceSimulator = new SequenceSimulator(); // sequence length default 1000
         sequenceSimulator.init(dummyAlg, tree, siteModel, branchRateModel);
 
         return sequenceSimulator.simulate();
