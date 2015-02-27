@@ -137,13 +137,13 @@ public class TreeSeqSimulator {
         }
 
         //403gene6t0
-        double popSize = 7.5583E5;
+        double popSize = 1.3755E5;
         String[] taxa = new String[]{"CA1.T401_1", "CA3.T415_1", "CB121212.12_1", "CB070117.03_1", "CB070121.08_1", "CB070121.16_1"};
         int[] dates = new int[]{0, 0, 5388, 6220, 25600, 30000};
-        double clockRate = 5.0407E-9;
+        double clockRate = 2.1045E-8;
         double mutationRate = 1.0; // fixed
-        double kappa = 5.1242;
-        double gammaShape = 0.0243;
+        double kappa = 5.1183;
+        double gammaShape = 0.0256;
 
         createXML(workPath, "403gene6t0sim.xml", reader, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
 
@@ -155,13 +155,13 @@ public class TreeSeqSimulator {
         }
 
         //403gene6t0 swap rate
-        popSize = 7.5583E5;
+        popSize = 1.3755E5;
         taxa = new String[]{"CA1.T401_1", "CA3.T415_1", "CB121212.12_1", "CB070117.03_1", "CB070121.08_1", "CB070121.16_1"};
         dates = new int[]{0, 0, 5388, 6220, 25600, 30000};
-        clockRate = 7.2028E-9; // swap rate
+        clockRate = 1.3721E-8; // swap rate
 //        mutationRate = 1.0;
-        kappa = 5.1242;
-        gammaShape = 0.0243;
+        kappa = 5.1183;
+        gammaShape = 0.0256;
 
         createXML(workPath, "403gene6t0simRev.xml", reader, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
 
@@ -174,13 +174,13 @@ public class TreeSeqSimulator {
         }
 
         //403gene6t716
-        popSize = 4.2299E5;
+        popSize = 2.0371E5;
         taxa = new String[]{"CB111229.15_1", "CB130106.26_1", "CB121212.12_1", "CB070117.03_1", "CB070121.08_1", "CB070121.16_1"};
         dates = new int[]{716, 1937, 5388, 6220, 25600, 30000};
-        clockRate = 7.2028E-9;
+        clockRate = 1.3721E-8;
 //        mutationRate = 1.0;
-        kappa = 5.2931;
-        gammaShape = 0.0244;
+        kappa = 5.2662;
+        gammaShape = 0.0245;
 
         createXML(workPath, "403gene6t716sim.xml", reader, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
 
@@ -192,13 +192,13 @@ public class TreeSeqSimulator {
         }
 
         //403gene6t716 swap rate
-        popSize = 4.2299E5;
+        popSize = 2.0371E5;
         taxa = new String[]{"CB111229.15_1", "CB130106.26_1", "CB121212.12_1", "CB070117.03_1", "CB070121.08_1", "CB070121.16_1"};
         dates = new int[]{716, 1937, 5388, 6220, 25600, 30000};
-        clockRate = 5.0407E-9; // swap rate
+        clockRate = 2.1045E-8; // swap rate
 //        mutationRate = 1.0;
-        kappa = 5.2931;
-        gammaShape = 0.0244;
+        kappa = 5.2662;
+        gammaShape = 0.0245;
 
         createXML(workPath, "403gene6t716simRev.xml", reader, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
     } // main
