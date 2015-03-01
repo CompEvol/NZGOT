@@ -66,7 +66,7 @@ public class TreeSeqSimulator {
 
         TraitSet timeTrait = new TraitSet();
         timeTrait.initByName(
-                "traitname", "date",
+                "traitname", "date-backward",
                 "taxa", taxonSet,
                 "value", traitSB.toString());
 
