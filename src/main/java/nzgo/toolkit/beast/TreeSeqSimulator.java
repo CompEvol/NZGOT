@@ -35,14 +35,10 @@ import java.util.List;
  * @author Walter Xie
  */
 public class TreeSeqSimulator {
-    private final double popSize;
-    private final String[] taxa;
-    private final int[] dates;
 
-    public TreeSeqSimulator(double popSize, String[] taxa, int[] dates) {
-        this.popSize = popSize;
-        this.taxa = taxa;
-        this.dates = dates;
+    private final static PrintStream out = System.out;
+
+    public TreeSeqSimulator() {
     }
 
     public Alignment getDummyAlignment(String[] taxa) throws Exception {
@@ -63,6 +59,7 @@ public class TreeSeqSimulator {
                 traitSB.append(",");
             traitSB.append(taxa[i]).append("=").append(dates[i]);
         }
+//        out.println(traitSB.toString());
 
         TraitSet timeTrait = new TraitSet();
         timeTrait.initByName(
@@ -221,7 +218,6 @@ public class TreeSeqSimulator {
         }
         assert outTreeFile != null;
 
-        PrintStream out = System.out;
         out.println("Total " + ids.length + " genes");
 
         // xml file
@@ -240,7 +236,7 @@ public class TreeSeqSimulator {
 
         // print data
         for (String id : ids) {
-            TreeSeqSimulator treeSeqSimulator = new TreeSeqSimulator(popSize, taxa, dates);
+            TreeSeqSimulator treeSeqSimulator = new TreeSeqSimulator();
             try {
                 Alignment dummyAlg = treeSeqSimulator.getDummyAlignment(taxa);
                 Tree tree = treeSeqSimulator.getRandomTree(popSize, dummyAlg, taxa, dates);
@@ -256,7 +252,7 @@ public class TreeSeqSimulator {
 
                 XMLProducer producer = new XMLProducer();
                 String sXML = producer.toRawXML(alignment);
-                out.println(sXML);
+//                out.println(sXML);
 
                 outFile.println(sXML);
 
