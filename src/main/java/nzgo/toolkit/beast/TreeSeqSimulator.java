@@ -245,8 +245,8 @@ public class TreeSeqSimulator {
                 Alignment dummyAlg = treeSeqSimulator.getDummyAlignment(taxa);
                 Tree tree = treeSeqSimulator.getRandomTree(popSize, dummyAlg, taxa, dates);
 
-                out.println("tree " + id + " = " + tree.toString());
-                outTreeFile.println("tree " + id + " = " + tree.toString());
+//                out.println("tree " + id + " = " + tree.toString());
+                outTreeFile.println("tree " + id + " = " + tree.getRoot().toNewick(false));
 
                 SiteModel siteModel = treeSeqSimulator.getSiteModel(dummyAlg, mutationRate, kappa, gammaShape);
                 BranchRateModel branchRateModel = treeSeqSimulator.getBranchModel(clockRate);
