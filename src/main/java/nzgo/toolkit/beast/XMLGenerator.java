@@ -16,7 +16,7 @@ public class XMLGenerator {
 
     private static final String chainLength = "5000000";
     private static final String logEvery = "50000";
-    private static final String fileName = "40g10k6t.log";
+    private static final String fileName = "10k6t.log";
 
     public XMLGenerator() { }
 

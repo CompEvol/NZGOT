@@ -36,8 +36,10 @@ public class TreeSeqSimulator {
     private final static PrintStream out = System.out;
     private final static String traitName = "date-backward";
     private static final int SEQUENCE_LENGTH = 10000;
-    private static final int NUM_GENES = 3;
-    private static final String OUT_FILE_PREFIX = NUM_GENES + "g10k6t";
+    private static final int NUM_GENES = 10;
+    private static final String OUT_FILE_PREFIX = "sim" + NUM_GENES + "g10k6t";
+
+    private static final int replicates = 100;
 
     private static StringBuilder traitSB;
 
@@ -145,7 +147,9 @@ public class TreeSeqSimulator {
         double kappa = 5.1183;
         double gammaShape = 0.0256;
 
-        createXML(workPath, OUT_FILE_PREFIX + "0sim.xml", genes, SEQUENCE_LENGTH, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
+        for (int r=0; r<replicates; r++) {
+            createXML(workPath, OUT_FILE_PREFIX + "0-" + r + ".xml", genes, SEQUENCE_LENGTH, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
+        }
 
         //====== 3rd simulation
         //403gene6t716
@@ -157,7 +161,9 @@ public class TreeSeqSimulator {
         kappa = 5.2662;
         gammaShape = 0.0245;
 
-        createXML(workPath, OUT_FILE_PREFIX + "716sim.xml", genes, SEQUENCE_LENGTH, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
+        for (int r=0; r<replicates; r++) {
+            createXML(workPath, OUT_FILE_PREFIX + "716-" + r + ".xml", genes, SEQUENCE_LENGTH, popSize, taxa, dates, clockRate, mutationRate, kappa, gammaShape);
+        }
     } // main
 
     // create xml
