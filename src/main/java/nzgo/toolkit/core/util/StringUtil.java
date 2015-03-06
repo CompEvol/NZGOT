@@ -1,5 +1,8 @@
 package nzgo.toolkit.core.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * StringUtil
  * @author Walter Xie
@@ -30,5 +33,14 @@ public class StringUtil {
                 return true;
         }
         return false;
+    }
+
+    public static String substringBetween(String wholeStr, String subStr1, String subStr2) {
+        Pattern pattern = Pattern.compile(subStr1 + "(.*?)" + subStr2);
+        Matcher matcher = pattern.matcher(wholeStr);
+        matcher.find();
+//        while (matcher.find()) { //TODO multi-match
+            return matcher.group(1);
+//        }
     }
 }
