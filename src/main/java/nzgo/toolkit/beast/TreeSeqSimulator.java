@@ -33,13 +33,14 @@ import java.util.List;
  */
 public class TreeSeqSimulator {
 
-    private final static PrintStream out = System.out;
-    private final static String traitName = "date-backward";
+    private static final PrintStream out = System.out;
+    private static final String traitName = "date-backward";
     private static final int SEQUENCE_LENGTH = 10000;
     private static final int NUM_GENES = 10;
     private static final String OUT_FILE_PREFIX = "sim" + NUM_GENES + "g10k6t";
-
     private static final int replicates = 100;
+
+    private static final XMLGenerator.TREE_PRIOR treePrior = XMLGenerator.TREE_PRIOR.ConstantPopulation;
 
     private static StringBuilder traitSB;
 
@@ -194,7 +195,9 @@ public class TreeSeqSimulator {
 
         // print head
         assert outFile != null;
-        outFile.println(XMLGenerator.getBeastHead());
+
+        XMLGenerator xmlGenerator = new XMLGenerator(treePrior);
+        outFile.println(xmlGenerator.getBeastHead());
 
         // print data
         for (String id : genes) {
@@ -226,7 +229,7 @@ public class TreeSeqSimulator {
         outTreeFile.flush();
         outTreeFile.close();
 
-        XMLGenerator.createXML(outFile, genes, traitSB.toString(), traitName);
+        xmlGenerator.createXML(outFile, genes, traitSB.toString(), traitName);
 
         outFile.flush();
         outFile.close();
