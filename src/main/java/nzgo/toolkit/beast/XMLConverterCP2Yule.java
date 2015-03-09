@@ -1,6 +1,5 @@
 package nzgo.toolkit.beast;
 
-import nzgo.toolkit.beast.XMLGenerator.TREE_PRIOR;
 import nzgo.toolkit.core.util.StringUtil;
 
 import java.io.BufferedReader;
@@ -12,7 +11,6 @@ import java.io.IOException;
  * @author Walter Xie
  */
 public class XMLConverterCP2Yule extends XMLConverter{
-    private static final TREE_PRIOR treePrior = TREE_PRIOR.Yule;
 
     private static final int NUM_GENES = 10;
     private static final String FILE_PREFIX = "sim" + NUM_GENES + "g10k6t";
@@ -27,12 +25,12 @@ public class XMLConverterCP2Yule extends XMLConverter{
         String sourcePath = "C:\\Beast2\\Adelie\\simulation\\ConstantPopulation\\" + NUM_GENES + "g0";
         String targetPath = "C:\\Beast2\\Adelie\\simulation\\Yule\\" + NUM_GENES + "g0";
         String filePrefix = FILE_PREFIX + "0-";
-        xmlConverter.batchConvertXML(sourcePath, targetPath, filePrefix, replicates);
+        xmlConverter.batchConvertXML(sourcePath, targetPath, filePrefix, filePrefix.replace("sim", "yule"), replicates);
 
         sourcePath = "C:\\Beast2\\Adelie\\simulation\\ConstantPopulation\\" + NUM_GENES + "g716";
         targetPath = "C:\\Beast2\\Adelie\\simulation\\Yule\\" + NUM_GENES + "g716";
         filePrefix = FILE_PREFIX + "716-";
-        xmlConverter.batchConvertXML(sourcePath, targetPath, filePrefix, replicates);
+        xmlConverter.batchConvertXML(sourcePath, targetPath, filePrefix, filePrefix.replace("sim", "yule"), replicates);
     } // main
 
     protected String replaceFrom(final BufferedReader reader) throws IOException {

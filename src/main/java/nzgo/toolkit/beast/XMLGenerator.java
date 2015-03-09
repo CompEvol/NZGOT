@@ -254,7 +254,8 @@ public class XMLGenerator {
     private String getPriors(String firstId){
         return "\t\t\t\t<prior id=\"ClockPrior.c:" + firstId + "\" name=\"distribution\"\n" +
               "\t\t\t\t\t\tx=\"@clockRate.c:" + firstId + "\">\n" +
-              "\t\t\t\t\t<Uniform id=\"Uniform.0\" name=\"distr\" upper=\"Infinity\"/>\n" +
+              "\t\t\t\t\t<Uniform id=\"Uniform.0\" name=\"distr\" upper=\"1\"/>\n" +
+//              "\t\t\t\t\t<OneOnX id=\"OneOnX.1\" name=\"distr\"/>\n" +
               "\t\t\t\t</prior>\n" +
               "\t\t\t\t<prior id=\"GammaShapePrior.s:" + firstId + "\" name=\"distribution\"\n" +
               "\t\t\t\t\t\tx=\"@gammaShape.s:" + firstId + "\">\n" +

@@ -17,10 +17,10 @@ import java.nio.file.Paths;
 public abstract class XMLConverter {
     public XMLConverter() { }
 
-    protected void batchConvertXML(String sourcePath, String targetPath, String filePrefix, int replicates){
+    protected void batchConvertXML(String sourcePath, String targetPath, String sFilePrefix, String tFilePrefix, int replicates){
         for (int r=0; r<replicates; r++) {
             // source
-            Path inPath = Paths.get(sourcePath, filePrefix + r + ".xml"); // 403gene6t0sim.xml, 403gene6t716sim.xml
+            Path inPath = Paths.get(sourcePath, sFilePrefix + r + ".xml");
             BufferedReader reader = null;
             try {
                 reader = Files.newBufferedReader(inPath, Charset.defaultCharset());
@@ -29,7 +29,7 @@ public abstract class XMLConverter {
             }
 
             // target
-            Path outPath = Paths.get(targetPath, filePrefix.replace("sim", "yule") + r + ".xml");
+            Path outPath = Paths.get(targetPath, tFilePrefix + r + ".xml");
             PrintStream out = null;
             try {
                 out = new PrintStream(outPath.toFile());
