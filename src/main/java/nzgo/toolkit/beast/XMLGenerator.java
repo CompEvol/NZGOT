@@ -18,10 +18,11 @@ public class XMLGenerator {
     private static final String chainLength = "3000000";
     private static final String logEvery = "30000";
     private static final String fileName = "10k6t.log";
+    private final TREE_PRIOR treePrior;
+    private double popSize = 300000;
 
     public enum TREE_PRIOR{ConstantPopulation, Yule};
 
-    private final TREE_PRIOR treePrior;
 
     public XMLGenerator(TREE_PRIOR treePrior) {
         this.treePrior = treePrior;
@@ -55,6 +56,11 @@ public class XMLGenerator {
 
     // No Head No Data
     public void createXML(PrintStream out, String[] ids, String traits, String traitName){
+        createXML(out, ids, null, null, traits, traitName);
+    }
+
+    public void createXML(PrintStream out, String[] ids, String traits, String traitName, double popSize){
+        this.popSize = popSize;
         createXML(out, ids, null, null, traits, traitName);
     }
 
@@ -205,7 +211,7 @@ public class XMLGenerator {
               "\t\t\t<parameter id=\"kappa.s:" + firstId + "\" lower=\"0.0\" name=\"stateNode\">2.0</parameter>\n" +
               "\t\t\t<parameter id=\"gammaShape.s:" + firstId + "\" name=\"stateNode\">0.5</parameter>\n" +
               (treePrior == TREE_PRIOR.ConstantPopulation ?
-                    "\t\t\t<parameter id=\"popSize.t:" + firstId + "\" name=\"stateNode\">300000.0</parameter>\n" :
+                    "\t\t\t<parameter id=\"popSize.t:" + firstId + "\" name=\"stateNode\">" + popSize + "</parameter>\n" :
                     "\t\t\t<parameter id=\"birthRate.t:" + firstId + "\" name=\"stateNode\">1.0</parameter>\n") +
               "\t\t</state>\n";
     }

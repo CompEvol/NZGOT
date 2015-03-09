@@ -36,7 +36,7 @@ public class TreeSeqSimulator {
     private static final PrintStream out = System.out;
     private static final String traitName = "date-backward";
     private static final int SEQUENCE_LENGTH = 10000;
-    private static final int NUM_GENES = 10;
+    private static final int NUM_GENES = 3;
     private static final String OUT_FILE_PREFIX = "sim" + NUM_GENES + "g10k6t";
     private static final int replicates = 100;
 
@@ -229,7 +229,8 @@ public class TreeSeqSimulator {
         outTreeFile.flush();
         outTreeFile.close();
 
-        xmlGenerator.createXML(outFile, genes, traitSB.toString(), traitName);
+//        xmlGenerator.createXML(outFile, genes, traitSB.toString(), traitName);
+        xmlGenerator.createXML(outFile, genes, traitSB.toString(), traitName, popSize);
 
         outFile.flush();
         outFile.close();
