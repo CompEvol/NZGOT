@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../JEBL2/JEBL2.iml" filepath="$PROJECT_DIR$/../JEBL2/JEBL2.iml" />
       <module fileurl="file://$PROJECT_DIR$/NZGOT.iml" filepath="$PROJECT_DIR$/NZGOT.iml" />
       <module fileurl="file://$PROJECT_DIR$/../beast2/beast2.iml" filepath="$PROJECT_DIR$/../beast2/beast2.iml" />
     </modules>

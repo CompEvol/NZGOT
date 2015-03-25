@@ -169,6 +169,15 @@ public class XMLGenerator {
               "beast.evolution.substitutionmodel:beast.evolution.likelihood\" version=\"2.0\">\n\n";
     }
 
+    public String getTaxonSet(String[] taxa) {
+        String taxonset = "\t<taxonset spec=\"TaxonSet\" id=\"taxa\">\n";
+        for (String t : taxa) {
+            taxonset += "\t\t<taxon id=\"" + t + "\" spec=\"Taxon\"/>\n";
+        }
+        taxonset += "\t</taxonset>\n\n";
+        return taxonset;
+    }
+
     private String getMaps(){
         return "\t<map name=\"Uniform\">beast.math.distributions.Uniform</map>\n" +
               "\t<map name=\"Exponential\">beast.math.distributions.Exponential</map>\n" +
@@ -192,16 +201,14 @@ public class XMLGenerator {
             return  "\t\t\t<tree id=\"Tree.t:" + id + "\" name=\"stateNode\">\n" +
                   "\t\t\t\t<trait id=\"dateTrait.t:" + id + "\" spec=\"beast.evolution.tree.TraitSet\" traitname=\"" + traitName + "\">\n" +
                   "\t\t\t\t" + traits + "\n" +
-                  "\t\t\t\t\t<taxa id=\"TaxonSet." + id + "\" spec=\"TaxonSet\">\n" +
-                  "\t\t\t\t\t\t<data idref=\"" + id + "\" name=\"alignment\"/>\n" +
-                  "\t\t\t\t\t</taxa>\n" +
+                  "\t\t\t\t\t<taxa idref=\"taxa\"/>\n" +
                   "\t\t\t\t</trait>\n" +
-                  "\t\t\t\t<taxonset idref=\"TaxonSet." + id + "\"/>\n" +
+                  "\t\t\t\t<taxonset idref=\"taxa\"/>\n" +
                   "\t\t\t</tree>\n";
         } else {
             return "\t\t\t<tree id=\"Tree.t:" + id + "\" name=\"stateNode\">\n" +
                   "\t\t\t\t<trait idref=\"dateTrait.t:" + idref + "\" spec=\"beast.evolution.tree.TraitSet\" traitname=\"" + traitName + "\"/>\n" +
-                  "\t\t\t\t<taxonset idref=\"TaxonSet." + idref + "\"/>\n" +
+                  "\t\t\t\t<taxonset idref=\"taxa\"/>\n" +
                   "\t\t\t</tree>\n";
         }
     }
@@ -218,19 +225,19 @@ public class XMLGenerator {
 
     private String getRandomTree(String id, String idref) {
         if (id.contentEquals(idref)) {
-            return "\t<init estimate=\"false\" id=\"RandomTree.t:" + id + "\" initial=\"@Tree.t:" + id + "\"\n" +
-                  "\t\tspec=\"beast.evolution.tree.RandomTree\" taxa=\"@" + id + "\">\n" +
-                  "\t\t<populationModel id=\"ConstantPopulation0.t:" + id + "\" spec=\"ConstantPopulation\">\n" +
-                  "\t\t\t<parameter id=\"randomPopSize.t:" + id + "\" name=\"popSize\">300000.0</parameter>\n" +
-                  "\t\t</populationModel>\n" +
-                  "\t</init>\n";
+            return "\t\t<init estimate=\"false\" id=\"RandomTree.t:" + id + "\" initial=\"@Tree.t:" + id + "\"\n" +
+                  "\t\t\tspec=\"beast.evolution.tree.RandomTree\" taxonset=\"@taxa\">\n" +
+                  "\t\t\t<populationModel id=\"ConstantPopulation0.t:" + id + "\" spec=\"ConstantPopulation\">\n" +
+                  "\t\t\t\t<parameter id=\"randomPopSize.t:" + id + "\" name=\"popSize\">300000.0</parameter>\n" +
+                  "\t\t\t</populationModel>\n" +
+                  "\t\t</init>\n";
         } else {
-            return "\t<init estimate=\"false\" id=\"RandomTree.t:" + id + "\" initial=\"@Tree.t:" + id + "\"\n" +
-                  "\t\tspec=\"beast.evolution.tree.RandomTree\" taxa=\"@" + id + "\">\n" +
-                  "\t\t<populationModel id=\"ConstantPopulation0.t:" + id + "\" spec=\"ConstantPopulation\">\n" +
-                  "\t\t\t<parameter idref=\"randomPopSize.t:" + idref + "\" name=\"popSize\"/>\n" +
-                  "\t\t</populationModel>\n" +
-                  "\t</init>\n";
+            return "\t\t<init estimate=\"false\" id=\"RandomTree.t:" + id + "\" initial=\"@Tree.t:" + id + "\"\n" +
+                  "\t\t\tspec=\"beast.evolution.tree.RandomTree\" taxonset=\"@taxa\">\n" +
+                  "\t\t\t<populationModel id=\"ConstantPopulation0.t:" + id + "\" spec=\"ConstantPopulation\">\n" +
+                  "\t\t\t\t<parameter idref=\"randomPopSize.t:" + idref + "\" name=\"popSize\"/>\n" +
+                  "\t\t\t</populationModel>\n" +
+                  "\t\t</init>\n";
         }
     }
 
