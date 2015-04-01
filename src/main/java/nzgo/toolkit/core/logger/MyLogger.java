@@ -18,9 +18,9 @@ public class MyLogger {
     //make the constructor private so that this class cannot be instantiated
     private MyLogger(){ }
 
-    private static Logger getLogger() {
+    public static Logger getLogger() {
         if (null == LOGGER) {
-            Level level = Level.FINER;
+            Level level = Level.FINER; // Level.INFO; // for release //
             LOGGER = Logger.getLogger(MyLogger.class.getName());
             LOGGER.setLevel(level);
             LOGGER.setUseParentHandlers(false);
