@@ -5,8 +5,10 @@ package nzgo.toolkit.core.naming;
  * @author Walter Xie
  */
 public class SiteNameParser extends NameParser {
-    // such as >IDME8NK01BSVYW|CO1-soilkit|8-I|prep1;size=60863;
+    // >IDME8NK01BSVYW|CO1-soilkit|8-I|prep1;size=60863;
     public static final int LABEL_SAMPLE_INDEX = 2;
+    // SRR1720793.280;size=1749;
+    public static final int SRR_LABEL_SAMPLE_INDEX = 0;
 
     // the sampling location parsed is determined by siteType
     // e.g. 454 soil data: by subplot is 2-C and 2-N, by plot is 2
@@ -27,11 +29,14 @@ public class SiteNameParser extends NameParser {
     // mostly use for sequences annotation (*.fasta)
     // eg IDME8NK01ETVXF|DirectSoil|LB1-A
     public SiteNameParser(String siteType, int labelSampleId) {
-        super("\\|", "-");
+        this("\\|", "-", siteType, labelSampleId);
+    }
+
+    public SiteNameParser(String regex1, String regex2, String siteType, int labelSampleId) {
+        super(regex1, regex2);
         getSeparator(0).setSplitIndex(labelSampleId);
         this.siteType = siteType;
     }
-
 
 //    public void setSiteType(String siteType) {
 //        this.siteType = siteType;

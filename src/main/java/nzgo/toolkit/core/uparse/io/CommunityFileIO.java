@@ -133,12 +133,16 @@ public class CommunityFileIO extends OTUsFileIO {
 
     /**
      * take the annotated size from the unique sequence label to count, and save it in OTU
+     * http://drive5.com/usearch/manual/opt_uparseout.html
      *
      * 1st set siteType in siteNameParser, default to BY_PLOT
      * 2nd load reads into each OTU, and parse label to get sample array
      * 3rd set sample array, and calculate Alpha diversity for each OTU
      *
      * e.g.
+     * SRR1720793.280;size=1749;	otu	*	*	*
+     * SRR1720797.218;size=537;	match	99.7	*	SRR1720797.101
+     *
      * IPCL6BO02G2MEU|18S-combined|5-I|18S-FLX;size=23;	otu	*	*	*
      * IPCL6BO02F6OAL|18S-combined|5-I|18S-FLX;size=23;	match	99.3	*	IPCL6BO02H63PX|18S-combined|4-N|18S-FLX
      * IPCL6BO02FK1D5|18S-combined|CM30C30-N|18S-FLX;size=23;	chimera	96.3	97.7	IPCL6BO02G7N0M|18S-combined|CM30C30-L|18S-FLX(1-68)+IPCL6BO02IQUGN|18S-combined|3-N|18S-FLX(69-300)

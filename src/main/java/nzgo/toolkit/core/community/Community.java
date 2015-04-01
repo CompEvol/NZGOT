@@ -2,6 +2,7 @@ package nzgo.toolkit.core.community;
 
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.naming.NameParser;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.NameUtil;
 import nzgo.toolkit.core.naming.SiteNameParser;
@@ -9,6 +10,7 @@ import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.uparse.DereplicatedSequence;
 import nzgo.toolkit.core.uparse.io.CommunityFileIO;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
+import nzgo.toolkit.core.util.ArrayUtil;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.BufferedReader;
@@ -106,10 +108,9 @@ public class Community<E> extends OTUs<E> {
      *  @param upMappingFile
      * @param chimerasFile      chimeras filtering result after OTU clustering, if null, no this step
      * @param siteNameParser
-     * @param countSizeAnnotation
      * @param removeElements
      */
-    public Community(Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser, boolean countSizeAnnotation, final boolean removeElements) {
+    public Community(Path upMappingFile, Path chimerasFile, SiteNameParser siteNameParser, final boolean removeElements) {
         super(NameUtil.getNameNoExtension(upMappingFile.getFileName().toString()));
         this.siteNameParser = siteNameParser;
 
@@ -118,7 +119,8 @@ public class Community<E> extends OTUs<E> {
 
         TreeSet<String> sitesTS = null;
         try {
-            this.setCountSizeAnnotation(countSizeAnnotation);
+            // must count annotated size for UP
+            this.setCountSizeAnnotation(true);
             sitesTS = CommunityFileIO.importCommunityFromUPFile(this, upMappingFile, chimerasFile, siteNameParser);
         } catch (IOException e) {
             e.printStackTrace();
@@ -225,6 +227,46 @@ public class Community<E> extends OTUs<E> {
         return sizeRemoved;
     }
 
+    /**
+     * replace sample name to id|gene|plot-subplot according to mapping file:
+     * SRR1706032	16S	Plot1-B	50	18	270	6.08
+     * SRR1706033	18S	Plot1-B	50	18	270	6.08
+     * SRR1706034	COI	Plot1-B	50	18	270	6.08
+     *
+     * @param mappingFilePath
+     */
+    public void replaceSiteNames(Path mappingFilePath, NameParser lineParser) throws IOException {
+        final int GENE_COL_INDEX = 2;
+        final int SAMPLE_COL_INDEX = 1;
+        BufferedReader reader = FileIO.getReader(mappingFilePath, "SRA runs mapping table");
+
+        int replaced = 0;
+        String gene = null;
+        String line = reader.readLine();
+        while (line != null) {
+            String[] items = lineParser.getSeparator(0).parse(line);
+            if (items.length < 3)
+                throw new IllegalArgumentException("Invalid SRA mapping file format at line = " + line);
+
+            int sitesIndex = ArrayUtil.indexOf(items[0], sites);
+            if (sitesIndex >= 0) {
+                sites[sitesIndex] = items[SAMPLE_COL_INDEX];
+                replaced++;
+
+                if (gene == null) {
+                    gene = items[GENE_COL_INDEX];
+                } else if (!gene.equalsIgnoreCase(items[GENE_COL_INDEX])) {
+                    MyLogger.error("Find inconsistent name in column " + GENE_COL_INDEX+1 + ", " + gene + " != " + items[GENE_COL_INDEX]);
+                }
+            }
+
+            line = reader.readLine();
+        }
+        reader.close();
+
+        MyLogger.debug("Replaced "  + replaced + " sample names given " + mappingFilePath.getFileName());
+    }
+
     public int getChimerasRemoved() {
         return chimerasRemoved;
     }
@@ -276,7 +318,7 @@ public class Community<E> extends OTUs<E> {
                     Path otuMappingFile = Paths.get(otusPath.toString(), otuMappingFileName);
                     Path chimerasFile = null;//Paths.get(otusPath.toString(), chimerasFileName);
                     SiteNameParser siteNameParser = new SiteNameParser();
-                    Community community = new Community(otuMappingFile, chimerasFile, siteNameParser, countSizeAnnotation, removeElements);
+                    Community community = new Community(otuMappingFile, chimerasFile, siteNameParser, removeElements);
 
                     Path outCMFilePath = Paths.get(otusPath.toString(), experiment + "_" + thre + cmFileName);
                     row = CommunityFileIO.writeCommunityMatrix(outCMFilePath, community);
