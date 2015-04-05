@@ -64,7 +64,7 @@ public class Community<E> extends OTUs<E> {
      * @param removeElements                 if true, then clear elementsSet
      */
     public Community(Path mappingFile, SiteNameParser siteNameParser, boolean countSizeAnnotation, final boolean removeElements) {
-        super(NameUtil.getNameNoExtension(mappingFile.getFileName().toString()));
+        super(mappingFile.getFileName().toString());
         this.siteNameParser = siteNameParser;
 
         if (mappingFile == null)
@@ -264,7 +264,7 @@ public class Community<E> extends OTUs<E> {
         }
         reader.close();
 
-        MyLogger.debug("Replaced "  + replaced + " sample names given " + mappingFilePath.getFileName());
+        MyLogger.info("Replaced "  + replaced + " sample names given " + mappingFilePath.getFileName());
     }
 
     public int getChimerasRemoved() {

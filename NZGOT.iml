@@ -9,7 +9,8 @@
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="beast2" exported="" />
     <orderEntry type="library" exported="" name="lib-NZGOT" level="project" />
+    <orderEntry type="module" module-name="BEAST2" exported="" />
   </component>
 </module>
+
