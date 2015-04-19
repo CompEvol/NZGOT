@@ -67,7 +67,7 @@ public class DenoiserCheck extends Module {
                 int correctedSite = 0;
                 for (int j = 0; j < sequence1.getLength(); j++) {
                     State state1 = sequence1.getState(j);
-                    State state2 = sequence1.getState(j);
+                    State state2 = sequence2.getState(j);
 
                     if (state1.compareTo(state2) != 0) {
                         correctedSite++;
