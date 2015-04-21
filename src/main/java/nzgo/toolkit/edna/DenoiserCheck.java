@@ -43,7 +43,7 @@ public class DenoiserCheck extends Module {
         Path working = module.init(arguments, args);
         // input
         String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.SUFFIX_FASTA);
+        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ);
 
         // output
         String inputFileName2 = arguments.getStringOption("comp");
@@ -55,27 +55,30 @@ public class DenoiserCheck extends Module {
             List<Sequence> sequenceList2 = SequenceFileIO.importNucleotideSequences(inputFile2);
 
             System.out.println("File 1 has " + sequenceList1.size() + " sequences, and file 2 has " + sequenceList2.size() + " sequences.");
-            assert sequenceList1.size() == sequenceList2.size();
+//            assert sequenceList1.size() == sequenceList2.size();
 
-            for (int i = 0; i < sequenceList1.size(); i++) {
-                Sequence sequence1 = sequenceList1.get(i);
+            for (int i = 0; i < sequenceList2.size(); i++) {
                 Sequence sequence2 = sequenceList2.get(i);
 
-                assert sequence1.getTaxon().getName().equalsIgnoreCase(sequence2.getTaxon().getName());
-                assert sequence1.getLength() == sequence2.getLength();
+                for (int j = 0; j < sequenceList1.size(); j++) {
+                    Sequence sequence1 = sequenceList1.get(i);
 
-                int correctedSite = 0;
-                for (int j = 0; j < sequence1.getLength(); j++) {
-                    State state1 = sequence1.getState(j);
-                    State state2 = sequence2.getState(j);
+                    if (sequence1.getTaxon().getName().equalsIgnoreCase(sequence2.getTaxon().getName())) {
+                        assert sequence1.getLength() == sequence2.getLength();
 
-                    if (state1.compareTo(state2) != 0) {
-                        correctedSite++;
+                        int correctedSite = 0;
+                        for (int s = 0; s < sequence1.getLength(); s++) {
+                            State state1 = sequence1.getState(s);
+                            State state2 = sequence2.getState(s);
+
+                            if (state1.compareTo(state2) != 0) {
+                                correctedSite++;
+                            }
+                        }
+
+                        if (correctedSite > 0) totalCorrected++;
                     }
                 }
-
-                if (correctedSite >0) totalCorrected++;
-
 //                System.out.println(sequence1.getTaxon().getName() + " has " + corrected + " sites corrected.");
             }
 

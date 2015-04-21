@@ -3,8 +3,10 @@ package nzgo.toolkit.core.io;
 import jebl.evolution.io.FastaExporter;
 import jebl.evolution.io.FastaImporter;
 import jebl.evolution.io.ImportException;
+import jebl.evolution.sequences.BasicSequence;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
+import jebl.evolution.taxa.Taxon;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.AssemblerUtil;
 import nzgo.toolkit.core.naming.NameSpace;
@@ -31,9 +33,31 @@ import java.util.List;
 public class SequenceFileIO extends FileIO {
 
     public static List<Sequence> importNucleotideSequences (Path sequenceFile) throws IOException, ImportException {
-        FastaImporter sequenceImporter = new FastaImporter(sequenceFile.toFile() , SequenceType.NUCLEOTIDE);
+        MyLogger.info("\nimport sequences from " + sequenceFile);
 
-        return sequenceImporter.importSequences();
+        if (sequenceFile.toString().endsWith(NameSpace.SUFFIX_FASTA)) {
+            FastaImporter sequenceImporter = new FastaImporter(sequenceFile.toFile(), SequenceType.NUCLEOTIDE);
+            return sequenceImporter.importSequences();
+        } else {
+            List<Sequence> sequenceList = new ArrayList<>();
+
+            BufferedReader reader = getReader(sequenceFile, null);
+            String line = reader.readLine();
+            Long nLine = 0L;
+            while (line != null) {
+                if (nLine%4==0) { // cannot use "@" or "+" or ">" as keyword
+                    String label = line.substring(1);
+                    line = reader.readLine();
+                    Sequence sequence = new BasicSequence(SequenceType.NUCLEOTIDE, Taxon.getTaxon(label), line);
+                    sequenceList.add(sequence);
+                }
+                line = reader.readLine();
+                nLine++;
+            }
+            reader.close();
+            MyLogger.debug("There are " + nLine + " lines in the fastq file.");
+            return sequenceList;
+        }
     }
 
     public static List<String> importFastaLabelOnly (Path sequenceFile) throws IOException {
