@@ -5,8 +5,10 @@ import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.State;
 import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.io.SequenceFileIO;
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.util.StatUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -55,19 +57,21 @@ public class DenoiserCheck extends Module {
             List<Sequence> sequenceList2 = SequenceFileIO.importNucleotideSequences(inputFile2);
 
             System.out.println("File 1 has " + sequenceList1.size() + " sequences, and file 2 has " + sequenceList2.size() + " sequences.");
-//            assert sequenceList1.size() == sequenceList2.size();
 
             for (int i = 0; i < sequenceList2.size(); i++) {
                 Sequence sequence2 = sequenceList2.get(i);
 
                 for (int j = 0; j < sequenceList1.size(); j++) {
-                    Sequence sequence1 = sequenceList1.get(i);
+                    Sequence sequence1 = sequenceList1.get(j);
 
-                    if (sequence1.getTaxon().getName().equalsIgnoreCase(sequence2.getTaxon().getName())) {
-                        assert sequence1.getLength() == sequence2.getLength();
+                    String name1 = sequence1.getTaxon().getName();
+                    String name2 = sequence2.getTaxon().getName();
 
+                    // JBEL FastaImporter trim label after space
+                    if (name1.equalsIgnoreCase(name2) || name1.contains(name2) || name2.contains(name1)) {
                         int correctedSite = 0;
-                        for (int s = 0; s < sequence1.getLength(); s++) {
+                        int minLength = StatUtil.min(sequence1.getLength(), sequence2.getLength());
+                        for (int s = 0; s < minLength; s++) {
                             State state1 = sequence1.getState(s);
                             State state2 = sequence2.getState(s);
 
@@ -77,12 +81,15 @@ public class DenoiserCheck extends Module {
                         }
 
                         if (correctedSite > 0) totalCorrected++;
+
+                        MyLogger.debug(sequence1.getTaxon().getName() + " length " + sequence1.getLength() + " and " +
+                                sequence2.getTaxon().getName() + " length " + sequence2.getLength() + " has "
+                                + totalCorrected + " sites different in the overlapped part.");
                     }
                 }
-//                System.out.println(sequence1.getTaxon().getName() + " has " + corrected + " sites corrected.");
             }
 
-            System.out.println("There are total " + totalCorrected + " sequences corrected.");
+            MyLogger.info("There are total " + totalCorrected + " sequences corrected.");
         } catch (IOException | ImportException e) {
             e.printStackTrace();
         }

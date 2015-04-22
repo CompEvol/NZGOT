@@ -33,9 +33,11 @@ import java.util.List;
 public class SequenceFileIO extends FileIO {
 
     public static List<Sequence> importNucleotideSequences (Path sequenceFile) throws IOException, ImportException {
+        boolean isFasta = sequenceFile.toString().endsWith(NameSpace.SUFFIX_FASTA);
+
         MyLogger.info("\nimport sequences from " + sequenceFile);
 
-        if (sequenceFile.toString().endsWith(NameSpace.SUFFIX_FASTA)) {
+        if (isFasta) {
             FastaImporter sequenceImporter = new FastaImporter(sequenceFile.toFile(), SequenceType.NUCLEOTIDE);
             return sequenceImporter.importSequences();
         } else {
@@ -44,10 +46,12 @@ public class SequenceFileIO extends FileIO {
             BufferedReader reader = getReader(sequenceFile, null);
             String line = reader.readLine();
             Long nLine = 0L;
+
             while (line != null) {
-                if (nLine%4==0) { // cannot use "@" or "+" or ">" as keyword
+                if (nLine % 4 == 0) { // cannot use "@" or "+" or ">" as keyword
                     String label = line.substring(1);
                     line = reader.readLine();
+                    nLine++;
                     Sequence sequence = new BasicSequence(SequenceType.NUCLEOTIDE, Taxon.getTaxon(label), line);
                     sequenceList.add(sequence);
                 }
@@ -55,7 +59,8 @@ public class SequenceFileIO extends FileIO {
                 nLine++;
             }
             reader.close();
-            MyLogger.debug("There are " + nLine + " lines in the fastq file.");
+
+            MyLogger.debug("There are " + nLine + " lines in fastq file.");
             return sequenceList;
         }
     }
@@ -106,7 +111,7 @@ public class SequenceFileIO extends FileIO {
      * @throws IOException
      */
     public static List<DereplicatedSequence> importDereplicatedSequences (Path sequenceFile, boolean importSequence,
-                               boolean removeSizeAnnotation) throws IOException {
+                                                                          boolean removeSizeAnnotation) throws IOException {
 
         List<DereplicatedSequence> dereplicatedSequences = new ArrayList<>();
 
