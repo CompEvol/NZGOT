@@ -67,8 +67,12 @@ public class DenoiserCheck extends Module {
                     String name1 = sequence1.getTaxon().getName();
                     String name2 = sequence2.getTaxon().getName();
 
+                    // e.g. SRR1720797.5807 5807 length=538
+                    if (name1.indexOf(" ") > 0) name1 = name1.substring(0, name1.indexOf(" "));
+                    if (name2.indexOf(" ") > 0) name2 = name2.substring(0, name2.indexOf(" "));
+
                     // JBEL FastaImporter trim label after space
-                    if (name1.equalsIgnoreCase(name2) || name1.contains(name2) || name2.contains(name1)) {
+                    if (name1.equalsIgnoreCase(name2)) {
                         int correctedSite = 0;
                         int minLength = StatUtil.min(sequence1.getLength(), sequence2.getLength());
                         for (int s = 0; s < minLength; s++) {
@@ -82,9 +86,9 @@ public class DenoiserCheck extends Module {
 
                         if (correctedSite > 0) totalCorrected++;
 
-                        MyLogger.debug(sequence1.getTaxon().getName() + " length " + sequence1.getLength() + " and " +
-                                sequence2.getTaxon().getName() + " length " + sequence2.getLength() + " has "
-                                + totalCorrected + " sites different in the overlapped part.");
+                        MyLogger.debug(totalCorrected + " sites different between " +
+                                sequence1.getTaxon().getName() + " (length=" + sequence1.getLength() + ") and " +
+                                sequence2.getTaxon().getName() + " (length=" + sequence2.getLength() + ") in overlap.");
                     }
                 }
             }
