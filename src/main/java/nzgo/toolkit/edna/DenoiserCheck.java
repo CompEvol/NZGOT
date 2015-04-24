@@ -86,7 +86,7 @@ public class DenoiserCheck extends Module {
 
                         if (correctedSite > 0) totalCorrected++;
 
-                        MyLogger.debug(totalCorrected + " sites different between " +
+                        MyLogger.debug(correctedSite + " sites different between " +
                                 sequence1.getTaxon().getName() + " (length=" + sequence1.getLength() + ") and " +
                                 sequence2.getTaxon().getName() + " (length=" + sequence2.getLength() + ") in overlap.");
                     }
