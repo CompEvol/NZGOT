@@ -32,6 +32,27 @@ import java.util.List;
  */
 public class SequenceFileIO extends FileIO {
 
+    public static List<String> importFastqGzLabelOnly (Path sequenceFile, String desc) throws IOException {
+        List<String> labels = new ArrayList<>();
+
+        BufferedReader reader = FileIO.getReaderGZIP(sequenceFile, desc);
+
+        long lineNum = 0;
+        String line = reader.readLine();
+        while (line != null) {
+            if (lineNum % 4 == 0) {
+                String label = line.substring(1);
+                labels.add(label);
+            }
+
+            line = reader.readLine();
+            lineNum++;
+        }
+        reader.close();
+        MyLogger.debug("\nimport " + labels.size() + " sequences");
+        return labels;
+    }
+
     public static List<Sequence> importNucleotideSequences (Path sequenceFile) throws IOException, ImportException {
         boolean isFasta = sequenceFile.toString().endsWith(NameSpace.SUFFIX_FASTA);
 

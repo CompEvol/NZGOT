@@ -7,6 +7,8 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * file FileIO
@@ -43,9 +45,37 @@ public class FileIO {
     }
 
     // java 1.7
+    public static BufferedReader getReaderGZIP(Path path, String desc) throws IOException {
+
+        InputStream fileStream = new FileInputStream(path.toString());
+        InputStream gzipStream = new GZIPInputStream(fileStream);
+        Reader decoder = new InputStreamReader(gzipStream); //, encoding);
+
+        BufferedReader reader = new BufferedReader(decoder);
+
+        if (desc != null)
+            MyLogger.info("\nImport " + desc + " file: " + path);
+
+        return reader;
+    }
+
+    // java 1.7
     public static BufferedWriter getWriter(Path path, String desc) throws IOException {
 
         BufferedWriter writer = Files.newBufferedWriter(path, Charset.defaultCharset());
+
+        if (desc != null)
+            MyLogger.info("\nOutput " + desc + " file: " + path);
+
+        return writer;
+    }
+
+    // java 1.7
+    public static BufferedWriter getWriterGZIP(Path path, String desc) throws IOException {
+
+        GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(path.toFile()));
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zip, Charset.defaultCharset()));
 
         if (desc != null)
             MyLogger.info("\nOutput " + desc + " file: " + path);
@@ -74,7 +104,5 @@ public class FileIO {
 
         return out;
     }
-
-
 
 }

@@ -16,10 +16,9 @@ import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -145,6 +144,7 @@ public class SequenceUtil {
             if (line.startsWith(">")) {
                 String label = line.substring(1);
                 String item = siteNameParser.getSiteFullName(label);
+                item = NameUtil.getNameNoExtension(item); // SRR1706107.16107|8779
 
                 if (outMap.containsKey(item)) {
                     out = outMap.get(item);
@@ -301,7 +301,7 @@ public class SequenceUtil {
 
         BufferedReader reader = OTUsFileIO.getReader(inFastqFilePath, "original file");
 
-        int lineNum = 0;
+        long lineNum = 0;
         int total = 0;
         String line = reader.readLine();
         PrintStream out = null;
@@ -352,7 +352,7 @@ public class SequenceUtil {
      * @param removeLengthSmallerThan    remove sequence length smaller than given number, 0 will keep all empty sequences
      * @throws IOException
      */
-    public static void renameIdentifierInFastAOrQ(String workPathString, String inFileName, String regex, String replacement, int removeLengthSmallerThan) throws IOException {
+    public static void renameIdFastAOrQ(String workPathString, String inFileName, String regex, String replacement, int removeLengthSmallerThan) throws IOException {
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ);
 
@@ -399,18 +399,130 @@ public class SequenceUtil {
         MyLogger.debug("total lines = " + l + ", removed sequences = " + removed);
     }
 
+    //fastqToSplit >= fastqToMath
+    // make QIIME split_libraries_fastq.py work with FLASH
+    public static void splitFastqGzByMatchedLabel(String workPathString, String fastqToSplit, String fastqToMath) throws IOException {
+        Path file1 = Module.validateInputFile(Paths.get(workPathString), fastqToSplit,
+                "original file", NameSpace.SUFFIX_GZ);
+        Path file2 = Module.validateInputFile(Paths.get(workPathString), fastqToMath,
+                "original file", NameSpace.SUFFIX_GZ);
+
+        BufferedReader readerToSplit = FileIO.getReaderGZIP(file1, "fastq to split");
+
+        List<String> matchedLabels = SequenceFileIO.importFastqGzLabelOnly(file2, "fastq to match");
+        MyLogger.debug("sequences to match = " + matchedLabels.size());
+
+        // NameUtil.getNameNoExtension(*.fastq.gz) = *.fastq
+        Path outDiffPath = Paths.get(workPathString, "diff-" + NameUtil.getNameNoExtension(fastqToSplit) +
+                NameSpace.SUFFIX_GZ);
+        BufferedWriter writerDiff = FileIO.getWriterGZIP(outDiffPath, "sequences not matched in labels");
+        Path outSamePath = Paths.get(workPathString, "same-" + NameUtil.getNameNoExtension(fastqToSplit) +
+                NameSpace.SUFFIX_GZ);
+        BufferedWriter writerSame = FileIO.getWriterGZIP(outSamePath, "sequences matched in labels");
+
+        long lineNum = 0;
+        long diff = 0;
+        long same = 0;
+        String line = readerToSplit.readLine();
+        boolean isSame = false;
+        while (line != null) {
+            if (lineNum % 4 == 0) {
+                String label = line.substring(1);
+//                int index = matchedLabels.indexOf(label);
+                if (matchedLabels.size() > 0 && label.contentEquals(matchedLabels.get(0))) {
+//                    MyLogger.debug("index = " + index);
+                    isSame = true;
+                    same++;
+                    matchedLabels.remove(0);
+//                    MyLogger.debug("size = " + matchedLabels.size());
+                } else {
+                    isSame = false;
+                    diff++;
+                }
+            }
+
+            if (isSame) {
+                writerSame.append(line);
+                writerSame.newLine();
+            } else {
+                writerDiff.append(line);
+                writerDiff.newLine();
+            }
+            line = readerToSplit.readLine();
+            lineNum++;
+
+            // flush every 100,000 sequences
+            if (lineNum % 400000 == 0) {
+                writerSame.flush();
+                writerDiff.flush();
+                MyLogger.debug("same = " + same + ", diff = " + diff);
+            }
+        }
+
+        readerToSplit.close();
+        writerSame.flush();
+        writerDiff.flush();
+        writerSame.close();
+        writerDiff.close();
+
+        MyLogger.info("explore same sequences = " + same + ", different sequences = " + diff +
+                ", total = " + (diff+same));
+    }
+
+    public static void renameIdFastqGz(String workPathString, String inFileName, String regex, String replacement) throws IOException {
+        Path inFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+                "original file", NameSpace.SUFFIX_FASTQ_GZ);
+
+        BufferedReader reader = FileIO.getReaderGZIP(inFilePath, "identifier to rename");
+
+        // NameUtil.getNameNoExtension(*.fastq.gz) = *.fastq
+        Path outFilePath = Paths.get(workPathString, NameUtil.getNameNoExtension(NameUtil.getNameNoExtension(inFileName)) +
+                "-new" + NameSpace.SUFFIX_FASTQ_GZ);
+        BufferedWriter writer = FileIO.getWriterGZIP(outFilePath, "identifier renamed");
+
+        long lineNum = 0;
+        String line = reader.readLine();
+        while (line != null) {
+            if (lineNum % 2 == 0) {
+                line = line.replaceAll(regex, replacement);
+            }
+            writer.append(line);
+            writer.newLine();
+
+            if (lineNum % 100000 == 0) {
+                writer.flush();
+            }
+
+            line = reader.readLine();
+            lineNum++;
+        }
+        reader.close();
+        writer.flush();
+        writer.close();
+
+        MyLogger.debug("total lines = " + lineNum + ", renamed sequences = " + (lineNum/4));
+    }
+
+
     // main
     public static void main(String[] args) throws IOException{
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/SRA/bak/COI-spun");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/merged");
         MyLogger.info("\nWorking path = " + workDir);
 
-//        String inFile = "otus.fasta";//"sorted.fasta";
+        String file1 = "Undetermined_S0_L001_I1_001.fastq.gz";
+        String file2 = "out.extendedFrags.fastq.gz";
+
+//        renameIdFastqGz(workDir.toString(), file2, "_1:N:0:0", " 1:N:0:0");
+
+        splitFastqGzByMatchedLabel(workDir.toString(), file1, file2);
+
+//        String inFile = "16S.fasta";//"sorted.fasta";
 //        String regex = ".*\\|prep1.*";//".*\\|MID-.*";  //".*\\|28S.*";
 //        String regex = ".*up=chimera.*";
 //        splitFastAOrQTo2(workDir.toString(), inFastaFile, regex);
-//        splitFastaByLabelItem(workDir.toString(), inFile, SiteNameParser.LABEL_SAMPLE_INDEX);
+//        splitFastaByLabelItem(workDir.toString(), inFile, 0);
 
 //        splitFastaBySites(workDir.toString(), "otus.fasta");
 
@@ -426,16 +538,16 @@ public class SequenceUtil {
 //            splitFastqByLabelItem(workPath.toString(), experiment + NameSpace.SUFFIX_FASTQ, SiteNameParser.LABEL_SAMPLE_INDEX);
 //        }
 
-        try(DirectoryStream<Path> stream = Files.newDirectoryStream(workDir)) {
-            for(Path file : stream) {
-                if (Files.exists(file)) {
-                    String fileName = file.getFileName().toString();
-                    if (fileName.toLowerCase().endsWith(NameSpace.SUFFIX_FASTQ) && !fileName.toLowerCase().contains("-new")) {
-                        renameIdentifierInFastAOrQ(workDir.toString(), fileName, "\\|", ":", 1);
-                    }
-                }
-            }
-        }
+//        try(DirectoryStream<Path> stream = Files.newDirectoryStream(workDir)) {
+//            for(Path file : stream) {
+//                if (Files.exists(file)) {
+//                    String fileName = file.getFileName().toString();
+//                    if (fileName.toLowerCase().endsWith(NameSpace.SUFFIX_FASTQ) && !fileName.toLowerCase().contains("-new")) {
+//                        renameIdentifierInFastAOrQ(workDir.toString(), fileName, "\\|", ":", 1);
+//                    }
+//                }
+//            }
+//        }
     }
 
 }
