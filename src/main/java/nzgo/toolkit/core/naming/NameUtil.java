@@ -20,6 +20,11 @@ public class NameUtil {
         return false;
     }
 
+    public static boolean isFASTA(String fileName) {
+        return NameUtil.hasFileExtension(fileName, NameSpace.SUFFIX_FASTA) ||
+                NameUtil.hasFileExtension(fileName, NameSpace.SUFFIX_FNA);
+    }
+
     public static void validateFileExtension(String fileName, String... fileNameExtension) {
         if (!NameUtil.hasFileExtension(fileName, fileNameExtension))
             throw new IllegalArgumentException("Invalid file name extension : " + fileName);

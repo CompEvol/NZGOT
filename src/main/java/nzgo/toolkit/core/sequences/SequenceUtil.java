@@ -14,6 +14,7 @@ import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.uparse.io.OTUsFileIO;
 import nzgo.toolkit.core.util.ArrayUtil;
+import nzgo.toolkit.core.util.MapUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,9 +22,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.zip.DataFormatException;
 
 /**
  * JEBL Sequence Util
@@ -31,6 +31,10 @@ import java.util.Map;
  * @author Walter Xie
  */
 public class SequenceUtil {
+
+    public static long getNumOfSequences(long numOfLines, String fileName) {
+        return NameUtil.isFASTA(fileName) ? numOfLines / 2 : numOfLines / 4;
+    }
 
     public static void assembleSequenceLabels(List<Sequence> sequences, Assembler assembler) {
         for (int i = 0; i < sequences.size(); i++) {
@@ -130,7 +134,7 @@ public class SequenceUtil {
 
         String outputFileNameStem = NameUtil.getNameNoExtension(inFastaFilePath.toFile().getName());
 
-        int fileLimit = 100;
+        final int fileLimit = 100;
         SiteNameParser siteNameParser = new SiteNameParser(itemIndex);
         Map<String, PrintStream> outMap = new HashMap<>();
 
@@ -354,7 +358,7 @@ public class SequenceUtil {
      */
     public static void renameIdFastAOrQ(String workPathString, String inFileName, String regex, String replacement, int removeLengthSmallerThan) throws IOException {
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
-                "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ);
+                "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA, NameSpace.SUFFIX_FASTQ);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 
@@ -370,7 +374,7 @@ public class SequenceUtil {
         int removed = 0;
         String line = reader.readLine();
         while (line != null) {
-            if ( (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTA) && line.startsWith(">")) ||
+            if ( (NameUtil.isFASTA(inFileName) && line.startsWith(">")) ||
                     (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTQ) && l % 2 == 0)) {
                 String newIdentifier = line.replaceAll(regex, replacement);
                 // read line
@@ -503,6 +507,67 @@ public class SequenceUtil {
         MyLogger.debug("total lines = " + lineNum + ", renamed sequences = " + (lineNum/4));
     }
 
+    /**
+     * summarize FastA Or Q By Label which contains sample information
+     * @param workPathString
+     * @param inFileName
+     * @param regex         separator to delimit the label into String items[]
+     * @param index         index of String items[] to retrieve sample
+     * @throws IOException
+     * @throws DataFormatException
+     */
+    public static void summarizeFastAOrQByLabel(String workPathString, String inFileName, String regex, int index) throws IOException, DataFormatException {
+        Path inFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+                "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA, NameSpace.SUFFIX_FASTQ);
+
+        BufferedReader reader = FileIO.getReader(inFilePath, "for summary");
+        SortedMap<String, Integer> sampleSummary = new TreeMap<>();
+
+        final int sampleLimit = 200;
+        long lineNum = 0;
+        String line = reader.readLine();
+        while (line != null) {
+            if ( (NameUtil.isFASTA(inFileName) && line.startsWith(">")) ||
+                    (NameUtil.hasFileExtension(inFileName, NameSpace.SUFFIX_FASTQ) && lineNum % 4 == 0)) {
+
+                String label = line.substring(1);
+                String[] items = label.split(regex, -1);
+
+                if (index >= items.length)
+                    throw new DataFormatException("index " + index + " should < items.length " + items.length);
+
+                String sample = items[index];
+
+                if (sampleSummary.containsKey(sample)) {
+                    Integer v = sampleSummary.get(sample);
+                    v++;
+                    sampleSummary.put(sample,v);
+                } else {
+                    sampleSummary.put(sample, 1);
+                }
+
+                if (sampleSummary.size() > sampleLimit)
+                    throw new DataFormatException("sample size reaches the limit " + sampleLimit +
+                            ", please check your regex or index, or reset sampleLimit in the code.");
+
+            }
+
+            line = reader.readLine();
+            lineNum++;
+        }
+        reader.close();
+
+        MyLogger.debug("lines = " + lineNum + ", sequences = " + getNumOfSequences(lineNum, inFileName));
+
+        MyLogger.info(sampleSummary.size() + " samples :");
+        int total = 0;
+        // sorted by value in descending
+        for (Map.Entry<String, Integer> entry : MapUtil.entriesSortedByValues(sampleSummary, false)) {
+            MyLogger.info(entry.getKey() + "\t" + entry.getValue());
+            total += entry.getValue();
+        }
+        MyLogger.info("total sequences = " + total);
+    }
 
     // main
     public static void main(String[] args) throws IOException{
@@ -514,9 +579,18 @@ public class SequenceUtil {
         String file1 = "Undetermined_S0_L001_I1_001.fastq.gz";
         String file2 = "out.extendedFrags.fastq.gz";
 
+        String file = "slout_q20/seqs.fastq";
+
+        //@806rcbc9_3 M00598:32:000000000-A5R9N:1:1101:17145:1723 1:N:0:0 orig_bc=GTATGCGCTGTA new_bc=GTATGCGCTGTA bc_diffs=0
+        try {
+            summarizeFastAOrQByLabel(workDir.toString(), file, "_", 0);
+        } catch (DataFormatException e) {
+            e.printStackTrace();
+        }
+
 //        renameIdFastqGz(workDir.toString(), file2, "_1:N:0:0", " 1:N:0:0");
 
-        splitFastqGzByMatchedLabel(workDir.toString(), file1, file2);
+//        splitFastqGzByMatchedLabel(workDir.toString(), file1, file2);
 
 //        String inFile = "16S.fasta";//"sorted.fasta";
 //        String regex = ".*\\|prep1.*";//".*\\|MID-.*";  //".*\\|28S.*";

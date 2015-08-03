@@ -17,6 +17,7 @@ public class NameSpace {
     public static final String SUFFIX_GZ = ".gz";
     public static final String SUFFIX_FASTQ_GZ = SUFFIX_FASTQ + SUFFIX_GZ;
     public static final String SUFFIX_FASTA = ".fasta";
+    public static final String SUFFIX_FNA = ".fna";
     public static final String SUFFIX_OTUS = SUFFIX_FASTA;
     public static final String SUFFIX_MAPPING = ".m8";
     public static final String SUFFIX_UC = ".uc";
