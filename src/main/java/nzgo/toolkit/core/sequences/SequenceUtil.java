@@ -573,13 +573,13 @@ public class SequenceUtil {
     public static void main(String[] args) throws IOException{
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/merged");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/OTUs");
         MyLogger.info("\nWorking path = " + workDir);
 
         String file1 = "Undetermined_S0_L001_I1_001.fastq.gz";
         String file2 = "out.extendedFrags.fastq.gz";
 
-        String file = "slout_q20/seqs.fastq";
+        String file = "qc/postqc.fasta";
 
         //@806rcbc9_3 M00598:32:000000000-A5R9N:1:1101:17145:1723 1:N:0:0 orig_bc=GTATGCGCTGTA new_bc=GTATGCGCTGTA bc_diffs=0
         try {
