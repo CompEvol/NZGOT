@@ -7,7 +7,7 @@
                      University of Auckland
                     walter@cs.auckland.ac.nz
 
-Last updated: walter@cs.auckland.ac.nz - 25th August 2015
+Last updated: 25th August 2015
 
 
 =====
