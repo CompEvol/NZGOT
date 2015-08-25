@@ -14,11 +14,22 @@ import java.util.List;
 import static nzgo.toolkit.core.io.FileIO.getReader;
 
 /**
+ * resemble R utils
+ *
  * @author Walter Xie
  */
 public class Utils {
     public static final char comment = '#';
 
+    /**
+     *
+     * @param file           file
+     * @param sep            separator
+     * @param hasColnames    whether file contains column names in the 1st row
+     * @param hasRownames    whether file contains row names in the 1st column
+     * @param quote          remove all quotes, such as \" or \' in each line
+     * @return               DataFrame
+     */
     public static DataFrame readTable(Path file, String sep, boolean hasColnames, boolean hasRownames, String quote) {
         DataFrame dataFrame = null;
         Separator separator = new Separator(sep);
