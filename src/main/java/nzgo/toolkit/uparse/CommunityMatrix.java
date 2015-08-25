@@ -56,6 +56,7 @@ public class CommunityMatrix {
 //        Set<String> otus = new HashSet<>();
         // 1st col of up
         List<String> labels = out_up.getData(UPParser.QUERY_COLUMN_ID);
+        // separated by _, such as 806rcbc67_3069;size=19037;
         Set<String> samples = Parser.getSamples(labels, "_.*;?size=\\d+;?");
 
     }

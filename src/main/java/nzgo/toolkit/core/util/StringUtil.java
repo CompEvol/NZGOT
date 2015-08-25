@@ -11,10 +11,6 @@ import java.util.regex.Pattern;
  */
 public class StringUtil {
 
-    public static String getStringExclude(String original, String regex) {
-        return original.replaceAll(regex, "");
-    }
-
     public static String getRow(Object[] elements) {
         return getRow(elements, "\t");
     }

@@ -1,7 +1,6 @@
 package nzgo.toolkit.core.uparse;
 
 import nzgo.toolkit.core.naming.Separator;
-import nzgo.toolkit.core.util.StringUtil;
 
 import java.util.List;
 import java.util.Set;
@@ -23,7 +22,7 @@ public class Parser {
     }
 
     public static String getLabelNoSizeAnnotation(String label) {
-        return StringUtil.getStringExclude(label, REGEX_SIZE_ANNOTATION);
+        return label.replaceAll(REGEX_SIZE_ANNOTATION, "");
     }
 
     public static String getLabel(String label, boolean removeSizeAnnotation) {
@@ -34,7 +33,7 @@ public class Parser {
         Set<String> samples = new TreeSet<>();
 
         for (String label :labels) {
-            String sample = StringUtil.getStringExclude(label, regex);
+            String sample = label.replaceAll(regex, "");
             samples.add(sample);
         }
 
