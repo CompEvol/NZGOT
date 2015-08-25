@@ -1,14 +1,13 @@
-                   NZGOT v0.0.1 2013-2014
+                   NZGOT v0.1.0 2013-2015
             New Zealand Genomic Observatory Toolkit
                              by
-                Walter Xie & Alexei J. Drummond
+                         Walter Xie
 
                 Department of Computer Science
                      University of Auckland
                     walter@cs.auckland.ac.nz
-                    alexei@cs.auckland.ac.nz
 
-Last updated: walter@cs.auckland.ac.nz - 30th January 2014
+Last updated: walter@cs.auckland.ac.nz - 25th August 2015
 
 
 =====
@@ -36,24 +35,24 @@ others. Core package is always on the top of dependency, it cannot contain any c
 other packages.
 The available packages at the current version are:
 
-1) Useful tools to rename labels for sequences or tree by regular expressions
-Main package: nzgo.labelregex
+1) resemble R data frame and read.table
+Main package: nzgo.toolkit.r
 Owners: Walter Xie
 
-2) Useful tools for meta-barcoding, such as DNA sequences quality check.
-Main package: nzgo.metabarcoding
+2) useful tools to parse UPARSE pipeline outputs, and create community matrices.
+Main package: nzgo.toolkit.uparse, nzgo.toolkit.edna
 Owners: Walter Xie
 
-3) Community matrix analysis.
-Main package: nzgo.cma
-Owners: Walter Xie, Alexei Drummond
+3) useful tools to parse BLAST outputs, and taxonomic identification from NCBI.
+Main package: nzgo.core.ncbi
+Owners: Walter Xie
 
-4) Error correction tool for the next-generation sequencing data.
-Main package: nzgo.ec
+4) error correction tool for the next-generation sequencing data.
+Main package: nzgo.toolkit.ec
 Owners: Thomas Hummel, Alexei Drummond, Walter Xie
 
-5) Useful tools for BEAST 2 project.
-Main package: nzgo.beast
+5) useful tools for BEAST 2 project.
+Main package: nzgo.toolkit.beast
 Owners: Walter Xie
 
 
