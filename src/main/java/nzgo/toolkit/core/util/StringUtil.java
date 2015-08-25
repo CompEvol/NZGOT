@@ -64,4 +64,13 @@ public class StringUtil {
         }
         return matchedList;
     }
+
+
+    public static List<String> getNames(String prefix, int from, int to) {
+        List<String> names = new ArrayList<>();
+        for (int i=from; i<to; i++) {
+            names.add(prefix + Integer.toString(i));
+        }
+        return names;
+    }
 }

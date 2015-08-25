@@ -3,6 +3,10 @@ package nzgo.toolkit.core.uparse;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.util.StringUtil;
 
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 /**
  * Parse USEARCH output
  * @author Walter Xie
@@ -25,6 +29,18 @@ public class Parser {
     public static String getLabel(String label, boolean removeSizeAnnotation) {
         return removeSizeAnnotation ? getLabelNoSizeAnnotation(label) : label;
     }
+
+    public static Set<String> getSamples(List<String> labels, String regex) {
+        Set<String> samples = new TreeSet<>();
+
+        for (String label :labels) {
+            String sample = StringUtil.getStringExclude(label, regex);
+            samples.add(sample);
+        }
+
+        return samples;
+    }
+
 
     public static double getIdentity(String identity) {
         if (identity.length() > 0 && !Parser.isNA(identity))

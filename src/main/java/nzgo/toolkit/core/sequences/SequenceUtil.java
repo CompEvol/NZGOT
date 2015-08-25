@@ -52,20 +52,52 @@ public class SequenceUtil {
      * get sequence string from a list of sequences given the sequence label
      *
      * @param sequenceLabel Label of query sequence
-     * @param sequenceList  Sequence list
+     * @param sequences  Sequence list
      * @return amino acid sequence found from the list or null
      */
-    public static String getSequenceStringFrom(String sequenceLabel, List<Sequence> sequenceList) {
-
-        String seqName;
-
-        for (Sequence sequence : sequenceList) {
-            seqName = sequence.getTaxon().toString();
-            if (seqName.contentEquals(sequenceLabel))
-                return sequence.getString();
+    public static String getSequenceStringFrom(String sequenceLabel, List<Sequence> sequences) {
+        int i = indexOf(sequenceLabel, sequences);
+        if (i > -1) {
+            Sequence sequence = sequences.get(i);
+            return sequence.getString();
         }
         return null;
+    }
 
+    /**
+     *
+     * @param sequenceLabel
+     * @param sequences
+     * @return       index of sequence in the list, -1 if cannot find
+     */
+    public static int indexOf(String sequenceLabel, List<Sequence> sequences) {
+        String seqName;
+        for (int i = 0; i < sequences.size(); i++) {
+            Sequence sequence = sequences.get(i);
+            seqName = sequence.getTaxon().toString();
+            if (seqName.contentEquals(sequenceLabel))
+                return i;
+        }
+        return -1;
+    }
+
+    /**
+     * remove subset sequences from sequences
+     * @param toRemove
+     * @param sequences
+     * @return
+     */
+    public static List<Sequence> removeAllFrom(List<Sequence> toRemove, List<Sequence> sequences) {
+        List<Sequence> survivals = new ArrayList<>();
+        String seqName;
+        for (Sequence sequence : sequences) {
+            seqName = sequence.getTaxon().toString();
+            int i = indexOf(seqName, toRemove);
+            // add if not in toRemove list
+            if (i < 0)
+                survivals.add(sequence);
+        }
+        return survivals;
     }
 
     /**
@@ -246,6 +278,7 @@ public class SequenceUtil {
      * @param fileName2
      * @throws IOException
      */
+    @Deprecated
     public static void diffFastAFrom(String workPathString, String fileName1, String fileName2) throws IOException {
         Path file1 = Module.validateInputFile(Paths.get(workPathString), fileName1,
                 "original file", NameSpace.SUFFIX_FASTA);
@@ -356,7 +389,8 @@ public class SequenceUtil {
      * @param removeLengthSmallerThan    remove sequence length smaller than given number, 0 will keep all empty sequences
      * @throws IOException
      */
-    public static void renameIdFastAOrQ(String workPathString, String inFileName, String regex, String replacement, int removeLengthSmallerThan) throws IOException {
+    public static void renameIdFastAOrQ(String workPathString, String inFileName, String regex, String replacement,
+                                        int removeLengthSmallerThan) throws IOException {
         Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA, NameSpace.SUFFIX_FASTQ);
 
@@ -516,7 +550,8 @@ public class SequenceUtil {
      * @throws IOException
      * @throws DataFormatException
      */
-    public static void summarizeFastAOrQByLabel(String workPathString, String inFileName, String regex, int index) throws IOException, DataFormatException {
+    public static void summarizeFastAOrQByLabel(String workPathString, String inFileName, String regex, int index)
+            throws IOException, DataFormatException {
         Path inFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA, NameSpace.SUFFIX_FASTQ);
 
