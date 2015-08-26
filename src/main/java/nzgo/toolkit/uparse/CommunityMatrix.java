@@ -5,6 +5,7 @@ import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.Sequence;
 import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
+import nzgo.toolkit.core.math.Arithmetic;
 import nzgo.toolkit.core.r.DataFrame;
 import nzgo.toolkit.core.r.Matrix;
 import nzgo.toolkit.core.r.Utils;
@@ -17,6 +18,7 @@ import nzgo.toolkit.core.util.ArrayUtil;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +40,7 @@ public class CommunityMatrix {
     public static Matrix createCommunityMatrix(Path finalOTUsPath, Path outUpPath, Path derepUcPath) throws IOException {
         // sort samples
         final boolean sort = true;
-        final String sampleRegx = "_.*;?size=\\d+;?";
+        final String sampleRegx = "_.*";
 
         List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
         Set<String> finalOTUsSet = new HashSet<>(finalOTUs);
@@ -60,13 +62,17 @@ public class CommunityMatrix {
         communityMatrix.setColNames(samples.toArray(new String[ncol]));
         communityMatrix.setRowNames(finalOTUs.toArray(new String[nrow]));
 
+        MyLogger.info("Fill in community matrix with " + ncol + " columns " + nrow + " rows ...");
+
         for (int r = 0; r < nrow; r++) {
             // OTU representative sequence label
             String rowName = communityMatrix.getRowName(r);
             List<String> duplicateSequences = UCParser.getDuplicateSequences(rowName, derep_uc);
             duplicateSequences.add(0, rowName); // count OTU representative sequence
-            Double[] otuDupSeqCount = getOneRowCM(communityMatrix.getColNames(), duplicateSequences, sampleRegx);
+            double[] otuDupSeqCount = getOneRowCM(communityMatrix.getColNames(), duplicateSequences, sampleRegx);
             communityMatrix.addRowData(r, otuDupSeqCount);
+
+            double rowsum = Arithmetic.sum(otuDupSeqCount);
 
             // unique reads belonging to this OTU
             List<String> memberNames = UPParser.getMembers(rowName, out_up);
@@ -75,7 +81,11 @@ public class CommunityMatrix {
                 duplicateSequences.add(0, member); // count member sequence
                 otuDupSeqCount = getOneRowCM(communityMatrix.getColNames(), duplicateSequences, sampleRegx);
                 communityMatrix.addRowData(r, otuDupSeqCount);
+
+                rowsum += Arithmetic.sum(otuDupSeqCount);
             }
+
+            MyLogger.debug("Row " + r + " : " + rowName + ", sum = " + rowsum);
         }
 
         String[] summary = communityMatrix.summary();
@@ -92,14 +102,15 @@ public class CommunityMatrix {
      * @param sampleRegx   regx to extract sample name from label
      * @return
      */
-    public static Double[] getOneRowCM(String[] colNames, List<String> labels, String sampleRegx) {
+    public static double[] getOneRowCM(String[] colNames, List<String> labels, String sampleRegx) {
         final double step = 1;
-        Double[] oneRowCM = new Double[colNames.length];
+        double[] oneRowCM = new double[colNames.length];
+        Arrays.fill(oneRowCM, (double) 0);
         for (String label : labels) {
             String sampleName = Parser.getSample(label, sampleRegx);
             int colId = ArrayUtil.indexOf(sampleName, colNames);
             if (colId < 0 || colId >= colNames.length)
-                throw new IllegalArgumentException("Label " + label + " does NOT match column names ! ");
+                throw new IllegalArgumentException("Sample " + sampleName + " from label " + label + " does NOT match column names ! ");
 
             oneRowCM[colId] += step;
         }

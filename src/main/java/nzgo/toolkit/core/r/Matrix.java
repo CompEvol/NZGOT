@@ -1,6 +1,7 @@
 package nzgo.toolkit.core.r;
 
-import nzgo.toolkit.core.util.MatrixUtil;
+import nzgo.toolkit.core.math.Arithmetic;
+import nzgo.toolkit.core.math.Summary;
 import nzgo.toolkit.core.util.StringUtil;
 
 /**
@@ -12,17 +13,17 @@ import nzgo.toolkit.core.util.StringUtil;
  */
 public class Matrix {
 
-    protected Double[][] data;
+    protected double[][] data;
     protected String[] colNames;
     protected String[] rowNames;
 
     public Matrix(int nrow, int ncol) {
-        data = new Double[nrow][ncol];
+        data = new double[nrow][ncol];
         rowNames = new String[nrow];
         colNames = new String[ncol];
     }
 
-    public Matrix(Double[][] data) {
+    public Matrix(double[][] data) {
         this.data = data;
         // set row/col names later
     }
@@ -63,52 +64,44 @@ public class Matrix {
         this.rowNames = rowNames;
     }
 
-    public Double[][] getData() {
+    public double[][] getData() {
         return data;
     }
 
     // add rowData with original data[row]
-    public void addRowData(int row, Double[] rowData) {
+    public void addRowData(int row, double[] rowData) {
         assert row >= 0 && row < nrow() && rowData.length == data[row].length;
         for (int i = 0; i < rowData.length; i++)
             data[row][i] += rowData[i];
     }
 
-    public void appendRow(Double[]... rowData) {
+    public void appendRow(double[]... rowData) {
         MatrixUtil.appendRow(data, rowData);
     }
 
     public String[] summary() {
-        String[] summary = new String[6];
+        String[] summary = new String[7];
 
         summary[0] = "Matrix has " + ncol() + " columns and " + nrow() + " rows.";
         summary[1] = "Data sum = " + MatrixUtil.sum(data) + ".";
 
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
+        double[] colSums = MatrixUtil.colSums(data);
         summary[2] = "Column names (col sums) :";
-        Number[] colSums = MatrixUtil.colSums(data);
         for (int i = 0; i < colNames.length; i++) {
             summary[2] += (" " + colNames[i] + " (" + colSums[i] + "), ");
-            min = Math.min(min, colSums[i].doubleValue());
-            max = Math.min(max, colSums[i].doubleValue());
         }
         summary[2] = StringUtil.replaceLast(summary[2], ", ", ".");
-        summary[3] = "Column sums : min = " + min + ", max = " + max + ".";
+        summary[3] = "Column sums : min = " + Arithmetic.min(colSums) + ", max = " + Arithmetic.max(colSums) + ".";
 
-        int singleton = 0;
-        int coupleton = 0;
+        double[] rowSums = MatrixUtil.rowSums(data);
         summary[4] = "Row names (row sums) : ";
-        Number[] rowSums = MatrixUtil.rowSums(data);
         for (int i = 0; i < rowNames.length; i++) {
             summary[4] += (" " + rowNames[i] + " (" + rowSums[i] + "), ");
-            if (rowSums[i].doubleValue() == 1)
-                singleton++;
-            if (rowSums[i].doubleValue() == 2)
-                coupleton++;
         }
         summary[4] = StringUtil.replaceLast(summary[4], ", ", ".");
-        summary[5] = "Matrix has " + singleton + " singletons, " + coupleton + " coupletons.";
+        summary[5] = "Column sums : min = " + Arithmetic.min(rowSums) + ", max = " + Arithmetic.max(rowSums) + ".";
+
+        summary[6] = "Matrix has " + Summary.singleton(rowSums) + " singletons, " + Summary.coupleton(rowSums) + " coupletons.";
 
         return summary;
     }

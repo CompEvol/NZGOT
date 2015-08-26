@@ -82,20 +82,20 @@ public class DataFrame<T> {
         List<T> colDataEqualTo = new ArrayList<>();
         List<T> colData = getColData(col);
         List<T> colDataOfValue = getColData(colOfValue);
-        for (int i = 0; i < ncol(); i++)
+        for (int i = 0; i < colData.size(); i++)
             if (colDataOfValue.get(i).equals(value))
                 colDataEqualTo.add(colData.get(i));
 
         return colDataEqualTo;
     }
 
-    //TODO generalise
+    //TODO generalise to multi-column
     public List<T> getColDataEqualToAnd(int col, T value1, int colOfValue1, T value2, int colOfValue2) {
         List<T> colDataEqualTo = new ArrayList<>();
         List<T> colData = getColData(col);
         List<T> colDataOfValue1 = getColData(colOfValue1);
         List<T> colDataOfValue2 = getColData(colOfValue2);
-        for (int i = 0; i < ncol(); i++)
+        for (int i = 0; i < colData.size(); i++)
             if (colDataOfValue1.get(i).equals(value1) && colDataOfValue2.get(i).equals(value2))
                 colDataEqualTo.add(colData.get(i));
 
