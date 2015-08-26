@@ -61,6 +61,13 @@ public class StringUtil {
         return matchedList;
     }
 
+    // http://stackoverflow.com/questions/16665387/replace-last-occurrence-of-a-character-in-a-string
+    public static String replaceLast(String string, String substring, String replacement) {
+        int index = string.lastIndexOf(substring);
+        if (index == -1)
+            return string;
+        return string.substring(0, index) + replacement + string.substring(index+substring.length());
+    }
 
     public static List<String> getNames(String prefix, int from, int to) {
         List<String> names = new ArrayList<>();

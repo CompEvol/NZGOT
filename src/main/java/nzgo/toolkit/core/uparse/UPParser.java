@@ -1,5 +1,9 @@
 package nzgo.toolkit.core.uparse;
 
+import nzgo.toolkit.core.r.DataFrame;
+
+import java.util.List;
+
 /**
  * Output file, UPARSE tabbed format. Supported by cluster_otus and uparse_ref.
  * http://drive5.com/usearch/manual8/opt_uparseout.html
@@ -16,4 +20,7 @@ public class UPParser extends Parser {
     public static final int Identity_COLUMN_ID = 2;
     public static final int OTU_COLUMN_ID = 4;
 
+    public static List<String> getMembers(String otu, DataFrame<String> out_up) {
+        return out_up.getColDataEqualToAnd(QUERY_COLUMN_ID, OTU_MEMBER, Classification_COLUMN_ID, otu, OTU_COLUMN_ID);
+    }
 }

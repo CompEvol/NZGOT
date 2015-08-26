@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class DataFrame<T> {
 
+    // list of columns
     protected List<List<T>> data = new ArrayList<>();
     protected List<String> colNames = new ArrayList<>();
     protected List<String> rowNames = new ArrayList<>();
@@ -25,7 +26,7 @@ public class DataFrame<T> {
     public DataFrame(final List<String> colNames) {
         this.colNames = colNames;
         for (int i=0; i<colNames.size(); i++)
-            this.data.add(new ArrayList<>());
+            this.data.add(new ArrayList<T>());
     }
 
     public DataFrame(final List<String> colNames, final List<List<T>> data) {
@@ -70,9 +71,35 @@ public class DataFrame<T> {
     }
 
     // Note: use Java index to start from 0
-    public List<T> getData(int col) {
+    public List<T> getColData(int col) {
         assert col >= 0 && col < ncol();
         return data.get(col);
+    }
+
+    // get a list of values in col column in the rows,
+    // whose values in colOfValue column equal to the given value
+    public List<T> getColDataEqualTo(int col, T value, int colOfValue) {
+        List<T> colDataEqualTo = new ArrayList<>();
+        List<T> colData = getColData(col);
+        List<T> colDataOfValue = getColData(colOfValue);
+        for (int i = 0; i < ncol(); i++)
+            if (colDataOfValue.get(i).equals(value))
+                colDataEqualTo.add(colData.get(i));
+
+        return colDataEqualTo;
+    }
+
+    //TODO generalise
+    public List<T> getColDataEqualToAnd(int col, T value1, int colOfValue1, T value2, int colOfValue2) {
+        List<T> colDataEqualTo = new ArrayList<>();
+        List<T> colData = getColData(col);
+        List<T> colDataOfValue1 = getColData(colOfValue1);
+        List<T> colDataOfValue2 = getColData(colOfValue2);
+        for (int i = 0; i < ncol(); i++)
+            if (colDataOfValue1.get(i).equals(value1) && colDataOfValue2.get(i).equals(value2))
+                colDataEqualTo.add(colData.get(i));
+
+        return colDataEqualTo;
     }
 
     // Note: use Java index to start from 0
@@ -82,7 +109,6 @@ public class DataFrame<T> {
         colNames.remove(col);
         data.remove(col);
     }
-
 
     // set data after set col names
     public void setData(List<List<T>> data) {
@@ -97,10 +123,26 @@ public class DataFrame<T> {
     public void appendRow(T[] row) {
         assert row.length == colNames.size();
         rowNames.add(Integer.toString(nrow() + 1));
-        for (int i = 0; i < data.size(); i++) {
+        for (int i = 0; i < ncol(); i++) {
             List<T> colData = data.get(i);
             colData.add(row[i]);
             assert rowNames.size() == colData.size();
         }
+    }
+
+    // col == ncol() to append a new column
+    public void appendCol(int col, T value) {
+        assert col >= 0 && col <= ncol();
+        String colName = "V" + Integer.toString(col);
+        if (colNames.contains(colName))
+            colName += "_1";
+        colNames.add(colName);
+
+        this.data.add(col, new ArrayList<T>());
+        List<T> colData = data.get(col);
+        for (int i = 0; i < nrow(); i++)
+            colData.add(value); // fill default value in this column for all rows
+
+        assert rowNames.size() == colData.size();
     }
 }

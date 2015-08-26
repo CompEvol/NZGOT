@@ -1,5 +1,9 @@
 package nzgo.toolkit.core.uparse;
 
+import nzgo.toolkit.core.r.DataFrame;
+
+import java.util.List;
+
 /**
  * USEARCH cluster format (UC) is a tab-separated text file
  * http://www.drive5.com/usearch/manual/ucout.html
@@ -18,4 +22,7 @@ public class UCParser extends Parser {
     public static final int Query_Sequence_COLUMN_ID = 8;
     public static final int Target_Sequence_COLUMN_ID = 9;
 
+    public static List<String> getDuplicateSequences(String uniqueSequence, DataFrame<String> derep_uc) {
+         return derep_uc.getColDataEqualTo(Query_Sequence_COLUMN_ID, uniqueSequence, Target_Sequence_COLUMN_ID);
+    }
 }

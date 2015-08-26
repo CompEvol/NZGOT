@@ -1,7 +1,7 @@
 package nzgo.toolkit.core.naming;
 
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.util.ArrayUtil;
+import nzgo.toolkit.core.util.NumberUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -76,7 +76,7 @@ public class Command {
     public Integer[] getIndexesInCommand(String command) {
         String ids = command.substring(command.indexOf("("), command.indexOf(")"));
         String[] idArray = indexesSeparator.parse(ids);
-        return ArrayUtil.parseNumbers(idArray);
+        return NumberUtil.parseNumbers(idArray);
     }
 
     public void move(List<String> items, int from, int to) {
