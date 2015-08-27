@@ -18,6 +18,7 @@ import nzgo.toolkit.core.util.ArrayUtil;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -145,6 +146,12 @@ public class CommunityMatrix {
 
         writer.flush();
         writer.close();
+
+        Path logPath = Paths.get(cmPath.getParent().toString(), cmPath.getFileName() + ".log");
+        PrintStream log_out = FileIO.getPrintStream(logPath, "log");
+        for (String s : communityMatrix.summary())
+            log_out.println(s);
+        log_out.close();
     }
 
 
