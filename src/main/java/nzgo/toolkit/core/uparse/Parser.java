@@ -54,6 +54,15 @@ public class Parser {
         return samples;
     }
 
+    public static long getAnnotatedSize(String label) {
+        String size = label.replaceFirst(REGEX_SIZE, "$1");
+
+        if (size != null && size.length() != label.length())
+            return Long.parseLong(size);
+        else
+            return 0;
+    }
+
     // need to remove size annotation to determine if they are same label
     public static boolean isSameSequence(String label1, String label2) {
         return getLabelNoSizeAnnotation(label1).equalsIgnoreCase(getLabelNoSizeAnnotation(label2));
@@ -71,7 +80,7 @@ public class Parser {
      * @param name
      * @return
      */
-    public static int getAnnotatedSize(String name) {
+    public static int getAnnotatedSizeInt(String name) {
         String size = name.replaceFirst(REGEX_SIZE, "$1");
 
         if (size != null && size.length() != name.length())

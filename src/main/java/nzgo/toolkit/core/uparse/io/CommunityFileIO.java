@@ -85,7 +85,7 @@ public class CommunityFileIO extends OTUsFileIO {
                     String finalLabel = Parser.getLabel(fields[UCParser.Query_Sequence_COLUMN_ID], initCommunity.removeSizeAnnotation);
                     double identity = Parser.getIdentity(fields[UCParser.H_Identity_COLUMN_ID]);
                     // annotated size from dereplication
-                    int annotatedSize = Parser.getAnnotatedSize(fields[UCParser.Query_Sequence_COLUMN_ID]);
+                    int annotatedSize = Parser.getAnnotatedSizeInt(fields[UCParser.Query_Sequence_COLUMN_ID]);
 
                     if (initCommunity.containsUniqueElement(otuName)) {
                         OTU otu = initCommunity.getOTU(otuName);
@@ -187,7 +187,7 @@ public class CommunityFileIO extends OTUsFileIO {
             if (fields.length < 2) throw new IllegalArgumentException("Error: invalid mapping in the line: " + line);
 
             String querySeqLabel = fields[UPParser.QUERY_COLUMN_ID];
-            int annotatedSize = Parser.getAnnotatedSize(querySeqLabel); // annotated size from dereplication
+            int annotatedSize = Parser.getAnnotatedSizeInt(querySeqLabel); // annotated size from dereplication
             String finalLabel = Parser.getLabel(querySeqLabel, initCommunity.removeSizeAnnotation);
             OTU otu;
 

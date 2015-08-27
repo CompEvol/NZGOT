@@ -15,7 +15,7 @@ public class DereplicatedSequence extends Element {
 
     public DereplicatedSequence(String name) {
         super(name);
-        int annotatedSize = Parser.getAnnotatedSize(name);
+        int annotatedSize = Parser.getAnnotatedSizeInt(name);
         if (annotatedSize > 0) {
             setName(Parser.getLabelNoSizeAnnotation(name));
             setAnnotatedSize(annotatedSize);

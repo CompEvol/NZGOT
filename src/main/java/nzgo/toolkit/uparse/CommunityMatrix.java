@@ -51,8 +51,8 @@ public class CommunityMatrix {
         DataFrame<String> derep_uc = Utils.readTable(derepUcPath);
         DataFrame<String> out_up = Utils.readTable(outUpPath);
 
-        // 1st col of up
-        List<String> labels = out_up.getColData(UPParser.QUERY_COLUMN_ID);
+        // only derep_uc has all sample names
+        List<String> labels = derep_uc.getColData(UCParser.Query_Sequence_COLUMN_ID);
         // sample name is the 1st element separated by _, such as 806rcbc67_3069;size=19037;
         Set<String> samples = Parser.getSamples(labels, sampleRegx, sort);
 
@@ -62,7 +62,7 @@ public class CommunityMatrix {
         communityMatrix.setColNames(samples.toArray(new String[ncol]));
         communityMatrix.setRowNames(finalOTUs.toArray(new String[nrow]));
 
-        MyLogger.info("Fill in community matrix with " + ncol + " columns " + nrow + " rows ...");
+        MyLogger.info("Fill in community matrix to " + ncol + " columns " + nrow + " rows ...");
 
         for (int r = 0; r < nrow; r++) {
             // OTU representative sequence label
@@ -85,7 +85,7 @@ public class CommunityMatrix {
                 rowsum += Arithmetic.sum(otuDupSeqCount);
             }
 
-            MyLogger.debug("Row " + r + " : " + rowName + ", sum = " + rowsum);
+            MyLogger.debug("Row " + r + " : " + rowName + ", members = " + memberNames.size() + ", sum = " + rowsum);
         }
 
         String[] summary = communityMatrix.summary();

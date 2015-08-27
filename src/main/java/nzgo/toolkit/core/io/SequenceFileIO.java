@@ -151,7 +151,7 @@ public class SequenceFileIO extends FileIO {
 
                 String label = line.substring(1);
                 // get annotated size before remove it from label
-                int annotatedSize = Parser.getAnnotatedSize(label);
+                int annotatedSize = Parser.getAnnotatedSizeInt(label);
                 label = Parser.getLabel(label, removeSizeAnnotation);
 
                 ds = new DereplicatedSequence(label);
