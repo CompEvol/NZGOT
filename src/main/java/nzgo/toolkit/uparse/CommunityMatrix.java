@@ -3,6 +3,7 @@ package nzgo.toolkit.uparse;
 
 import jebl.evolution.io.ImportException;
 import jebl.evolution.sequences.Sequence;
+import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.math.Arithmetic;
@@ -15,6 +16,7 @@ import nzgo.toolkit.core.uparse.UCParser;
 import nzgo.toolkit.core.uparse.UPParser;
 import nzgo.toolkit.core.util.ArrayUtil;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -117,9 +119,32 @@ public class CommunityMatrix {
         return oneRowCM;
     }
 
-    public static void writeCommunityMatrix(Path cmPath, Matrix communityMatrix, String sep) {
+    public static void writeCommunityMatrix(Path cmPath, Matrix communityMatrix, String sep) throws IOException {
+        BufferedWriter writer = FileIO.getWriter(cmPath, "community matrix");
 
+        String[] colNames = communityMatrix.getColNames();
+        String[] rowNames = communityMatrix.getRowNames();
+        assert colNames.length == communityMatrix.ncol();
+        assert rowNames.length == communityMatrix.nrow();
 
+        double[][] data = communityMatrix.getData();
+        // col names
+        writer.write(""); // the column of row name
+        for (int c = 0; c < communityMatrix.ncol(); c++) {
+            writer.write(sep + colNames[c]);
+        }
+        writer.write("\n");
+        // main
+        for (int r = 0; r < communityMatrix.nrow(); r++) {
+            writer.write(rowNames[r]); // the column of row name
+            for (int c = 0; c < communityMatrix.ncol(); c++) {
+                writer.write(sep + data[r][c]);
+            }
+            writer.write("\n");
+        }
+
+        writer.flush();
+        writer.close();
     }
 
 
