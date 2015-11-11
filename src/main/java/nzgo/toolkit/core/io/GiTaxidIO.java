@@ -5,6 +5,8 @@ import nzgo.toolkit.core.logger.MyLogger;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Large File IO
@@ -144,12 +146,14 @@ public class GiTaxidIO extends FileIO {
 
     //Main test method
     public static void main(final String[] args) throws Exception {
-        File gi_taxid_raf_nucl = new File("/Users/dxie004/Documents/ModelEcoSystem/454/BLAST/gi_taxid_nucl.dmp");
-        GiTaxidIO giTaxidIO = new GiTaxidIO(gi_taxid_raf_nucl);
+        Path gi_taxid_raf_nucl = Paths.get(System.getProperty("user.home") + "/Projects/BLAST/gi_taxid_nucl_diff.dmp");
+        GiTaxidIO giTaxidIO = new GiTaxidIO(gi_taxid_raf_nucl.toFile());
 
         long lStartTime = System.currentTimeMillis();
 
-        String taxid = giTaxidIO.mapGIToTaxid("22535996");
+        String taxid = giTaxidIO.mapGIToTaxid("77133");
+
+        MyLogger.info("taxid = " + taxid);
 
         long lEndTime = System.currentTimeMillis();
 
