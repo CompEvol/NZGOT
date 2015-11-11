@@ -12,6 +12,15 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="beast2" exported="" />
     <orderEntry type="library" exported="" name="lib-NZGOT" level="project" />
+    <orderEntry type="module-library" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="module-library">
       <library name="Maven: beast:beast2:2">
         <CLASSES>
@@ -25,15 +34,6 @@
       <library name="Maven: jebl:jebl2:r22">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/jebl2-r22.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
