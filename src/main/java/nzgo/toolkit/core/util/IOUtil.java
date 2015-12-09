@@ -13,12 +13,27 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * IO Util
  * @author Walter Xie
  */
 public class IOUtil {
+
+    // glob = "*.{c,h,cpp,hpp,java}" or "*"
+    public static List<Path> listFiles(Path dir, String glob) throws IOException {
+        final List<Path> files = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, glob)) {
+            for (Path file : stream) {
+                if (!Files.isDirectory(file)) {
+                    files.add(file);
+                }
+            }
+        }
+        return files;
+    }
 
     // http://stackoverflow.com/questions/5930087/how-to-check-if-a-directory-is-empty-in-java
     public static boolean isDirEmpty(final Path directory) throws IOException {
