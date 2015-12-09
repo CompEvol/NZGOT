@@ -61,11 +61,11 @@ public class SequenceFileGlue {
     public static void main(final String[] args) {
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/Miyake et al Reef Fish/");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/Miyake454/");
         MyLogger.info("\nWorking path = " + workDir);
 
         Path dir = Paths.get(workDir.toString(), "raw");
-        Path outPath = Paths.get(workDir.toString(), "16s.fasta");
+        Path outPath = Paths.get(workDir.toString(), "denoised.fasta");
 
         try {
             List<Path> files = IOUtil.listFiles(dir, "*.{fasta}");
