@@ -1,6 +1,7 @@
 package nzgo.toolkit.core.uparse;
 
 import nzgo.toolkit.core.naming.Separator;
+import nzgo.toolkit.core.r.DataFrame;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,15 @@ public class Parser {
 
     public static String getLabel(String label, boolean removeSizeAnnotation) {
         return removeSizeAnnotation ? getLabelNoSizeAnnotation(label) : label;
+    }
+
+    public static void getLabelNoSizeAnnotation(DataFrame<String> out, int col) {
+        List<String> colData = out.getColData(col);
+        for (int i = 0; i < colData.size(); i++) {
+            String val = colData.get(i);
+            colData.set(i, getLabelNoSizeAnnotation(val));
+        }
+        out.replaceCol(col, colData);
     }
 
     // assume sample name is the 1st element, chop the end

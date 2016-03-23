@@ -46,6 +46,11 @@ public class CommunityMatrix {
         final String sampleRegx = "_.*";
 
         List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
+        for (int i = 0; i < finalOTUs.size(); i++) {
+            String label = finalOTUs.get(i);
+            finalOTUs.set(i, label.replaceAll("\\|\\d+", ""));
+        }
+
         Set<String> finalOTUsSet = new HashSet<>(finalOTUs);
 
         if (finalOTUs.size() != finalOTUsSet.size())
@@ -53,6 +58,8 @@ public class CommunityMatrix {
 
         DataFrame<String> derep_uc = Utils.readTable(derepUcPath);
         DataFrame<String> out_up = Utils.readTable(outUpPath);
+
+        Parser.getLabelNoSizeAnnotation(out_up, UPParser.QUERY_COLUMN_ID);
 
         // only derep_uc has all sample names
         List<String> labels = derep_uc.getColData(UCParser.Query_Sequence_COLUMN_ID);
@@ -159,12 +166,12 @@ public class CommunityMatrix {
     public static void main(final String[] args) {
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/OTUs");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/Miyake454/OTUs");
         MyLogger.info("\nWorking path = " + workDir);
 
 //        Path otusPath = Paths.get(workDir.toString(), "otus97", "otus.fasta");
 //        Path chimerasPath = Paths.get(workDir.toString(), "otus97", "chimeras.fasta");
-        Path finalOTUsPath = Paths.get(workDir.toString(), "otus97", "16s.fasta");
+        Path finalOTUsPath = Paths.get(workDir.toString(), "otus97", "otus.fasta");
 //        try {
 //            removeChimeras(otusPath, chimerasPath, finalOTUsPath);
 //        } catch (IOException | ImportException e) {

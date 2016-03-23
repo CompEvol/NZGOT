@@ -145,4 +145,12 @@ public class DataFrame<T> {
 
         assert rowNames.size() == colData.size();
     }
+
+
+    public void replaceCol(int col, List<T> colData) {
+        assert col >= 0 && col < ncol();
+        assert colData.size() == nrow();
+
+        data.set(col, colData);
+    }
 }
