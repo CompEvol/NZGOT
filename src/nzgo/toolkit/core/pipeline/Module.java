@@ -82,7 +82,7 @@ public class Module {
     }
 
     // args[0]
-    public String getFirstArg(Arguments arguments) {
+    public String getFirstArg(Arguments arguments, boolean compulsory) {
         String firstArg = null;
 
         // check args[]
@@ -95,9 +95,19 @@ public class Module {
             firstArg = args2[0];
 
             if (NameUtil.isEmptyNull(firstArg))
-                throw new IllegalArgumentException("Argument cannot be null or empty");
+                throw new IllegalArgumentException("Argument value cannot be null or empty");
+        }
+
+        if (compulsory && firstArg == null) {
+            MyLogger.error("Input is compulsory :");
+            printUsage(arguments);
+            System.exit(0);
         }
         return firstArg;
+    }
+
+    public String getFirstArg(Arguments arguments) {
+        return getFirstArg(arguments, false);
     }
 
     //+++++++++++++++ Arguments +++++++++++++++++

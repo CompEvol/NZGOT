@@ -114,7 +114,7 @@ public class SequenceFileIO extends FileIO {
         }
 
         reader.close();
-        MyLogger.debug("\nimport " + labels.size() + " sequences");
+        MyLogger.info("\nimport " + labels.size() + " sequences");
         return labels;
     }
 

@@ -14,7 +14,7 @@ public class NZGOTVersion extends Version {
      */
     private static final String VERSION = "0.1.0";
 
-    private static final String DATE_STRING = "2013-2015";
+    private static final String DATE_STRING = "2013-2016";
 
     private static final boolean IS_PRERELEASE = false;
 
