@@ -166,23 +166,23 @@ public class CommunityMatrix {
     public static void main(final String[] args) {
 //        if (args.length != 1) throw new IllegalArgumentException("Working path is missing in the argument !");
 
-        Path workDir = Paths.get(System.getProperty("user.home") + "/Projects/FishGutMicrobiomes/Miyake454/OTUs");
+        Path workDir = Paths.get(System.getProperty("user.home") + "/WorkSpace/NGBA2/OTUs");
         MyLogger.info("\nWorking path = " + workDir);
 
-//        Path otusPath = Paths.get(workDir.toString(), "otus97", "otus.fasta");
-//        Path chimerasPath = Paths.get(workDir.toString(), "otus97", "chimeras.fasta");
-        Path finalOTUsPath = Paths.get(workDir.toString(), "otus97", "otus.fasta");
-//        try {
-//            removeChimeras(otusPath, chimerasPath, finalOTUsPath);
-//        } catch (IOException | ImportException e) {
-//            e.printStackTrace();
-//        }
+        Path otusPath = Paths.get(workDir.toString(), "otus97", "otus.fasta");
+        Path chimerasPath = Paths.get(workDir.toString(), "otus97", "chimeras.fasta");
+        Path finalOTUsPath = Paths.get(workDir.toString(), "otus97", "16s.fasta");
+        try {
+            removeChimeras(otusPath, chimerasPath, finalOTUsPath);
+        } catch (IOException | ImportException e) {
+            e.printStackTrace();
+        }
 
         Path derepUcPath = Paths.get(workDir.toString(), "qc", "derep.uc");
 
         Path outUpPath = Paths.get(workDir.toString(), "otus97", "out.up");
 
-        Path cmPath = Paths.get(workDir.toString(), "otus97", "16s-97.csv");
+        Path cmPath = Paths.get(workDir.toString(), "otus97", "16s.csv");
 
         Matrix communityMatrix = null;
         try {

@@ -1,15 +1,21 @@
 package nzgo.toolkit.edna;
 
+import jebl.evolution.io.ImportException;
 import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.io.Arguments;
+import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameParser;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.pipeline.Module;
+import nzgo.toolkit.core.r.Matrix;
 import nzgo.toolkit.core.uparse.io.CommunityFileIO;
+import nzgo.toolkit.uparse.CommunityMatrix;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Create Community Matrix from UPARSE output file
@@ -37,68 +43,69 @@ public class CMCreator extends Module {
         Module module = new CMCreator();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
-                new Arguments.StringOption("out", "output-file-name", "Output community matrix in csv file."),
-                new Arguments.StringOption("sra", "SRR-mapping-file", "The mapping file to map SRA runs to " +
-                        "subplots and genes, for example, SRR1706032 <tab> 16S <tab> Plot1-B. If mapping file is given, " +
-                        "then all sequences labels will be replaced to a new format id|gene|plot-subplot, " +
-                        "such as SRR1706032.1|16S|Plot1-B."),
-                new Arguments.StringOption("chi", "output-file-name", "Output community matrix in csv file.")
-//                new Arguments.Option("ca", "Count annotated size in sequences identifier, " +
-//                        "for example, HA5K40001BTFNL|IndirectSoil|3-H;size=177;")
+                new Arguments.StringOption("qc", "qc-folder",
+                        "qc folder to contain all dereplication results, such as derep.uc."),
+                new Arguments.StringOption("otus", "otus-folder",
+                        "otus folder to contain all OTUs and chimeras results, " +
+                                "such as otus.fasta and chimeras.fasta"),
+                new Arguments.StringOption("prefix", "output-prefix",
+                        "prefix for output community matrix in csv file, such as 16s.csv, " +
+                                "and final OTUs, such as 16s.fasta.")
         };
         final Arguments arguments = module.getArguments(newOptions);
 
-        Path working = module.init(arguments, args);
-        // input
-        String inputFileName = module.getFirstArg(arguments);
-        Path inputFile = module.getInputFile(working, inputFileName, NameSpace.SUFFIX_UP);
+        Path workDir = module.init(arguments, args);
+
+        // if give final OTUs in input, then skip rm chimera OTUs
+//        String inputFileName = module.getFirstArg(arguments);
+//        if (inputFileName != null) {
+//            Path inputFile = module.getInputFile(workDir, inputFileName, NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA);
+//        } else {
+//
+//        }
+
+        MyLogger.info("\nWorking path = " + workDir);
 
         // output
-        String outFileName = "cm" + NameSpace.SUFFIX_CSV;
-        if (arguments.hasOption("out")) {
-            outFileName = arguments.getStringOption("out");
+        String outFilePrefix = "16s";
+        if (arguments.hasOption("prefix")) {
+            outFilePrefix = arguments.getStringOption("prefix");
         }
-        Path outFile = module.validateOutputFile(outFileName, "output", arguments.hasOption("overwrite"), NameSpace.SUFFIX_CSV);
 
-        String sraFileName = arguments.getStringOption("sra");
-        Path sraFile;
-        if (sraFileName == null) {
-            sraFile = null;
+        String qcFolder = "qc";
+        if (arguments.hasOption("qc")) {
+            qcFolder = arguments.getStringOption("qc");
+        }
+
+        String otusFolder = "otus97";
+        if (arguments.hasOption("otus")) {
+            otusFolder = arguments.getStringOption("otus");
+        }
+
+        Path otusPath = Paths.get(workDir.toString(), otusFolder, "otus.fasta");
+        Path chimerasPath = Paths.get(workDir.toString(), otusFolder, "chimeras.fasta");
+        Path finalOTUsPath = Paths.get(workDir.toString(), otusFolder, outFilePrefix+".fasta");
+
+        if (Files.exists(finalOTUsPath)) {
+            MyLogger.info("Final OTUs exist" + finalOTUsPath.toString() + ", use it and skip removing chimera OTUs.");
         } else {
-            sraFile = module.validateInputFile(null, sraFileName, "SRA runs table", null);
-        }
-
-        String chimerasFileName = arguments.getStringOption("chi");
-        Path chimerasFile;
-        if (chimerasFileName == null) {
-            chimerasFile = null;
-        } else {
-            chimerasFile = module.validateInputFile(working, chimerasFileName, "chimeras file", null);
-        }
-
-//        boolean countSizeAnnotation = arguments.hasOption("ca");
-        boolean removeElements = false;
-
-        SiteNameParser siteNameParser = new SiteNameParser();
-        if (sraFile != null) {
-            // e.g. SRR1720793.280;size=1749;
-            siteNameParser = new SiteNameParser("\\.", "-", NameSpace.BY_SUBPLOT, SiteNameParser.SRR_LABEL_SAMPLE_INDEX);
-        }
-
-//        Community community = new Community(inputFile, siteNameParser, countSizeAnnotation, removeElements);
-        Community community = new Community(inputFile, chimerasFile, siteNameParser, removeElements);
-
-        if (sraFile != null) {
-            NameParser lineParser = new NameParser();
+            MyLogger.info("Removing chimera OTUs from " + otusPath.toString());
             try {
-                community.replaceSiteNames(sraFile, lineParser);
-            } catch (IOException e) {
+                CommunityMatrix.removeChimeras(otusPath, chimerasPath, finalOTUsPath);
+            } catch (IOException | ImportException e) {
                 e.printStackTrace();
             }
         }
 
+        Path derepUcPath = Paths.get(workDir.toString(), qcFolder, "derep.uc");
+        Path outUpPath = Paths.get(workDir.toString(), otusFolder, "out.up");
+        Path cmPath = Paths.get(workDir.toString(), otusFolder, outFilePrefix+".csv");
+
+        Matrix communityMatrix = null;
         try {
-            int[] row = CommunityFileIO.writeCommunityMatrix(outFile, community);
+            communityMatrix = CommunityMatrix.createCommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
+
+            CommunityMatrix.writeCommunityMatrix(cmPath, communityMatrix, ",");
         } catch (IOException e) {
             e.printStackTrace();
         }

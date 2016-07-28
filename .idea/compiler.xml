@@ -2,7 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
-    <option name="BUILD_PROCESS_HEAP_SIZE" value="5120" />
+    <option name="BUILD_PROCESS_HEAP_SIZE" value="6000" />
     <resourceExtensions />
     <wildcardResourcePatterns>
       <entry name="!?*.java" />
@@ -24,12 +24,6 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="nzgot" />
-      </profile>
-      <profile default="false" name="Annotation profile for NZGOT" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="true" />
         <module name="NZGOT" />
       </profile>
     </annotationProcessing>
