@@ -4,7 +4,7 @@
         New Zealand Genomic Observatory Toolkit.
 	</description>
 
-    <property name="JDK_VERSION" value="1.7"/>
+    <property name="JDK_VERSION" value="1.8"/>
 
     <!-- set global properties for this build -->
     <property name="src" location="src"/>
@@ -30,12 +30,12 @@
 	</target>
 
     <!-- clean previous build, compile Java source code, and Junit test, and make the beast.jar and beauti.jar -->
-    <target name="build" depends="clean,compile-all,dist-all"
+    <target name="build" depends="compile-all,dist-all"
             description="Clean and Build all and distribute jar">
     </target>
 
     <!-- compile Java source code -->
-    <target name="compile-all" depends="init">
+    <target name="compile-all" depends="init,clean">
         <mkdir dir="${build}"/>
 
         <!-- Compile the java code from ${src} into ${build} /bin -->
@@ -44,8 +44,9 @@
                fork="true"
                memoryinitialsize="512m"
                memorymaximumsize="2048m">
-            <include name="nzgo/core/**"/>
-            <include name="nzgo/edna/**"/>
+            <include name="nzgo/toolkit/core/**"/>
+            <include name="nzgo/toolkit/edna/**"/>
+            <include name="nzgo/toolkit/uparse/**"/>
         </javac>
         <echo message="Successfully complied."/>
     </target>
@@ -62,8 +63,9 @@
                 <attribute name="Main-Class" value="${main_CMCreator}"/>
             </manifest>
             <fileset dir="${build}">
-                <include name="nzgo/core/**/*.class"/>
-                <include name="nzgo/cma/**/*.class"/>
+                <include name="nzgo/toolkit/core/**/*.class"/>
+                <include name="nzgo/toolkit/edna/**/*.class"/>
+                <include name="nzgo/toolkit/uparse/**/*.class"/>
             </fileset>
             <zipgroupfileset dir="${lib}" includes="beast.jar"/>
             <zipgroupfileset dir="${lib}" includes="jebl2-r22.jar"/>
