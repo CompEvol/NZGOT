@@ -50,7 +50,7 @@ public class IOUtil {
      * @throws java.io.IOException
      */
     public static void splitFileByLabelItem(String workPathString, String inFastaFileName, String... matches) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "input", null);
+        Path inFastaFilePath = Module.inputValidFile(Paths.get(workPathString), inFastaFileName, "input", null);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 

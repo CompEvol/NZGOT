@@ -61,7 +61,7 @@ public class MD5ChecksumTable {
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/GigaDB-NZGO/SRA/COI-spun");
         MyLogger.info("\nWorking path = " + workDir);
 
-        Path inPath = Module.validateInputFile(workDir, "md5.txt", "input");
+        Path inPath = Module.inputValidFile(workDir, "md5.txt", "input");
 
         Path outPath = Paths.get(workDir.toString(), "md5Table.txt");
 

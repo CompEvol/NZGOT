@@ -1,15 +1,11 @@
 package nzgo.toolkit.edna;
 
 import jebl.evolution.io.ImportException;
-import nzgo.toolkit.core.community.Community;
 import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.naming.NameParser;
 import nzgo.toolkit.core.naming.NameSpace;
-import nzgo.toolkit.core.naming.SiteNameParser;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.r.Matrix;
-import nzgo.toolkit.core.uparse.io.CommunityFileIO;
 import nzgo.toolkit.uparse.CommunityMatrix;
 
 import java.io.IOException;
@@ -24,7 +20,7 @@ import java.nio.file.Paths;
 public class CMCreator extends Module {
 
     public CMCreator() {
-        super("CMCreator", "Create community matrix from UPARSE output UP file and dereplication UC file.");
+        super("CMCreator", "Create community matrix from UPARSE OTU clustering UP mapping file and dereplication UC file.");
     }
 
     public void printUsage(final Arguments arguments) {
@@ -89,7 +85,8 @@ public class CMCreator extends Module {
         Path chimerasPath = null;
         if (arguments.hasOption("chimeotus")) {
             String chimeraOTUs = arguments.getStringOption("chimeotus");
-            chimerasPath = module.getInputFile(workDir, chimeraOTUs, NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA);
+            chimerasPath = module.inputValidFile(workDir, chimeraOTUs, "chimeras OTUs",
+                    NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA);
         }
 
         Path finalOTUsPath = Paths.get(workDir.toString(), outFilePrefix+".fasta");
@@ -97,7 +94,8 @@ public class CMCreator extends Module {
             MyLogger.info("Removing chimera OTUs from " + otusPath.toString());
 
             if (!arguments.hasOption("overwrite") && Files.exists(finalOTUsPath))
-                throw new IllegalArgumentException("Find output file " + finalOTUsPath + ", use -overwrite option to allow overwrite.");
+                throw new IllegalArgumentException("Find output file " + finalOTUsPath +
+                        ", use -overwrite option to allow overwrite.");
 
             try {
                 CommunityMatrix.removeChimeras(otusPath, chimerasPath, finalOTUsPath);
@@ -110,8 +108,9 @@ public class CMCreator extends Module {
             MyLogger.info("Use given final OTUs " + finalOTUsPath.toString() + " and skip removing chimera OTUs.");
         }
 
-        Path derepUcPath = module.getInputFile(Paths.get(workDir.getParent().toString(), qcFolder), "derep.uc", NameSpace.SUFFIX_UC);
-        Path outUpPath = module.getInputFile(workDir, "out.up", NameSpace.SUFFIX_UP);
+        Path derepUcPath = module.inputValidFile(Paths.get(workDir.getParent().toString(), qcFolder),
+                "derep.uc", "dereplication UC file", NameSpace.SUFFIX_UC);
+        Path outUpPath = module.inputValidFile(workDir, "out.up", "OTU clustering UP mapping file", NameSpace.SUFFIX_UP);
         Path cmPath = Paths.get(workDir.toString(), outFilePrefix+".csv");
 
         if (!arguments.hasOption("overwrite") && Files.exists(cmPath))

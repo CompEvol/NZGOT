@@ -177,7 +177,7 @@ public class Module {
      */
     public static Path getInputFile(Path workPath, String inputFileName, String... inputfileNameExtension) {
 
-        Path inputFile = validateInputFile(workPath, inputFileName, "input", inputfileNameExtension);
+        Path inputFile = inputValidFile(workPath, inputFileName, "input", inputfileNameExtension);
 
         if (workPath != null) {
             System.setProperty(NameSpace.HOME_DIR, workPath.toAbsolutePath().toString());
@@ -222,7 +222,7 @@ public class Module {
      * @param ioMessage
      * @return
      */
-    public static Path validateInputFile(Path workPath, String fileName, String ioMessage, String... fileNameExtension) {
+    public static Path inputValidFile(Path workPath, String fileName, String ioMessage, String... fileNameExtension) {
         validateFileName(fileName, ioMessage, fileNameExtension);
 
         if (workPath == null)

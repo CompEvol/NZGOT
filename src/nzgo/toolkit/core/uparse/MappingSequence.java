@@ -45,13 +45,13 @@ public class MappingSequence {
         MyLogger.info("\nWorking path = " + workPathString);
 
         String inFastaFileName = "chimeras.fasta";
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName,
+        Path inFastaFilePath = Module.inputValidFile(Paths.get(workPathString), inFastaFileName,
                 "dereplicated sequences file", NameSpace.SUFFIX_FASTA);
 
         List<DereplicatedSequence> dereplicatedSequences = SequenceFileIO.importDereplicatedSequences(inFastaFilePath, true, false);
 
         inFastaFileName = "reads.fasta";
-        inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName,
+        inFastaFilePath = Module.inputValidFile(Paths.get(workPathString), inFastaFileName,
                 "all sequences file", NameSpace.SUFFIX_FASTA);
 
         List<DereplicatedSequence> allSequences = SequenceFileIO.importDereplicatedSequences(inFastaFilePath, false, false);

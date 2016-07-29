@@ -130,10 +130,10 @@ public class TaxonLCA {
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/20141215/");
         MyLogger.info("\nWorking path = " + workDir);
 
-        Path inFilePath = Module.validateInputFile(workDir, "COI.txt", "input", null);
+        Path inFilePath = Module.inputValidFile(workDir, "COI.txt", "input", null);
 
         Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
-        Path inFilePath2 = Module.validateInputFile(workDir2, "1721_COI_fixed_MEGAN_taxon_ids_order.txt", "BLAST", null);
+        Path inFilePath2 = Module.inputValidFile(workDir2, "1721_COI_fixed_MEGAN_taxon_ids_order.txt", "BLAST", null);
         List<String[]> blastList = null;
         try {
             blastList = ConfigFileIO.importTSV(inFilePath2, "");
@@ -142,7 +142,7 @@ public class TaxonLCA {
         }
 
         Path workDir3 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/bak/longlabel/");
-        Path inFilePath3 = Module.validateInputFile(workDir3, "COI.fasta", "long identifiers", NameSpace.SUFFIX_FASTA);
+        Path inFilePath3 = Module.inputValidFile(workDir3, "COI.fasta", "long identifiers", NameSpace.SUFFIX_FASTA);
         List<String> longIdentifier = new ArrayList<>();
         try {
             longIdentifier = SequenceFileIO.importFastaLabelOnly(inFilePath3, false);

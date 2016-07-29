@@ -91,7 +91,7 @@ public class GigaDBSubmission {
         GigaDBSubmission gigaDBSubmission = new GigaDBSubmission();
 
         Path workDir3 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/database/");
-        Path allPropertiesPath = Module.validateInputFile(workDir3, "Invert-size-lifestage.txt", "input");
+        Path allPropertiesPath = Module.inputValidFile(workDir3, "Invert-size-lifestage.txt", "input");
         try {
             gigaDBSubmission.setPropertiesList(ConfigFileIO.importTSV(allPropertiesPath, " all properties"));
         } catch (IOException e) {
@@ -104,7 +104,7 @@ public class GigaDBSubmission {
 
 
         Path workDir = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
-        Path inFilePath = Module.validateInputFile(workDir, "COI-LCA-order-SampleSourceModifiersTable.txt", "input"); // 1st row is head
+        Path inFilePath = Module.inputValidFile(workDir, "COI-LCA-order-SampleSourceModifiersTable.txt", "input"); // 1st row is head
 
         try {
             BufferedReader reader = OTUsFileIO.getReader(inFilePath, "samples");

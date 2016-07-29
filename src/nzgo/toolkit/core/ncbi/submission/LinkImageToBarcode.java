@@ -95,7 +95,7 @@ public class LinkImageToBarcode {
         MyLogger.info("\nWorking path = " + workDir);
 
         Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
-        Path inFilePath = Module.validateInputFile(workDir2, "COI-LCA.txt", "input");
+        Path inFilePath = Module.inputValidFile(workDir2, "COI-LCA.txt", "input");
 
         Path notInDir = Paths.get(workDir.toString(), notInDirName);
 

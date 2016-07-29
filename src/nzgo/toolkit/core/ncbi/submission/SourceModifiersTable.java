@@ -179,7 +179,7 @@ public class SourceModifiersTable {
         MyLogger.info("\nWorking path = " + workDir);
 
 //        Path workDir2 = Paths.get(System.getProperty("user.home") + "/Documents/ModelEcoSystem/454/2010-pilot/COITraditional/data/");
-//        Path inFilePath2 = Module.validateInputFile(workDir2, "COI-fixed.fasta", "old identifiers", NameSpace.SUFFIX_FASTA);
+//        Path inFilePath2 = Module.inputValidFile(workDir2, "COI-fixed.fasta", "old identifiers", NameSpace.SUFFIX_FASTA);
 //        List<String> longIdentifier = new ArrayList<>();
 //        try {
 //            longIdentifier = SequenceFileIO.importFastaLabelOnly(inFilePath2, false);
@@ -187,7 +187,7 @@ public class SourceModifiersTable {
 //            e.printStackTrace();
 //        }
 
-        Path inFilePath = Module.validateInputFile(workDir, "COI-LCA-order.txt", "input");
+        Path inFilePath = Module.inputValidFile(workDir, "COI-LCA-order.txt", "input");
 
         String outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
         String outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());
@@ -260,7 +260,7 @@ public class SourceModifiersTable {
         }
 
         // fasta file
-        inFilePath = Module.validateInputFile(workDir, "COI-fixed.fasta", "input", NameSpace.SUFFIX_FASTA);
+        inFilePath = Module.inputValidFile(workDir, "COI-fixed.fasta", "input", NameSpace.SUFFIX_FASTA);
 
         outputFileNameStem = NameUtil.getNameNoExtension(inFilePath.toFile().getName());
         outputFileExtension = NameUtil.getSuffix(inFilePath.toFile().getName());

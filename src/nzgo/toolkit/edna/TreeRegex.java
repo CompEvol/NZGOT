@@ -122,7 +122,7 @@ public class TreeRegex extends Module{
         RegexFactory.RegexType regexType = null;
         if (arguments.hasOption("regex_type")) {
             regexType = RegexFactory.RegexType.valueOf(arguments.getStringOption("regex_type"));
-            Path separatorsTSV = module.validateInputFile(working, NameSpace.SEPARATORS_FILE, "customized separators", NameSpace.SUFFIX_TSV);
+            Path separatorsTSV = module.inputValidFile(working, NameSpace.SEPARATORS_FILE, "customized separators", NameSpace.SUFFIX_TSV);
             nameParser = new NameParser(separatorsTSV, regexType);
         }
 
@@ -183,7 +183,7 @@ public class TreeRegex extends Module{
             traitsMapTSV = module.validateOutputFile(NameSpace.TRAITS_MAPPING_FILE, "traits mapping", true, NameSpace.SUFFIX_TSV);
             traitsIO += 2;
         } else if (arguments.hasOption("traitsMapIn")) {
-            traitsMapTSV = module.validateInputFile(working, NameSpace.TRAITS_MAPPING_FILE, "traits mapping", NameSpace.SUFFIX_TSV);
+            traitsMapTSV = module.inputValidFile(working, NameSpace.TRAITS_MAPPING_FILE, "traits mapping", NameSpace.SUFFIX_TSV);
             traitsIO += 1;
         }
 

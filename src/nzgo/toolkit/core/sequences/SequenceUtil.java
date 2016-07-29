@@ -109,7 +109,7 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastAOrQTo2(String workPathString, String inFileName, String regex) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+        Path inFastaFilePath = Module.inputValidFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FASTQ);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
@@ -162,7 +162,7 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemIndex) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "input", NameSpace.SUFFIX_FASTA);
+        Path inFastaFilePath = Module.inputValidFile(Paths.get(workPathString), inFastaFileName, "input", NameSpace.SUFFIX_FASTA);
 
         String outputFileNameStem = NameUtil.getNameNoExtension(inFastaFilePath.toFile().getName());
 
@@ -223,7 +223,7 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastaByLabelItem(String workPathString, String inFastaFileName, int itemIndex, String... matches) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFastaFileName, "input", NameSpace.SUFFIX_FASTA);
+        Path inFastaFilePath = Module.inputValidFile(Paths.get(workPathString), inFastaFileName, "input", NameSpace.SUFFIX_FASTA);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
 
@@ -280,9 +280,9 @@ public class SequenceUtil {
      */
     @Deprecated
     public static void diffFastAFrom(String workPathString, String fileName1, String fileName2) throws IOException {
-        Path file1 = Module.validateInputFile(Paths.get(workPathString), fileName1,
+        Path file1 = Module.inputValidFile(Paths.get(workPathString), fileName1,
                 "original file", NameSpace.SUFFIX_FASTA);
-        Path file2 = Module.validateInputFile(Paths.get(workPathString), fileName2,
+        Path file2 = Module.inputValidFile(Paths.get(workPathString), fileName2,
                 "original file", NameSpace.SUFFIX_FASTA);
 
         BufferedReader reader1 = OTUsFileIO.getReader(file1, "file 1");
@@ -328,7 +328,7 @@ public class SequenceUtil {
      * @throws IOException
      */
     public static void splitFastqByLabelItem(String workPathString, String inFastqFileName, int itemIndex) throws IOException {
-        Path inFastqFilePath = Module.validateInputFile(Paths.get(workPathString), inFastqFileName, "input", NameSpace.SUFFIX_FASTQ);
+        Path inFastqFilePath = Module.inputValidFile(Paths.get(workPathString), inFastqFileName, "input", NameSpace.SUFFIX_FASTQ);
 
         String outputFileNameStem = NameUtil.getNameNoExtension(inFastqFilePath.toFile().getName());
 
@@ -391,7 +391,7 @@ public class SequenceUtil {
      */
     public static void renameIdFastAOrQ(String workPathString, String inFileName, String regex, String replacement,
                                         int removeLengthSmallerThan) throws IOException {
-        Path inFastaFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+        Path inFastaFilePath = Module.inputValidFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA, NameSpace.SUFFIX_FASTQ);
 
         BufferedReader reader = OTUsFileIO.getReader(inFastaFilePath, "original file");
@@ -440,9 +440,9 @@ public class SequenceUtil {
     //fastqToSplit >= fastqToMath
     // make QIIME split_libraries_fastq.py work with FLASH
     public static void splitFastqGzByMatchedLabel(String workPathString, String fastqToSplit, String fastqToMath) throws IOException {
-        Path file1 = Module.validateInputFile(Paths.get(workPathString), fastqToSplit,
+        Path file1 = Module.inputValidFile(Paths.get(workPathString), fastqToSplit,
                 "original file", NameSpace.SUFFIX_GZ);
-        Path file2 = Module.validateInputFile(Paths.get(workPathString), fastqToMath,
+        Path file2 = Module.inputValidFile(Paths.get(workPathString), fastqToMath,
                 "original file", NameSpace.SUFFIX_GZ);
 
         BufferedReader readerToSplit = FileIO.getReaderGZIP(file1, "fastq to split");
@@ -508,7 +508,7 @@ public class SequenceUtil {
     }
 
     public static void renameIdFastqGz(String workPathString, String inFileName, String regex, String replacement) throws IOException {
-        Path inFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+        Path inFilePath = Module.inputValidFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTQ_GZ);
 
         BufferedReader reader = FileIO.getReaderGZIP(inFilePath, "identifier to rename");
@@ -552,7 +552,7 @@ public class SequenceUtil {
      */
     public static void summarizeFastAOrQByLabel(String workPathString, String inFileName, String regex, int index)
             throws IOException, DataFormatException {
-        Path inFilePath = Module.validateInputFile(Paths.get(workPathString), inFileName,
+        Path inFilePath = Module.inputValidFile(Paths.get(workPathString), inFileName,
                 "original file", NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA, NameSpace.SUFFIX_FASTQ);
 
         BufferedReader reader = FileIO.getReader(inFilePath, "for summary");

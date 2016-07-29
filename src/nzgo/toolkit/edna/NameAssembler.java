@@ -132,7 +132,7 @@ public class NameAssembler extends Module{
             if (arguments.hasOption("traitsMap")) {
                 traitsMapTSVName = arguments.getStringOption("traitsMap");
             }
-            Path traitsMapTSV = module.validateInputFile(working, traitsMapTSVName, "traits mapping", NameSpace.SUFFIX_TSV);
+            Path traitsMapTSV = module.inputValidFile(working, traitsMapTSVName, "traits mapping", NameSpace.SUFFIX_TSV);
             try {
                 traitsMap = TaxonomyFileIO.importPreTaxaTraits(traitsMapTSV);
             } catch (IOException e) {
