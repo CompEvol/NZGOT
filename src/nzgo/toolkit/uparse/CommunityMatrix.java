@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * @author Walter Xie
  */
-public class CommunityMatrix {
+public class CommunityMatrix { //TODO modify it to OO style
 
     public static void removeChimeras(Path otusPath, Path chimerasPath, Path finalOTUsPath) throws IOException, ImportException {
         List<Sequence> otus = SequenceFileIO.importNucleotideSequences(otusPath);
@@ -43,11 +43,15 @@ public class CommunityMatrix {
     }
 
     public static Matrix createCommunityMatrix(Path finalOTUsPath, Path outUpPath, Path derepUcPath) throws IOException {
+        List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
+        return createCommunityMatrix(finalOTUs, outUpPath, derepUcPath);
+    }
+
+    public static Matrix createCommunityMatrix(List<String> finalOTUs, Path outUpPath, Path derepUcPath) throws IOException {
         // sort samples
         final boolean sort = true;
         final String sampleRegx = "_.*";
 
-        List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
         for (int i = 0; i < finalOTUs.size(); i++) {
             String label = finalOTUs.get(i);
             finalOTUs.set(i, label.replaceAll("\\|\\d+", ""));
@@ -56,7 +60,7 @@ public class CommunityMatrix {
         Set<String> finalOTUsSet = new HashSet<>(finalOTUs);
 
         if (finalOTUs.size() != finalOTUsSet.size())
-            throw new IllegalArgumentException("Find duplicate ids from final OTUs file : " + finalOTUsPath);
+            throw new IllegalArgumentException("Find duplicate ids from final OTUs !");
 
         DataFrame<String> derep_uc = Utils.readTable(derepUcPath);
         DataFrame<String> out_up = Utils.readTable(outUpPath);
