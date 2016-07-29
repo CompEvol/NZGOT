@@ -37,6 +37,8 @@ public class CommunityMatrix {
 
         List<Sequence> finalOTUs = SequenceUtil.removeAllFrom(chimeras, otus);
 
+        MyLogger.info("Removing " + chimeras.size() + " chimera OTUs from " + otus.size() +
+                " OTUs, the final OTUs = " + finalOTUs.size());
         SequenceFileIO.writeToFasta(finalOTUsPath, finalOTUs);
     }
 

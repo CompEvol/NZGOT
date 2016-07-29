@@ -186,6 +186,8 @@ public class SequenceFileIO extends FileIO {
         FastaExporter sequenceExporter = new FastaExporter(writer);
 
         sequenceExporter.exportSequences(sequences);
+        writer.flush();
+        writer.close();
 
         MyLogger.debug("\nexport " + sequences.size() + " sequences");
     }

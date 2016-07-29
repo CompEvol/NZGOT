@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
 
 /**
  * Create Community Matrix from UPARSE output file
@@ -25,8 +26,10 @@ public class CMCreator extends Module {
 
     public void printUsage(final Arguments arguments) {
         arguments.printUsage(getName(), "[<otus-file-name>]");
-        System.out.println("  <otus-file-name> is OTUs from UPARSE, such as otus.fasta, " +
-                "or final OTUs removed chimeras OTUs, such as 16s.fasta.\n" +
+        System.out.println("  <otus-file-name> is compulsory input always in the last argument. " +
+                "It can be either OTUs from UPARSE, such as otus.fasta, " +
+                "or final OTUs after chimera OTUs are removed, such as 16s.fasta.\n" +
+                "\n************************* Description ****************************\n" +
                 "If give chimeras OTUs using option -chimeotus chimeras.fasta, " +
                 "then remove chimera OTUs from input OTUs to generate final OTUs and community matrix, " +
                 "otherwise skip removing chimera OTUs and use input as the final OTUs to create community matrix.\n" +
@@ -36,7 +39,7 @@ public class CMCreator extends Module {
         );
         System.out.println();
         System.out.println("  Example: " + getName() + " 16s.fasta");
-        System.out.println("  Example: " + getName() + " otus.fasta -chimeotus chimeras.fasta -prefix 18s");
+        System.out.println("  Example: " + getName() + " -chimeotus chimeras.fasta -prefix 18s otus.fasta");
         System.out.println("  Example: " + getName() + " -help");
         System.out.println();
     }
@@ -46,7 +49,7 @@ public class CMCreator extends Module {
         Module module = new CMCreator();
 
         Arguments.Option[] newOptions = new Arguments.Option[]{
-                new Arguments.StringOption("chimeotus", "chimeras-otus",
+                new Arguments.StringOption("chimeotus", "chimera-otus",
                         "chimeras OTUs discovered by Uchime, such as chimeras.fasta."),
                 new Arguments.StringOption("qc", "qc-folder",
                         "qc folder to contain all dereplication results, such as derep.uc."),
@@ -55,7 +58,10 @@ public class CMCreator extends Module {
 //                                "such as otus.fasta and chimeras.fasta"),
                 new Arguments.StringOption("prefix", "output-prefix",
                         "prefix for output community matrix in csv file, such as 16s.csv, " +
-                                "and final OTUs, such as 16s.fasta.")
+                                "and final OTUs, such as 16s.fasta."),
+                new Arguments.Option("nocm", "Only used to remove chimera OTUs, " +
+                        "no community matrix created."),
+                new Arguments.Option("debug", "Give more messages in debug level.")
         };
         final Arguments arguments = module.getArguments(newOptions);
 
@@ -67,6 +73,12 @@ public class CMCreator extends Module {
         // otherwise skip rm chimera OTUs and use input as the final OTUs
         String inputFileName = module.getFirstArg(arguments, true);
         Path otusPath = module.getInputFile(workDir, inputFileName, NameSpace.SUFFIX_FASTA, NameSpace.SUFFIX_FNA);
+
+        if (arguments.hasOption("debug")) {
+            MyLogger.setLevel(Level.FINE);
+        } else {
+            MyLogger.setLevel(Level.INFO);
+        }
 
         // output
         String outFilePrefix = "16s";
@@ -102,6 +114,12 @@ public class CMCreator extends Module {
             } catch (IOException | ImportException e) {
                 e.printStackTrace();
             }
+
+            if (arguments.hasOption("nocm")) {
+                MyLogger.info("Only remove chimera OTUs, no community matrix created.");
+                System.exit(0);
+            }
+
         } else {
             //skip rm chimera OTUs and use input as the final OTUs
             finalOTUsPath = otusPath;

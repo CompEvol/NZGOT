@@ -33,6 +33,10 @@ public class MyLogger {
         return LOGGER;
     }
 
+    public static void setLevel(Level level) {
+        LOGGER.setLevel(level);
+    }
+
     /**
      * message for debugging only
      * @param msg
