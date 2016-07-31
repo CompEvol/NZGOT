@@ -7,6 +7,7 @@ import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
 import nzgo.toolkit.core.r.Matrix;
 import nzgo.toolkit.uparse.CommunityMatrix;
+import nzgo.toolkit.uparse.FinalOTUs;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -109,8 +110,9 @@ public class CMCreator extends Module {
                 throw new IllegalArgumentException("Find output file " + finalOTUsPath +
                         ", use -overwrite option to allow overwrite.");
 
+            FinalOTUs finalOTUs = new FinalOTUs(otusPath, chimerasPath);
             try {
-                CommunityMatrix.removeChimeras(otusPath, chimerasPath, finalOTUsPath);
+                finalOTUs.rmChimeraOTUs(finalOTUsPath);
             } catch (IOException | ImportException e) {
                 e.printStackTrace();
             }

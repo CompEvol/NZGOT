@@ -2,7 +2,6 @@ package nzgo.toolkit.uparse;
 
 
 import jebl.evolution.io.ImportException;
-import jebl.evolution.sequences.Sequence;
 import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
@@ -10,7 +9,6 @@ import nzgo.toolkit.core.math.Arithmetic;
 import nzgo.toolkit.core.r.DataFrame;
 import nzgo.toolkit.core.r.Matrix;
 import nzgo.toolkit.core.r.Utils;
-import nzgo.toolkit.core.sequences.SequenceUtil;
 import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.UCParser;
 import nzgo.toolkit.core.uparse.UPParser;
@@ -30,17 +28,6 @@ import java.util.Set;
  * @author Walter Xie
  */
 public class CommunityMatrix { //TODO modify it to OO style
-
-    public static void removeChimeras(Path otusPath, Path chimerasPath, Path finalOTUsPath) throws IOException, ImportException {
-        List<Sequence> otus = SequenceFileIO.importNucleotideSequences(otusPath);
-        List<Sequence> chimeras = SequenceFileIO.importNucleotideSequences(chimerasPath);
-
-        List<Sequence> finalOTUs = SequenceUtil.removeAllFrom(chimeras, otus);
-
-        MyLogger.info("Removing " + chimeras.size() + " chimera OTUs from " + otus.size() +
-                " OTUs, the final OTUs = " + finalOTUs.size());
-        SequenceFileIO.writeToFasta(finalOTUsPath, finalOTUs);
-    }
 
     public static Matrix createCommunityMatrix(Path finalOTUsPath, Path outUpPath, Path derepUcPath) throws IOException {
         List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
@@ -178,8 +165,10 @@ public class CommunityMatrix { //TODO modify it to OO style
         Path otusPath = Paths.get(workDir.toString(), "otus97", "otus.fasta");
         Path chimerasPath = Paths.get(workDir.toString(), "otus97", "chimeras.fasta");
         Path finalOTUsPath = Paths.get(workDir.toString(), "otus97", "16s.fasta");
+
+        FinalOTUs finalOTUs = new FinalOTUs(otusPath, chimerasPath);
         try {
-            removeChimeras(otusPath, chimerasPath, finalOTUsPath);
+            finalOTUs.rmChimeraOTUs(finalOTUsPath);
         } catch (IOException | ImportException e) {
             e.printStackTrace();
         }
