@@ -38,23 +38,16 @@ public class CommunityMatrix {
         this.derepUcPath = derepUcPath;
     }
 
-    public void createCommunityMatrix(Path cmPath, String sep) throws IOException {
-        Matrix communityMatrix = getCommunityMatrix();
+    public void createCommunityMatrix(Path cmPath, String sep, final String sampleRegx) throws IOException {
+        Matrix communityMatrix = getCommunityMatrix(sampleRegx, true);
+        communityMatrix.validate();
 
         writeCommunityMatrix(cmPath, sep, communityMatrix);
     }
 
-
-    protected Matrix getCommunityMatrix() throws IOException {
-        List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
-        return getCommunityMatrix(finalOTUs);
-    }
-
-    protected Matrix getCommunityMatrix(List<String> finalOTUs) throws IOException {
-        // sort samples
-        final boolean sort = true;
-        final String sampleRegx = "_.*";
-
+    protected Matrix getCommunityMatrix(final String sampleRegx, final boolean sort) throws IOException {
+        // remove size annotation
+        List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true);
         validateID(finalOTUs);
 
         DataFrame<String> derep_uc = Utils.readTable(derepUcPath);
@@ -64,9 +57,18 @@ public class CommunityMatrix {
 
         // only derep_uc has all sample names
         List<String> labels = derep_uc.getColData(UCParser.Query_Sequence_COLUMN_ID);
-        // sample name is the 1st element separated by _, such as 806rcbc67_3069;size=19037;
+        // sample name is the 1st element separated by sampleRegx
+        // sort samples
         Set<String> samples = Parser.getSamples(labels, sampleRegx, sort);
 
+        Matrix communityMatrix = computeCommunityMatrix(finalOTUs, samples, sampleRegx, derep_uc, out_up);
+
+        return communityMatrix;
+    }
+
+    // single thread
+    protected Matrix computeCommunityMatrix(List<String> finalOTUs, Set<String> samples, String sampleRegx,
+                                          DataFrame<String> derep_uc, DataFrame<String> out_up) {
         int ncol = samples.size();
         int nrow = finalOTUs.size();
         Matrix communityMatrix = new Matrix(nrow, ncol);
@@ -97,13 +99,9 @@ public class CommunityMatrix {
             }
 
             if (rowsum < 1)
-                MyLogger.warn("Row " + r + " is empty !");
-            MyLogger.debug("Row " + r + " : " + rowName + ", members = " + memberNames.size() + ", sum = " + rowsum);
+                MyLogger.warn("Row " + r + " " + rowName + " is empty !");
+            MyLogger.debug("Row " + r + " " + rowName + ", members = " + memberNames.size() + ", sum = " + rowsum);
         }
-
-        String[] summary = communityMatrix.summary();
-        for (String s : summary)
-            MyLogger.info(s);
 
         return communityMatrix;
     }
@@ -147,8 +145,6 @@ public class CommunityMatrix {
 
         String[] colNames = communityMatrix.getColNames();
         String[] rowNames = communityMatrix.getRowNames();
-        assert colNames.length == communityMatrix.ncol();
-        assert rowNames.length == communityMatrix.nrow();
 
         double[][] data = communityMatrix.getData();
         // col names
@@ -168,6 +164,10 @@ public class CommunityMatrix {
 
         writer.flush();
         writer.close();
+
+        String[] summary = communityMatrix.summary();
+        for (String s : summary)
+            MyLogger.info(s);
 
         Path logPath = Paths.get(cmPath.getParent().toString(), cmPath.getFileName() + ".log");
         PrintStream log_out = FileIO.getPrintStream(logPath, "log");
@@ -203,7 +203,8 @@ public class CommunityMatrix {
 
         CommunityMatrix communityMatrix = new CommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
         try {
-            communityMatrix.createCommunityMatrix(cmPath, ",");
+            // sample name is the 1st element separated by ., such as AB144_Leaf.6
+            communityMatrix.createCommunityMatrix(cmPath, ",", "\\..*");
         } catch (IOException e) {
             e.printStackTrace();
         }

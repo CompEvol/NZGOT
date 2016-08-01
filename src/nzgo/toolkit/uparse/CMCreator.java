@@ -1,13 +1,10 @@
-package nzgo.toolkit.edna;
+package nzgo.toolkit.uparse;
 
 import jebl.evolution.io.ImportException;
 import nzgo.toolkit.core.io.Arguments;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.naming.NameSpace;
 import nzgo.toolkit.core.pipeline.Module;
-import nzgo.toolkit.core.r.Matrix;
-import nzgo.toolkit.uparse.CommunityMatrix;
-import nzgo.toolkit.uparse.FinalOTUs;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -138,7 +135,8 @@ public class CMCreator extends Module {
 
         CommunityMatrix communityMatrix = new CommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
         try {
-            communityMatrix.createCommunityMatrix(cmPath, ",");
+            // sample name is the 1st element separated by ., such as AB144_Leaf.6
+            communityMatrix.createCommunityMatrix(cmPath, ",", "\\..*");
         } catch (IOException e) {
             e.printStackTrace();
         }

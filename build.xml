@@ -13,7 +13,7 @@
     <property name="dist" location="${build}/dist"/>
     <property name="doc" location="${build}/doc" />
 
-    <property name="main_CMCreator" value="nzgo.toolkit.edna.CMCreator"/>
+    <property name="main_CMCreator" value="nzgo.toolkit.uparse.CMCreator"/>
 
 	<path id="classpath">
 		<fileset dir="${lib}" includes="beast.jar"/>
@@ -45,7 +45,6 @@
                memoryinitialsize="512m"
                memorymaximumsize="2048m">
             <include name="nzgo/toolkit/core/**"/>
-            <include name="nzgo/toolkit/edna/**"/>
             <include name="nzgo/toolkit/uparse/**"/>
             <include name="nzgo/toolkit/*.java"/>
         </javac>
@@ -65,7 +64,6 @@
             </manifest>
             <fileset dir="${build}">
                 <include name="nzgo/toolkit/core/**/*.class"/>
-                <include name="nzgo/toolkit/edna/**/*.class"/>
                 <include name="nzgo/toolkit/uparse/**/*.class"/>
                 <include name="nzgo/toolkit/NZGOTVersion.class"/>
             </fileset>

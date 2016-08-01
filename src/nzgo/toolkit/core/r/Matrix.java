@@ -4,6 +4,8 @@ import nzgo.toolkit.core.math.Arithmetic;
 import nzgo.toolkit.core.math.Summary;
 import nzgo.toolkit.core.util.StringUtil;
 
+import java.util.IllegalFormatException;
+
 /**
  * resemble R data frame
  * 1st[] is row, 2nd[] is column, data structure is different to DataFrame.java
@@ -43,7 +45,9 @@ public class Matrix {
     // Note: use Java index to start from 0
     public String getColName(int col) {
         assert col >= 0 && col < ncol();
-        return colNames[col];
+        synchronized (rowNames) {
+            return colNames[col];
+        }
     }
 
     public void setColNames(String[] colNames) {
@@ -57,7 +61,9 @@ public class Matrix {
     // Note: use Java index to start from 0
     public String getRowName(int row) {
         assert row >= 0 && row < nrow();
-        return rowNames[row];
+        synchronized (rowNames) {
+            return rowNames[row];
+        }
     }
 
     public void setRowNames(String[] rowNames) {
@@ -70,13 +76,17 @@ public class Matrix {
 
     // add rowData with original data[row]
     public void addRowData(int row, double[] rowData) {
-        assert row >= 0 && row < nrow() && rowData.length == data[row].length;
-        for (int i = 0; i < rowData.length; i++)
-            data[row][i] += rowData[i];
+        synchronized (data) {
+            assert row >= 0 && row < nrow() && rowData.length == data[row].length;
+            for (int i = 0; i < rowData.length; i++)
+                data[row][i] += rowData[i];
+        }
     }
 
     public void appendRow(double[]... rowData) {
-        MatrixUtil.appendRow(data, rowData);
+        synchronized (data) {
+            MatrixUtil.appendRow(data, rowData);
+        }
     }
 
     public String[] summary() {
@@ -104,5 +114,24 @@ public class Matrix {
         summary[6] = "Matrix has " + Summary.singleton(rowSums) + " singletons, " + Summary.coupleton(rowSums) + " coupletons.";
 
         return summary;
+    }
+
+    public void validate() {
+        if (colNames.length != ncol())
+            throw new IllegalArgumentException("Column names do not match the number of columns !");
+        if (rowNames.length != nrow())
+            throw new IllegalArgumentException("Row names do not match the number of rows !");
+
+        double[] rowSums = MatrixUtil.rowSums(data);
+        for (int i = 0; i < rowSums.length; i++) {
+            if (rowSums[i] == 0)
+                throw new IllegalArgumentException("Row " + i + " " + rowNames[i] + " is empty !");
+        }
+
+        double[] colSums = MatrixUtil.colSums(data);
+        for (int i = 0; i < colSums.length; i++) {
+            if (colSums[i] == 0)
+                throw new IllegalArgumentException("Column " + i + " " + colNames[i] + " is empty !");
+        }
     }
 }
