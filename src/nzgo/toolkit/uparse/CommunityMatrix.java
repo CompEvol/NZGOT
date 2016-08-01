@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * @author Walter Xie
  */
-public class CommunityMatrix { //TODO modify it to OO style
+public class CommunityMatrix {
 
     public static Matrix createCommunityMatrix(Path finalOTUsPath, Path outUpPath, Path derepUcPath) throws IOException {
         List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation

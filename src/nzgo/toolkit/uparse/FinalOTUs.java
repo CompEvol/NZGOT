@@ -11,6 +11,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
+ * the number of non-chimera OTUs after Uchime does not match
+ * the difference between input OTUs and chimera OTUs,
+ * so that we cannot use the non-chimera OTUs directly from Uchime.
+ *
  * @author Walter Xie
  */
 public class FinalOTUs {
@@ -29,7 +33,7 @@ public class FinalOTUs {
         List<Sequence> finalOTUs = SequenceUtil.removeAllFrom(chimeras, otus);
 
         MyLogger.info("Removing " + chimeras.size() + " chimera OTUs from " + otus.size() +
-                " OTUs, the final OTUs = " + finalOTUs.size());
+                " OTUs, write " + finalOTUs.size() + " final OTUs to file " + finalOTUsPath.toString());
         SequenceFileIO.writeToFasta(finalOTUsPath, finalOTUs);
 
         otus.clear();
