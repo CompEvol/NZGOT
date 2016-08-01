@@ -57,6 +57,10 @@ public class CMCreator extends Module {
                 new Arguments.StringOption("prefix", "output-prefix",
                         "prefix for output community matrix in csv file, such as 16s.csv, " +
                                 "and final OTUs, such as 16s.fasta."),
+                new Arguments.StringOption("sampleregx", "sample-regular-expression",
+                        "the regular expression to spilt sample from sequence label, default to \\..*, " +
+                                "the rule of sample identifiers in read labels is available on " +
+                                "http://drive5.com/usearch/manual/upp_labels_sample.html."),
                 new Arguments.Option("nocm", "Only used to remove chimera OTUs, " +
                         "no community matrix created."),
                 new Arguments.Option("debug", "Give more messages in debug level.")
@@ -87,10 +91,10 @@ public class CMCreator extends Module {
         if (arguments.hasOption("qc")) {
             qcFolder = arguments.getStringOption("qc");
         }
-//        String otusFolder = "otus97";
-//        if (arguments.hasOption("otus")) {
-//            otusFolder = arguments.getStringOption("otus");
-//        }
+        String sampleRegx = "\\..*";
+        if (arguments.hasOption("sampleregx")) {
+            sampleRegx = arguments.getStringOption("sampleregx");
+        }
 
         Path chimerasPath = null;
         if (arguments.hasOption("chimeotus")) {
@@ -101,7 +105,7 @@ public class CMCreator extends Module {
 
         Path finalOTUsPath = Paths.get(workDir.toString(), outFilePrefix+".fasta");
         if (chimerasPath != null) {
-            MyLogger.info("Removing chimera OTUs from " + otusPath.toString());
+            MyLogger.info("Removing chimera OTUs from " + otusPath.getFileName() + " ...");
 
             if (!arguments.hasOption("overwrite") && Files.exists(finalOTUsPath))
                 throw new IllegalArgumentException("Find output file " + finalOTUsPath +
@@ -136,7 +140,7 @@ public class CMCreator extends Module {
         CommunityMatrix communityMatrix = new CommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
         try {
             // sample name is the 1st element separated by ., such as AB144_Leaf.6
-            communityMatrix.createCommunityMatrix(cmPath, ",", "\\..*");
+            communityMatrix.createCommunityMatrix(cmPath, ",", sampleRegx);
         } catch (IOException e) {
             e.printStackTrace();
         }

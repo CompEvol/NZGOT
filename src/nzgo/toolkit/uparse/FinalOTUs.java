@@ -32,8 +32,10 @@ public class FinalOTUs {
 
         List<Sequence> finalOTUs = SequenceUtil.removeAllFrom(chimeras, otus);
 
-        MyLogger.info("Removing " + chimeras.size() + " chimera OTUs from " + otus.size() +
-                " OTUs, write " + finalOTUs.size() + " final OTUs to file " + finalOTUsPath.toString());
+        MyLogger.info("\nRemoving " + chimeras.size() + " chimera OTUs from " +
+                otus.size() + " OTUs, write " + finalOTUs.size() +
+                " final OTUs to file " + finalOTUsPath.toString());
+
         SequenceFileIO.writeToFasta(finalOTUsPath, finalOTUs);
 
         otus.clear();

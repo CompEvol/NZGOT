@@ -179,8 +179,6 @@ public class SequenceFileIO extends FileIO {
     }
 
     public static void writeToFasta(Path sequenceFile, List<Sequence> sequences) throws IOException {
-        MyLogger.info("\nCreating fasta ..." + sequenceFile);
-
         BufferedWriter writer = getWriter(sequenceFile, "fasta");
 
         FastaExporter sequenceExporter = new FastaExporter(writer);
@@ -193,8 +191,6 @@ public class SequenceFileIO extends FileIO {
     }
 
     public static void writeDereplicatedSequenceToFasta(Path sequenceFile, List<DereplicatedSequence> sequences) throws IOException {
-        MyLogger.info("\nCreating fasta ..." + sequenceFile);
-
         BufferedWriter writer = getWriter(sequenceFile, "fasta");
 
         for (DereplicatedSequence dereplicatedSequence : sequences) {
