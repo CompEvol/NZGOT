@@ -90,6 +90,9 @@ public class DataFrame<T> {
     }
 
     //TODO generalise to multi-column
+    // get a list of values in column 'col' for the row
+    // where column 'colOfValue1' and column 'colOfValue2' values
+    // both match the 'value1' and 'value2'
     public List<T> getColDataEqualToAnd(int col, T value1, int colOfValue1, T value2, int colOfValue2) {
         List<T> colDataEqualTo = new ArrayList<>();
         List<T> colData = getColData(col);

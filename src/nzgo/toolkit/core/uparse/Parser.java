@@ -31,7 +31,7 @@ public class Parser {
         return removeSizeAnnotation ? getLabelNoSizeAnnotation(label) : label;
     }
 
-    public static void getLabelNoSizeAnnotation(DataFrame<String> out, int col) {
+    public static void rmSizeAnnotation(DataFrame<String> out, int col) {
         List<String> colData = out.getColData(col);
         for (int i = 0; i < colData.size(); i++) {
             String val = colData.get(i);

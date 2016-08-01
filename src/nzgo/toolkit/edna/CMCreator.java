@@ -136,11 +136,9 @@ public class CMCreator extends Module {
         if (!arguments.hasOption("overwrite") && Files.exists(cmPath))
             throw new IllegalArgumentException("Find output file " + cmPath + ", use -overwrite option to allow overwrite.");
 
-        Matrix communityMatrix = null;
+        CommunityMatrix communityMatrix = new CommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
         try {
-            communityMatrix = CommunityMatrix.createCommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
-
-            CommunityMatrix.writeCommunityMatrix(cmPath, communityMatrix, ",");
+            communityMatrix.createCommunityMatrix(cmPath, ",");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -29,30 +29,38 @@ import java.util.Set;
  */
 public class CommunityMatrix {
 
-    public static Matrix createCommunityMatrix(Path finalOTUsPath, Path outUpPath, Path derepUcPath) throws IOException {
-        List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
-        return createCommunityMatrix(finalOTUs, outUpPath, derepUcPath);
+    final Path finalOTUsPath; final Path outUpPath; final Path derepUcPath;
+
+
+    public CommunityMatrix(Path finalOTUsPath, Path outUpPath, Path derepUcPath) {
+        this.finalOTUsPath = finalOTUsPath;
+        this.outUpPath = outUpPath;
+        this.derepUcPath = derepUcPath;
     }
 
-    public static Matrix createCommunityMatrix(List<String> finalOTUs, Path outUpPath, Path derepUcPath) throws IOException {
+    public void createCommunityMatrix(Path cmPath, String sep) throws IOException {
+        Matrix communityMatrix = getCommunityMatrix();
+
+        writeCommunityMatrix(cmPath, sep, communityMatrix);
+    }
+
+
+    protected Matrix getCommunityMatrix() throws IOException {
+        List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true); // remove size annotation
+        return getCommunityMatrix(finalOTUs);
+    }
+
+    protected Matrix getCommunityMatrix(List<String> finalOTUs) throws IOException {
         // sort samples
         final boolean sort = true;
         final String sampleRegx = "_.*";
 
-        for (int i = 0; i < finalOTUs.size(); i++) {
-            String label = finalOTUs.get(i);
-            finalOTUs.set(i, label.replaceAll("\\|\\d+", ""));
-        }
-
-        Set<String> finalOTUsSet = new HashSet<>(finalOTUs);
-
-        if (finalOTUs.size() != finalOTUsSet.size())
-            throw new IllegalArgumentException("Find duplicate ids from final OTUs !");
+        validateID(finalOTUs);
 
         DataFrame<String> derep_uc = Utils.readTable(derepUcPath);
         DataFrame<String> out_up = Utils.readTable(outUpPath);
 
-        Parser.getLabelNoSizeAnnotation(out_up, UPParser.QUERY_COLUMN_ID);
+        Parser.rmSizeAnnotation(out_up, UPParser.QUERY_COLUMN_ID);
 
         // only derep_uc has all sample names
         List<String> labels = derep_uc.getColData(UCParser.Query_Sequence_COLUMN_ID);
@@ -88,6 +96,8 @@ public class CommunityMatrix {
                 rowsum += Arithmetic.sum(otuDupSeqCount);
             }
 
+            if (rowsum < 1)
+                MyLogger.warn("Row " + r + " is empty !");
             MyLogger.debug("Row " + r + " : " + rowName + ", members = " + memberNames.size() + ", sum = " + rowsum);
         }
 
@@ -98,6 +108,18 @@ public class CommunityMatrix {
         return communityMatrix;
     }
 
+    protected void validateID(List<String> finalOTUs) {
+        for (int i = 0; i < finalOTUs.size(); i++) {
+            String label = finalOTUs.get(i);
+            finalOTUs.set(i, label.replaceAll("\\|\\d+", ""));
+        }
+
+        Set<String> finalOTUsSet = new HashSet<>(finalOTUs);
+
+        if (finalOTUs.size() != finalOTUsSet.size())
+            throw new IllegalArgumentException("Find duplicate ids from final OTUs !");
+    }
+
     /**
      * count 1 row community matrix by matching labels to col names using given sampleRegx
      * @param colNames     sample names in the same order of community matrix
@@ -105,7 +127,7 @@ public class CommunityMatrix {
      * @param sampleRegx   regx to extract sample name from label
      * @return
      */
-    public static double[] getOneRowCM(String[] colNames, List<String> labels, String sampleRegx) {
+    protected double[] getOneRowCM(String[] colNames, List<String> labels, String sampleRegx) {
         final double step = 1;
         double[] oneRowCM = new double[colNames.length];
         Arrays.fill(oneRowCM, (double) 0);
@@ -120,7 +142,7 @@ public class CommunityMatrix {
         return oneRowCM;
     }
 
-    public static void writeCommunityMatrix(Path cmPath, Matrix communityMatrix, String sep) throws IOException {
+    protected void writeCommunityMatrix(Path cmPath, String sep, Matrix communityMatrix) throws IOException {
         BufferedWriter writer = FileIO.getWriter(cmPath, "community matrix");
 
         String[] colNames = communityMatrix.getColNames();
@@ -179,11 +201,9 @@ public class CommunityMatrix {
 
         Path cmPath = Paths.get(workDir.toString(), "otus97", "16s.csv");
 
-        Matrix communityMatrix = null;
+        CommunityMatrix communityMatrix = new CommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
         try {
-            communityMatrix = createCommunityMatrix(finalOTUsPath, outUpPath, derepUcPath);
-
-            writeCommunityMatrix(cmPath, communityMatrix, ",");
+            communityMatrix.createCommunityMatrix(cmPath, ",");
         } catch (IOException e) {
             e.printStackTrace();
         }
