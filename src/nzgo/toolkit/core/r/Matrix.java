@@ -7,7 +7,7 @@ import nzgo.toolkit.core.util.StringUtil;
 import java.util.IllegalFormatException;
 
 /**
- * resemble R data frame
+ * resemble R matrix
  * 1st[] is row, 2nd[] is column, data structure is different to DataFrame.java
  * Note: use Java index to start from 0, not R index
  *

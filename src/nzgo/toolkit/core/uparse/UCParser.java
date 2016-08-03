@@ -22,7 +22,20 @@ public class UCParser extends Parser {
     public static final int Query_Sequence_COLUMN_ID = 8;
     public static final int Target_Sequence_COLUMN_ID = 9;
 
-    public static List<String> getDuplicateSequences(String uniqueSequence, DataFrame<String> derep_uc) {
-         return derep_uc.getColDataEqualTo(Query_Sequence_COLUMN_ID, uniqueSequence, Target_Sequence_COLUMN_ID);
+    private static UCParser ucParser = new UCParser( );
+
+    //prevents any other class from instantiating
+    private UCParser(){ }
+
+    // Static 'instance' method
+    public static UCParser getInstance( ) {
+        return ucParser;
     }
+
+
+
+//    @Deprecated
+//    public static List<String> getDuplicateSequences(String uniqueSequence, DataFrame<String> derep_uc) {
+//         return derep_uc.getColDataEqualTo(Query_Sequence_COLUMN_ID, uniqueSequence, Target_Sequence_COLUMN_ID);
+//    }
 }

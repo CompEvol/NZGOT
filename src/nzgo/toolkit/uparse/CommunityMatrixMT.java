@@ -1,69 +1,47 @@
-package nzgo.toolkit.uparse;
-
-import nzgo.toolkit.core.logger.MyLogger;
-import nzgo.toolkit.core.math.Arithmetic;
-import nzgo.toolkit.core.r.DataFrame;
-import nzgo.toolkit.core.r.Matrix;
-import nzgo.toolkit.core.uparse.UCParser;
-import nzgo.toolkit.core.uparse.UPParser;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
-
-/**
- * @author Walter Xie
- */
-public class CommunityMatrixMT extends CommunityMatrix {
-
-    private ForkJoinPool forkJoinPool;
-
-    public CommunityMatrixMT(Path finalOTUsPath, Path outUpPath, Path derepUcPath, int nthread) {
-        super(finalOTUsPath, outUpPath, derepUcPath);
-        if (nthread < 2)
-            throw new IllegalArgumentException("Invalid number of threads " + nthread + " !");
-
-        forkJoinPool = new ForkJoinPool(nthread);
-    }
-
-    @Override
-    protected Matrix computeCommunityMatrix(List<String> finalOTUs, Set<String> samples, String sampleRegx,
-                                          DataFrame<String> derep_uc, DataFrame<String> out_up) {
-        int ncol = samples.size();
-        int nrow = finalOTUs.size();
-        Matrix communityMatrix = new Matrix(nrow, ncol);
-        communityMatrix.setColNames(samples.toArray(new String[ncol]));
-        communityMatrix.setRowNames(finalOTUs.toArray(new String[nrow]));
-
-        MyLogger.info("Fill in community matrix to " + ncol + " columns " + nrow + " rows ...");
-
-        for (int r = 0; r < nrow; r++) {
-            // OTU representative sequence label
-            String rowName = communityMatrix.getRowName(r);
-            List<String> duplicateSequences = UCParser.getDuplicateSequences(rowName, derep_uc);
-            duplicateSequences.add(0, rowName); // count OTU representative sequence
-            double[] otuDupSeqCount = getOneRowCM(communityMatrix.getColNames(), duplicateSequences, sampleRegx);
-            communityMatrix.addRowData(r, otuDupSeqCount);
-
-            double rowsum = Arithmetic.sum(otuDupSeqCount);
-
-            // unique reads belonging to this OTU
-            List<String> memberNames = UPParser.getMembers(rowName, out_up);
-            for (String member : memberNames) {
-                duplicateSequences = UCParser.getDuplicateSequences(member, derep_uc);
-                duplicateSequences.add(0, member); // count member sequence
-                otuDupSeqCount = getOneRowCM(communityMatrix.getColNames(), duplicateSequences, sampleRegx);
-                communityMatrix.addRowData(r, otuDupSeqCount);
-
-                rowsum += Arithmetic.sum(otuDupSeqCount);
-            }
-
-            if (rowsum < 1)
-                MyLogger.warn("Row " + r + " " + rowName + " is empty !");
-            MyLogger.debug("Row " + r + " " + rowName + ", members = " + memberNames.size() + ", sum = " + rowsum);
-        }
-
-        return communityMatrix;
-    }
-}
+//package nzgo.toolkit.uparse;
+//
+//import nzgo.toolkit.core.logger.MyLogger;
+//import nzgo.toolkit.core.math.Arithmetic;
+//import nzgo.toolkit.core.r.DataFrame;
+//import nzgo.toolkit.core.r.Matrix;
+//import nzgo.toolkit.core.uparse.UCParser;
+//import nzgo.toolkit.core.uparse.UPParser;
+//
+//import java.nio.file.Path;
+//import java.util.List;
+//import java.util.Set;
+//import java.util.concurrent.ForkJoinPool;
+//
+///**
+// * @author Walter Xie
+// */
+//public class CommunityMatrixMT extends CommunityMatrix {
+//
+//    private ForkJoinPool forkJoinPool;
+//
+//    public CommunityMatrixMT(Path finalOTUsPath, Path outUpPath, Path derepUcPath, int nthread) {
+//        super(finalOTUsPath, outUpPath, derepUcPath);
+//        if (nthread < 2)
+//            throw new IllegalArgumentException("Invalid number of threads " + nthread + " !");
+//
+//        forkJoinPool = new ForkJoinPool(nthread);
+//    }
+//
+//    @Override
+//    protected Matrix computeCommunityMatrix(List<String> finalOTUs, Set<String> samples, String sampleRegx,
+//                                          DataFrame<String> derep_uc, DataFrame<String> out_up) {
+//        int ncol = samples.size();
+//        int nrow = finalOTUs.size();
+//        Matrix communityMatrix = new Matrix(nrow, ncol);
+//        communityMatrix.setColNames(samples.toArray(new String[ncol]));
+//        communityMatrix.setRowNames(finalOTUs.toArray(new String[nrow]));
+//
+//        MyLogger.info("Fill in community matrix to " + ncol + " columns " + nrow + " rows ...");
+//
+//        for (int r = 0; r < nrow; r++) {
+//
+//        }
+//
+//        return communityMatrix;
+//    }
+//}

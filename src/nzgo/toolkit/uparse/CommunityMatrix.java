@@ -6,6 +6,8 @@ import nzgo.toolkit.core.io.FileIO;
 import nzgo.toolkit.core.io.SequenceFileIO;
 import nzgo.toolkit.core.logger.MyLogger;
 import nzgo.toolkit.core.math.Arithmetic;
+import nzgo.toolkit.core.naming.NameSpace;
+import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.r.DataFrame;
 import nzgo.toolkit.core.r.Matrix;
 import nzgo.toolkit.core.r.Utils;
@@ -13,16 +15,17 @@ import nzgo.toolkit.core.uparse.Parser;
 import nzgo.toolkit.core.uparse.UCParser;
 import nzgo.toolkit.core.uparse.UPParser;
 import nzgo.toolkit.core.util.ArrayUtil;
+import nzgo.toolkit.core.util.StringUtil;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static nzgo.toolkit.core.io.FileIO.getReader;
 
 /**
  * @author Walter Xie
@@ -39,21 +42,21 @@ public class CommunityMatrix {
     }
 
     public void createCommunityMatrix(Path cmPath, String sep, final String sampleRegx) throws IOException {
-        Matrix communityMatrix = getCommunityMatrix(sampleRegx, true);
-        communityMatrix.validate();
+        DataFrame<Number> communityMatrix = getCommunityMatrix(sampleRegx, true);
 
         writeCommunityMatrix(cmPath, sep, communityMatrix);
     }
 
-    protected Matrix getCommunityMatrix(final String sampleRegx, final boolean sort) throws IOException {
+    protected DataFrame<Number> getCommunityMatrix(final String sampleRegx, final boolean sort) throws IOException {
         // remove size annotation
         List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true);
         validateID(finalOTUs);
 
-        DataFrame<String> derep_uc = Utils.readTable(derepUcPath);
-        DataFrame<String> out_up = Utils.readTable(outUpPath);
+//        DataFrame<String> derep_uc = Utils.readTable(derepUcPath); // too slow
+//        DataFrame<String> out_up = Utils.readTable(outUpPath);
+        UPParser upParser = UPParser.getInstance();
+        HashMap<String, String> otus_map = upParser.createOTUsMap(finalOTUs, outUpPath);
 
-        Parser.rmSizeAnnotation(out_up, UPParser.QUERY_COLUMN_ID);
 
         // only derep_uc has all sample names
         List<String> labels = derep_uc.getColData(UCParser.Query_Sequence_COLUMN_ID);
@@ -66,9 +69,10 @@ public class CommunityMatrix {
         return communityMatrix;
     }
 
+
     // single thread
-    protected Matrix computeCommunityMatrix(List<String> finalOTUs, Set<String> samples, String sampleRegx,
-                                          DataFrame<String> derep_uc, DataFrame<String> out_up) {
+    protected DataFrame<Number> computeCommunityMatrix(List<String> finalOTUs, Set<String> samples, String sampleRegx,
+                                            DataFrame<String> derep_uc, DataFrame<String> out_up) {
         int ncol = samples.size();
         int nrow = finalOTUs.size();
         Matrix communityMatrix = new Matrix(nrow, ncol);
@@ -140,7 +144,7 @@ public class CommunityMatrix {
         return oneRowCM;
     }
 
-    protected void writeCommunityMatrix(Path cmPath, String sep, Matrix communityMatrix) throws IOException {
+    protected void writeCommunityMatrix(Path cmPath, String sep, DataFrame<Number> communityMatrix) throws IOException {
         BufferedWriter writer = FileIO.getWriter(cmPath, "community matrix");
 
         String[] colNames = communityMatrix.getColNames();

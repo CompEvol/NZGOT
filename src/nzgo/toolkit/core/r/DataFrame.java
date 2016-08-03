@@ -107,7 +107,7 @@ public class DataFrame<T> {
 
     // Note: use Java index to start from 0
     public void removeCol(int col) {
-        assert col >= 0 && col < ncol();
+        assert col >= 0 && col < ncol() : "Incorrect column index " + col + " !";
         MyLogger.debug("Remove " + col + " column " + getColName(col));
         colNames.remove(col);
         data.remove(col);
@@ -124,7 +124,7 @@ public class DataFrame<T> {
     }
 
     public void appendRow(T[] row) {
-        assert row.length == colNames.size();
+        assert row.length == colNames.size() : "column names do not match row data length !";
         rowNames.add(Integer.toString(nrow() + 1));
         for (int i = 0; i < ncol(); i++) {
             List<T> colData = data.get(i);
@@ -135,7 +135,7 @@ public class DataFrame<T> {
 
     // col == ncol() to append a new column
     public void appendCol(int col, T value) {
-        assert col >= 0 && col <= ncol();
+        assert col >= 0 && col <= ncol() : "Incorrect column index " + col + " !";
         String colName = "V" + Integer.toString(col);
         if (colNames.contains(colName))
             colName += "_1";
@@ -146,7 +146,7 @@ public class DataFrame<T> {
         for (int i = 0; i < nrow(); i++)
             colData.add(value); // fill default value in this column for all rows
 
-        assert rowNames.size() == colData.size();
+        assert rowNames.size() == colData.size() : "row names do not match column data length !";
     }
 
 
