@@ -80,12 +80,15 @@ public class Utils {
                             dataFrame.appendRow(newItems);
                         } else {
                             if (ncol < items.length) {
-                                if (nrow < 6) // only when first 5 rows
-                                    for (int i = ncol; i < items.length; i++)
-                                        dataFrame.appendCol(i, defaultValue);
-                                else
+                                if (nrow < 6) {// only when first 5 rows
+                                    for (int i = ncol; i < items.length; i++) {
+                                        String colName = "V." + Integer.toString(i);
+                                        dataFrame.appendCol(colName, defaultValue);
+                                    }
+                                } else {
                                     throw new IllegalArgumentException("Invalid number of items = " + items.length +
                                             ", NOT fit in data frame colNames size = " + ncol + ", line = " + line);
+                                }
                             }
                             // add row names to data frame, and remove 0 column after reading file
                             dataFrame.appendRow(items);

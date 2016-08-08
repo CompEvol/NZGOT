@@ -60,7 +60,7 @@ public class UPParser extends Parser {
                 if (items.length < OTU_COLUMN_ID + 1)
                     throw new IllegalArgumentException("Invalid file format or separator to get " +
                             items.length + " columns, but expecting at least " +
-                            (UCParser.Target_Sequence_COLUMN_ID + 1) + " columns in row " + nrow);
+                            (OTU_COLUMN_ID + 1) + " columns in row " + nrow);
 
                 // rm size annotation
                 String memberID = getLabelNoSizeAnnotation(items[QUERY_COLUMN_ID]);

@@ -5,6 +5,7 @@ import nzgo.toolkit.core.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * resemble R data frame, only string type
@@ -17,7 +18,7 @@ public class DataFrame<T> {
 
     // list of columns
     protected List<List<T>> data = new ArrayList<>();
-    protected List<String> colNames = new ArrayList<>();
+    protected List<String> colNames = new ArrayList<>(); //TODO unique?
     protected List<String> rowNames = new ArrayList<>();
 
 
@@ -29,7 +30,18 @@ public class DataFrame<T> {
             this.data.add(new ArrayList<T>());
     }
 
+    public DataFrame(final Set<String> colNames) {
+        this.colNames.addAll(colNames);
+        for (int i=0; i<colNames.size(); i++)
+            this.data.add(new ArrayList<T>());
+    }
+
     public DataFrame(final List<String> colNames, final List<List<T>> data) {
+        this(colNames);
+        setData(data);
+    }
+
+    public DataFrame(final Set<String> colNames, final List<List<T>> data) {
         this(colNames);
         setData(data);
     }
@@ -52,9 +64,14 @@ public class DataFrame<T> {
         assert col >= 0 && col < ncol();
         return colNames.get(col);
     }
-    public void setColNames(List<String> colNames) {
-        this.colNames.clear();
-        this.colNames.addAll(colNames);
+
+    public void setColName(int col, String newName) {
+        assert col >= 0 && col < ncol();
+        colNames.set(col, newName);
+    }
+
+    public int getColId(String colName) {
+        return colNames.indexOf(colName);
     }
 
     public List<String> getRowNames() {
@@ -64,6 +81,15 @@ public class DataFrame<T> {
     public void setRowNames(List<String> rowNames) {
         this.rowNames.clear();
         this.rowNames.addAll(rowNames);
+    }
+
+    public void setRowName(int row, String newName) {
+        assert row >= 0 && row < ncol();
+        rowNames.set(row, newName);
+    }
+
+    public int getRowId(String rowName) {
+        return rowNames.indexOf(rowName);
     }
 
     public List<List<T>> getData() {
@@ -123,6 +149,20 @@ public class DataFrame<T> {
             setRowNames(StringUtil.getNames("", 0, nrow()));
     }
 
+    public void setData(int row, int col, T value) {
+        assert col >= 0 && col < ncol() : "Incorrect column index " + col + " !";
+        assert row >= 0 && row < nrow() : "Incorrect row index " + row + " !";
+        List<T> colData = data.get(col);
+        colData.set(row, value);
+    }
+
+    public T getData(int row, int col) {
+        assert col >= 0 && col < ncol() : "Incorrect column index " + col + " !";
+        assert row >= 0 && row < nrow() : "Incorrect row index " + row + " !";
+        List<T> colData = data.get(col);
+        return colData.get(row);
+    }
+
     public void appendRow(T[] row) {
         assert row.length == colNames.size() : "column names do not match row data length !";
         rowNames.add(Integer.toString(nrow() + 1));
@@ -133,16 +173,26 @@ public class DataFrame<T> {
         }
     }
 
-    // col == ncol() to append a new column
-    public void appendCol(int col, T value) {
-        assert col >= 0 && col <= ncol() : "Incorrect column index " + col + " !";
-        String colName = "V" + Integer.toString(col);
-        if (colNames.contains(colName))
-            colName += "_1";
-        colNames.add(colName);
+    public void appendRow(String newName, T value) {
+        if (rowNames.contains(newName))
+            throw new IllegalArgumentException("Row name exist ! " + newName);
+        rowNames.add(newName);
 
-        this.data.add(col, new ArrayList<T>());
-        List<T> colData = data.get(col);
+        for (int i = 0; i < ncol(); i++) {
+            List<T> colData = data.get(i);
+            colData.add(value); // fill default value in this row for all columns
+            assert rowNames.size() == colData.size() : "row names do not match column data length !";
+        }
+    }
+
+    // col == ncol() to append a new column
+    public void appendCol(String newName, T value) {
+        if (colNames.contains(newName))
+            newName += "_1";
+        colNames.add(newName);
+
+        this.data.add(new ArrayList<T>());
+        List<T> colData = data.get(ncol());
         for (int i = 0; i < nrow(); i++)
             colData.add(value); // fill default value in this column for all rows
 

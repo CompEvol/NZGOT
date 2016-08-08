@@ -42,12 +42,12 @@ public class CommunityMatrix {
     }
 
     public void createCommunityMatrix(Path cmPath, String sep, final String sampleRegx) throws IOException {
-        DataFrame<Number> communityMatrix = getCommunityMatrix(sampleRegx, true);
+        DataFrame<Double> communityMatrix = getCommunityMatrix(sampleRegx, true);
 
         writeCommunityMatrix(cmPath, sep, communityMatrix);
     }
 
-    protected DataFrame<Number> getCommunityMatrix(final String sampleRegx, final boolean sort) throws IOException {
+    protected DataFrame<Double> getCommunityMatrix(final String sampleRegx, final boolean sort) throws IOException {
         // remove size annotation
         List<String> finalOTUs = SequenceFileIO.importFastaLabelOnly(finalOTUsPath, true);
         validateID(finalOTUs);
@@ -57,29 +57,90 @@ public class CommunityMatrix {
         UPParser upParser = UPParser.getInstance();
         HashMap<String, String> otus_map = upParser.createOTUsMap(finalOTUs, outUpPath);
 
+        DataFrame<Double> communityMatrix = computeCommunityMatrix(finalOTUs, otus_map, null, sampleRegx, sort);
 
-        // only derep_uc has all sample names
-        List<String> labels = derep_uc.getColData(UCParser.Query_Sequence_COLUMN_ID);
-        // sample name is the 1st element separated by sampleRegx
-        // sort samples
-        Set<String> samples = Parser.getSamples(labels, sampleRegx, sort);
-
-        Matrix communityMatrix = computeCommunityMatrix(finalOTUs, samples, sampleRegx, derep_uc, out_up);
+        int nrow1 = finalOTUs.size();
+        int nrow2 = communityMatrix.nrow();
 
         return communityMatrix;
     }
 
 
     // single thread
-    protected DataFrame<Number> computeCommunityMatrix(List<String> finalOTUs, Set<String> samples, String sampleRegx,
-                                            DataFrame<String> derep_uc, DataFrame<String> out_up) {
-        int ncol = samples.size();
-        int nrow = finalOTUs.size();
-        Matrix communityMatrix = new Matrix(nrow, ncol);
-        communityMatrix.setColNames(samples.toArray(new String[ncol]));
-        communityMatrix.setRowNames(finalOTUs.toArray(new String[nrow]));
+    protected DataFrame<Double> computeCommunityMatrix(List<String> finalOTUs, HashMap<String, String> otus_map,
+                                                       HashMap<String, String> derep_uc,
+                                                       String sampleRegx, boolean sort) {
+        // only derep_uc has all sample names, may add new samples when loop through derep.uc
+        // sample name is the 1st element separated by sampleRegx, sort samples
+        Set<String> samples = Parser.getSamples(otus_map.keySet(), sampleRegx, sort);
 
-        MyLogger.info("Fill in community matrix to " + ncol + " columns " + nrow + " rows ...");
+        DataFrame<Double> communityMatrix = new DataFrame<>(samples);
+        int ncol = communityMatrix.ncol();
+
+        MyLogger.info("Find " + ncol + " samples initially");
+
+        if (derep_uc == null) {
+            if (!derepUcPath.endsWith(NameSpace.SUFFIX_UC))
+                throw new IllegalArgumentException("The UC mapping file is required ! " + derepUcPath.getFileName());
+
+            Separator separator = new Separator("\t");
+            int nrow = 0;
+            try {
+                BufferedReader reader = getReader(derepUcPath, "De-replication UC mapping file");
+
+                String line = reader.readLine();
+                while (line != null) {
+                    String[] items = separator.parse(line);
+                    nrow++;
+
+                    // validation
+                    if (items.length < UCParser.Target_Sequence_COLUMN_ID + 1)
+                        throw new IllegalArgumentException("Invalid file format or separator to get " +
+                                items.length + " columns, but expecting at least " +
+                                (UCParser.Target_Sequence_COLUMN_ID + 1) + " columns in row " + nrow);
+
+                    // rm size annotation
+                    String duplSeqID = items[UCParser.Query_Sequence_COLUMN_ID];
+                    String uniqSeqID = items[UCParser.Target_Sequence_COLUMN_ID];
+                    if (finalOTUs.contains(uniqSeqID)) {
+                        int rowId = communityMatrix.getRowId(uniqSeqID);
+                        if (rowId < 0)
+                            communityMatrix.appendRow(uniqSeqID, 0.0);
+
+
+                        
+
+                    } else if (otus_map.containsKey(uniqSeqID)){
+                        String sampleName = Parser.getSample(uniqSeqID, sampleRegx);
+                        int colId = communityMatrix.getColId(sampleName);
+                        if (colId < 0) {
+                            communityMatrix.appendCol(sampleName, 0.0);
+                            ncol = communityMatrix.ncol();
+                        }
+                        double count = communityMatrix.getData(rowId, colId);
+                        communityMatrix.setData(rowId, colId, count + 1);
+
+                    }
+
+                    line = reader.readLine();
+                }
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            MyLogger.info("Match " + dupl_seq_to_uniq.size() + " unique sequences to " +
+                    otus.size() + " OTUs from " + nrow + " lines in mapping file.");
+
+            Set<String> uniq_v = new HashSet<>(dupl_seq_to_uniq.values());
+            if (otus.size() != uniq_v.size())
+                throw new RuntimeException("OTUs (" + otus.size() + ") in UP mapping file" +
+                        " does not match given OTUs (" + uniq_v.size() + ") !");
+        } else {
+
+        }
+
+
 
         for (int r = 0; r < nrow; r++) {
             // OTU representative sequence label
@@ -144,7 +205,7 @@ public class CommunityMatrix {
         return oneRowCM;
     }
 
-    protected void writeCommunityMatrix(Path cmPath, String sep, DataFrame<Number> communityMatrix) throws IOException {
+    protected void writeCommunityMatrix(Path cmPath, String sep, DataFrame<Double> communityMatrix) throws IOException {
         BufferedWriter writer = FileIO.getWriter(cmPath, "community matrix");
 
         String[] colNames = communityMatrix.getColNames();

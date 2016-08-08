@@ -3,10 +3,7 @@ package nzgo.toolkit.core.uparse;
 import nzgo.toolkit.core.naming.Separator;
 import nzgo.toolkit.core.r.DataFrame;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Parse USEARCH output
@@ -50,7 +47,7 @@ public class Parser {
         return items[i];
     }
 
-    public static Set<String> getSamples(List<String> labels, String regex, boolean sort) {
+    public static Set<String> getSamples(Collection<String> labels, String regex, boolean sort) {
         Set<String> samples;
         if (sort)
             samples = new TreeSet<>();
